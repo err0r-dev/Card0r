@@ -4,13 +4,14 @@ This file provides comprehensive context for AI assistants (like Claude, ChatGPT
 
 ## Project Overview
 
-**Card0r** is a full-stack TypeScript application that generates personalized video greeting cards using AI-powered message generation, canvas-based rendering, and FFmpeg video encoding.
+**Card0r** is a full-stack TypeScript application that generates personalized video greeting cards using AI-powered message generation and Remotion-based React video rendering.
 
 **Tech Stack:**
 - Frontend: React 19 + Vite + TypeScript + TailwindCSS + shadcn/ui
-- Backend: Node.js + Express + TypeScript + FFmpeg + node-canvas
+- Backend: Node.js + Express + TypeScript + Remotion
+- Video: Remotion (React-based video compositions)
 - AI: OpenAI GPT-4 for message generation
-- Media: Pixabay API for music
+- Media: Jamendo API for background music
 - State: Zustand for client state management
 - Deployment: Docker + docker-compose
 
@@ -24,6 +25,7 @@ This file provides comprehensive context for AI assistants (like Claude, ChatGPT
 Card0r/
 ├── frontend/           # React SPA (port 5173 dev, 3000 prod)
 ├── backend/            # Express API (port 3001)
+├── remotion/           # Remotion video compositions and decorations
 ├── shared/             # Shared TypeScript types
 ├── docker-compose.yml  # Orchestrates both services
 └── [docs]              # README, QUICKSTART, TESTING, BUILD_SUMMARY
@@ -32,11 +34,11 @@ Card0r/
 ### Data Flow
 
 ```
-User → Frontend → Backend API → Services → FFmpeg/Canvas → Videos
+User → Frontend → Backend API → Services → Remotion → Videos
                       ↓
                  OpenAI GPT-4 (messages)
                       ↓
-                 Pixabay API (music)
+                 Jamendo API (music)
 ```
 
 ---
@@ -48,7 +50,7 @@ User → Frontend → Backend API → Services → FFmpeg/Canvas → Videos
 Located in `backend/src/services/`:
 
 1. **validation.ts**
-   - Validates OpenAI and Pixabay API keys
+   - Validates OpenAI and Jamendo API keys
    - Makes test API calls to verify credentials
    - Returns validation status for each key
 
@@ -64,28 +66,19 @@ Located in `backend/src/services/`:
    - Generates ~75-100 word messages
    - Handles rate limiting and errors
 
-4. **pixabay-service.ts**
-   - Searches Pixabay for holiday-appropriate music
+4. **jamendo-service.ts**
+   - Searches Jamendo for holiday-appropriate music
    - Filters by duration (30+ seconds)
    - Returns top 5 tracks per theme
    - Handles API errors gracefully
 
-5. **canvas-renderer.ts** ⭐ MOST COMPLEX
-   - Creates 900 frames (30 fps × 30 seconds)
-   - Implements particle systems (snow, confetti, fireworks)
-   - Dynamic gradient backgrounds
-   - Text animations (fade-in, word-by-word reveals)
-   - Holiday-specific color schemes for 17 themes
-   - Returns PNG buffers for each frame
+5. **remotion-renderer.ts**
+   - Bundles and renders Remotion compositions
+   - Passes props (name, message, theme, senderName) to compositions
+   - Supports multiple resolutions (1080p, 4K, square, social)
+   - H.264 encoding with quality optimization
 
-6. **ffmpeg-service.ts**
-   - Encodes frames to video using FFmpeg
-   - Mixes audio tracks
-   - H.264 codec with quality optimization
-   - Supports multiple resolutions (1080p, 4K, etc.)
-   - Handles cleanup of temp files
-
-7. **video-generator.ts**
+6. **video-generator.ts**
    - Orchestrates entire video generation pipeline
    - Manages job queue (in-memory)
    - Tracks progress for each video
@@ -99,8 +92,52 @@ Located in `backend/src/routes/`:
 - **validation.ts** - `POST /api/validate-keys`
 - **upload.ts** - `POST /api/upload-csv` (with Multer middleware)
 - **messages.ts** - `POST /api/generate-messages` (requires x-openai-key header)
-- **music.ts** - `GET /api/music/:theme` (requires x-pixabay-key header)
+- **music.ts** - `GET /api/music/:theme` (requires x-jamendo-key header)
 - **videos.ts** - `POST /api/videos/generate`, `GET /api/videos/status/:jobId`
+
+### Remotion Video System
+
+Located in `remotion/src/`:
+
+**Core Compositions:**
+
+1. **Root.tsx** - Registers Remotion compositions
+2. **CardComposition.tsx** - Main composition orchestrating all slides and decorations
+3. **types.ts** - Type definitions and `HOLIDAY_COLORS` for all 17 themes
+
+**Slides** (`remotion/src/slides/`):
+- **IntroSlide.tsx** - Theme name introduction with fade animation
+- **NameRevealSlide.tsx** - Recipient name reveal with scale animation
+- **MessageSlide.tsx** - Animated message display (line-by-line reveal)
+- **SenderSlide.tsx** - "From: [senderName]" display
+- **OutroSlide.tsx** - Closing animation with pulse effect
+
+**Important**: All slides have transparent backgrounds to allow decorations to show through.
+
+**Decorations** (`remotion/src/decorations/`):
+
+Each theme has its own decoration component with theme-specific animations:
+
+| File | Theme | Animations |
+|------|-------|------------|
+| `ChristmasDecoration.tsx` | Christmas | Snow particles, Santa sleigh, lights, ornaments |
+| `NewYearDecoration.tsx` | New Year | Fireworks, confetti, champagne bubbles |
+| `ValentinesDecoration.tsx` | Valentine's | Hearts, rose petals, Cupid arrows |
+| `EasterDecoration.tsx` | Easter | Easter eggs, bunnies, butterflies |
+| `HalloweenDecoration.tsx` | Halloween | Bats, ghosts, spiders, pumpkins |
+| `ThanksgivingDecoration.tsx` | Thanksgiving | Autumn leaves, acorns, pumpkins |
+| `HanukkahDecoration.tsx` | Hanukkah | Menorah, Stars of David, dreidels, gelt |
+| `DiwaliDecoration.tsx` | Diwali | Diyas, rangoli, fireworks, sparklers |
+| `ChineseNewYearDecoration.tsx` | Chinese New Year | Lanterns, dragon, red envelopes |
+| `IslamicDecoration.tsx` | Islamic holidays | Crescents, lanterns, geometric patterns |
+| `ParticleDecoration.tsx` | Fallback | Generic particle system |
+
+**Animation System:**
+- Pre-seeded Y/X positions for immediate particle visibility from frame 0
+- Reduced delays (30 frames max) for fast particle appearance
+- Relative timing using `durationInFrames` for special animations (Santa, Cupid, sparklers)
+- Modulo-based wrapping: `(startY + (frame + delay) * speed) % (height + 100)`
+- Continuous animations throughout entire video duration
 
 ### Frontend Components
 
@@ -108,20 +145,29 @@ Located in `frontend/src/components/`:
 
 **UI Components** (`ui/`):
 - button.tsx, dialog.tsx, input.tsx, label.tsx, textarea.tsx
-- card.tsx, progress.tsx, radio-group.tsx, separator.tsx
+- card.tsx, progress.tsx, radio-group.tsx, separator.tsx, select.tsx
+- sonner.tsx (toast notifications)
 - All based on Radix UI primitives with Tailwind styling
 
 **Feature Components**:
-1. **SplashScreen.tsx** - Animated entrance with Framer Motion
+1. **SplashScreen.tsx** - Animated entrance with Framer Motion particles
 2. **MainLayout.tsx** - Top nav, dark mode toggle, settings button
 3. **SettingsModal.tsx** - API key management with validation
 4. **FileUploader.tsx** - Drag-drop CSV/Excel upload
-5. **RecipientForm.tsx** - Manual entry form
-6. **RecipientTable.tsx** - List of recipients with delete
+5. **RecipientForm.tsx** - Manual entry form with sender name field
+6. **RecipientTable.tsx** - List of recipients with edit/delete
 7. **HolidaySelector.tsx** - 17 holiday cards in 4 categories
 8. **FormatPicker.tsx** - Radio group for export formats
-9. **VideoGenerator.tsx** - Two-step generation with progress polling
-10. **VideoGallery.tsx** - Grid with preview and download
+9. **MusicSelector.tsx** - Music track selection from Jamendo
+10. **VideoGenerator.tsx** - Auto-triggering generation with progress polling
+11. **VideoGallery.tsx** - Grid with preview and download
+12. **DownloadStep.tsx** - Final download interface
+
+**Auto-Generation Flow** (VideoGenerator.tsx):
+- Automatic message generation when recipients, theme, and API key are ready
+- Automatic video generation when messages complete
+- Uses `useRef` to prevent infinite re-triggering
+- Auto-navigates to download step on completion
 
 ### Frontend Stores
 
@@ -129,12 +175,12 @@ Located in `frontend/src/stores/`:
 
 1. **settingsStore.ts**
    - Persisted to localStorage
-   - Stores: openaiKey, pixabayKey, darkMode
+   - Stores: openaiKey, jamendoKey, darkMode
    - Actions: setters and toggleDarkMode
 
 2. **recipientsStore.ts**
-   - Stores: recipients[], recipientsWithMessages[]
-   - Actions: add, remove, update, setRecipients, clear
+   - Stores: recipients[], recipientsWithMessages[], senderName
+   - Actions: add, remove, update, setRecipients, setSenderName, clear
 
 3. **videoStore.ts**
    - Stores: selectedTheme, selectedFormat, selectedMusicUrl, currentJobId, jobs[]
@@ -166,28 +212,28 @@ Located in `shared/src/index.ts`:
 17 themes with unique visual effects:
 
 ### Western (6)
-- `christmas` - Snow particles, red/green, Santa
-- `new_year` - Fireworks, confetti, gold/pink
-- `easter` - Spring petals, pastels, bunny
-- `valentines_day` - Hearts, rose petals, pink/red
-- `halloween` - Bats, pumpkins, orange/purple
-- `thanksgiving` - Autumn leaves, orange/brown
+- `christmas` - Snow particles, Santa sleigh, lights, ornaments
+- `new_year` - Fireworks, confetti, champagne bubbles
+- `easter` - Easter eggs, bunnies, butterflies
+- `valentines_day` - Hearts, rose petals, Cupid arrows
+- `halloween` - Bats, ghosts, spiders, pumpkins
+- `thanksgiving` - Autumn leaves, acorns, pumpkins
 
 ### Jewish (4)
 - `rosh_hashanah` - Honey, apples, gold/amber
-- `hanukkah` - Menorah, dreidels, blue/white
+- `hanukkah` - Menorah, Stars of David, dreidels, gelt
 - `passover` - Wheat, wine, earth tones
 - `yom_kippur` - Doves, peaceful gray/white
 
 ### Islamic (3)
-- `eid_al_fitr` - Crescent moon, green/gold
-- `eid_al_adha` - Mosque, green/gold
-- `ramadan` - Stars, crescent, purple/gold
+- `eid_al_fitr` - Crescent moons, lanterns, geometric patterns
+- `eid_al_adha` - Crescent moons, lanterns, geometric patterns
+- `ramadan` - Crescent moons, lanterns, geometric patterns
 
-### Asian (3)
-- `chinese_new_year` - Dragon, red envelopes, red/gold
-- `diwali` - Diya lamps, fireworks, orange/yellow
-- `lunar_new_year` - Lanterns, red/gold
+### Asian (4)
+- `chinese_new_year` - Lanterns, dragon, red envelopes
+- `diwali` - Diyas, rangoli, fireworks, sparklers
+- `lunar_new_year` - Lanterns, red/gold particles
 
 ---
 
@@ -209,14 +255,14 @@ Located in `shared/src/index.ts`:
 ```json
 {
   "openai": "sk-...",
-  "pixabay": "..."
+  "jamendo": "..."
 }
 ```
 **Response:**
 ```json
 {
   "openai": { "valid": true },
-  "pixabay": { "valid": true }
+  "jamendo": { "valid": true }
 }
 ```
 
@@ -247,7 +293,7 @@ Located in `shared/src/index.ts`:
 ```
 
 ### GET /api/music/:theme
-**Headers:** `x-pixabay-key: ...`
+**Headers:** `x-jamendo-key: ...`
 **Response:**
 ```json
 {
@@ -262,7 +308,8 @@ Located in `shared/src/index.ts`:
   "recipients": [{ ...recipientWithMessage }],
   "theme": "christmas",
   "format": "1080p",
-  "musicUrl": "https://..."
+  "musicUrl": "https://...",
+  "senderName": "John"
 }
 ```
 **Response:**
@@ -296,15 +343,49 @@ Located in `shared/src/index.ts`:
    }
    ```
 
-2. **Add Colors** (`backend/src/services/canvas-renderer.ts`)
+2. **Add Colors** (`remotion/src/types.ts`)
    ```typescript
-   const HOLIDAY_COLORS: Record<HolidayTheme, ...> = {
+   export const HOLIDAY_COLORS: Record<HolidayTheme, ThemeColors> = {
      // ...existing
      new_holiday: { bg: '#...', primary: '#...', secondary: '#...', accent: '#...' },
    }
    ```
 
-3. **Add Music Keywords** (`backend/src/services/pixabay-service.ts`)
+3. **Create Decoration Component** (`remotion/src/decorations/NewHolidayDecoration.tsx`)
+   ```typescript
+   export function NewHolidayDecoration({ theme }: DecorationProps) {
+     const frame = useCurrentFrame();
+     const { width, height, durationInFrames } = useVideoConfig();
+
+     // Generate particles with pre-seeded positions
+     const particles = useMemo(() =>
+       Array.from({ length: 30 }, (_, i) => ({
+         x: random(`x-${i}`) * width,
+         startY: random(`startY-${i}`) * (height + 100),
+         speed: 0.5 + random(`speed-${i}`) * 1.5,
+         delay: random(`delay-${i}`) * 30,
+         // ... other properties
+       })), [width, height]
+     );
+
+     // Render particles...
+   }
+   ```
+
+4. **Register Decoration** (`remotion/src/decorations/index.ts`)
+   ```typescript
+   import { NewHolidayDecoration } from './NewHolidayDecoration';
+
+   export function getDecorationForTheme(theme: HolidayTheme) {
+     switch (theme) {
+       // ...existing
+       case HolidayTheme.NEW_HOLIDAY:
+         return NewHolidayDecoration;
+     }
+   }
+   ```
+
+5. **Add Music Keywords** (`backend/src/services/jamendo-service.ts`)
    ```typescript
    const MUSIC_KEYWORDS: Record<HolidayTheme, string[]> = {
      // ...existing
@@ -312,7 +393,7 @@ Located in `shared/src/index.ts`:
    }
    ```
 
-4. **Add OpenAI Prompt** (`backend/src/services/openai-service.ts`)
+6. **Add OpenAI Prompt** (`backend/src/services/openai-service.ts`)
    ```typescript
    const HOLIDAY_PROMPTS: Record<HolidayTheme, string> = {
      // ...existing
@@ -320,36 +401,61 @@ Located in `shared/src/index.ts`:
    }
    ```
 
-5. **Add to Frontend Selector** (`frontend/src/components/HolidaySelector.tsx`)
+7. **Add to Frontend Selector** (`frontend/src/components/HolidaySelector.tsx`)
    ```typescript
    const HOLIDAYS: HolidayOption[] = [
      // ...existing
-     { id: HolidayTheme.NEW_HOLIDAY, name: 'New Holiday', emoji: '🎊', category: 'Western', gradient: 'from-... to-...' },
+     { id: HolidayTheme.NEW_HOLIDAY, name: 'New Holiday', emoji: '...', category: 'Western', gradient: 'from-... to-...' },
    ]
    ```
 
 ### Adding a New Video Format
 
-1. **Update Shared Types**
-2. **Add to FORMAT_CONFIGS** in canvas-renderer.ts
+1. **Update Shared Types** (`shared/src/index.ts`)
+2. **Add to FORMAT_CONFIGS** in `remotion-renderer.ts`
 3. **Add to FormatPicker** component with icon and description
 
 ### Modifying Video Structure
 
-The 30-second video structure in `canvas-renderer.ts`:
-- 0-5s: Intro (theme animation)
-- 5-8s: Name reveal
-- 8-25s: Message display
-- 25-30s: Outro
+The video structure in `remotion/src/CardComposition.tsx`:
+- Background: Full duration with theme gradient
+- Decorations: Full duration with theme-specific animations (snow, fireworks, etc.)
+- Intro: 5s (theme name fade in/out)
+- Name Reveal: 3s (recipient name scales up)
+- Message: Dynamic duration based on word count (~3.5 words/second)
+- Sender: 3s (displays "From: [senderName]")
+- Outro: 3s (sparkle effect)
 
-To modify, update the `generateFrame()` method time ranges.
+To modify, update the timing constants and Sequence components in CardComposition.tsx.
 
 ### Adding New Particle Effects
 
-In `canvas-renderer.ts`:
-1. Update `createParticle()` for new particle types
-2. Add theme-specific logic in `drawParticles()`
-3. Modify `updateParticles()` for custom physics
+To create a new decoration component:
+
+1. Create `remotion/src/decorations/YourDecoration.tsx`
+2. Use `useMemo` to generate particles with pre-seeded positions:
+   ```typescript
+   const particles = useMemo(() =>
+     Array.from({ length: COUNT }, (_, i) => ({
+       x: random(`x-${i}`) * width,
+       startY: random(`startY-${i}`) * (height + 100), // Pre-seeded Y
+       speed: 0.5 + random(`speed-${i}`) * 1.5,
+       delay: random(`delay-${i}`) * 30, // Max 30 frames delay
+     })), [width, height]
+   );
+   ```
+
+3. Calculate positions with modulo wrapping:
+   ```typescript
+   const yOffset = (particle.startY + (frame + particle.delay) * particle.speed) % (height + 100);
+   const currentY = yOffset - 50;
+   ```
+
+4. For special animations (like Santa), use relative timing:
+   ```typescript
+   const startFrame = Math.floor(durationInFrames * 0.3); // 30% into video
+   const duration = Math.floor(durationInFrames * 0.25);
+   ```
 
 ---
 
@@ -371,6 +477,7 @@ npm run build
 
 # Or individually
 npm run build:shared
+npm run build:remotion
 npm run build:frontend
 npm run build:backend
 ```
@@ -390,6 +497,12 @@ docker-compose logs -f
 docker-compose down
 ```
 
+### Previewing Videos in Remotion Studio
+```bash
+cd remotion
+npx remotion studio
+```
+
 ### Debugging
 
 **Backend:**
@@ -403,6 +516,11 @@ docker-compose down
 - Redux DevTools for Zustand (enable in store)
 - Console logs for API calls
 - Network tab for API debugging
+
+**Remotion:**
+- Use `npx remotion studio` to preview compositions
+- Check particle visibility from frame 0
+- Verify decoration components render before slides
 
 ---
 
@@ -418,8 +536,7 @@ docker-compose down
 1. **Parallel Processing**: Generate multiple videos concurrently
 2. **Job Queue**: Use Redis or BullMQ for persistent jobs
 3. **Caching**: Cache generated messages and music
-4. **WebWorkers**: Offload canvas rendering to worker threads
-5. **Streaming**: Stream frames to FFmpeg instead of writing to disk
+4. **Lambda Rendering**: Use Remotion Lambda for cloud rendering
 
 ---
 
@@ -428,7 +545,7 @@ docker-compose down
 1. **In-Memory Jobs**: Job tracking lost on server restart
 2. **Sequential Processing**: No parallel video generation
 3. **No Persistence**: Recipients and jobs not saved to database
-4. **API Rate Limits**: OpenAI and Pixabay have rate limits
+4. **API Rate Limits**: OpenAI and Jamendo have rate limits
 5. **Large Batches**: Recommended max 50 recipients
 6. **Browser Compatibility**: Requires modern browser for frontend
 
@@ -457,13 +574,18 @@ VITE_API_URL=http://localhost:3001/api
 
 ### Backend Critical
 - `express` - Web framework
-- `fluent-ffmpeg` - FFmpeg wrapper
-- `canvas` - Canvas rendering (requires native dependencies)
+- `@remotion/renderer` - Remotion video rendering
+- `@remotion/bundler` - Remotion bundling
 - `openai` - OpenAI API client
-- `axios` - HTTP client for Pixabay
+- `axios` - HTTP client for Jamendo
 - `multer` - File upload handling
 - `csv-parse` - CSV parsing
 - `xlsx` - Excel parsing
+
+### Remotion Critical
+- `remotion` - Core framework
+- `@remotion/cli` - CLI tools
+- `@remotion/bundler` - Webpack bundling
 
 ### Frontend Critical
 - `react` v19 - UI library
@@ -473,6 +595,7 @@ VITE_API_URL=http://localhost:3001/api
 - `lucide-react` - Icons
 - `sonner` - Toast notifications
 - `papaparse` - CSV parsing client-side
+- `xlsx` - Excel parsing client-side
 - `tailwindcss` - Styling
 
 ---
@@ -483,6 +606,7 @@ VITE_API_URL=http://localhost:3001/api
 - **Utilities**: camelCase (e.g., `utils.ts`)
 - **Stores**: camelCase with Store suffix (e.g., `settingsStore.ts`)
 - **Services**: kebab-case (e.g., `openai-service.ts`)
+- **Decorations**: PascalCase with Decoration suffix (e.g., `ChristmasDecoration.tsx`)
 - **Types**: PascalCase interfaces/types
 - **API routes**: kebab-case (e.g., `api-keys.ts`)
 
@@ -530,6 +654,7 @@ npm run dev:backend      # Backend only
 # Building
 npm run build           # Build all
 npm run build:shared    # Build shared types
+npm run build:remotion  # Build Remotion bundle
 npm run build:frontend  # Build frontend
 npm run build:backend   # Build backend
 
@@ -539,6 +664,9 @@ npm run install:all     # Install all dependencies
 # Production
 npm start              # Run both in production mode
 docker-compose up      # Run with Docker
+
+# Remotion
+cd remotion && npx remotion studio  # Preview compositions
 ```
 
 ---
@@ -546,9 +674,8 @@ docker-compose up      # Run with Docker
 ## Resources
 
 - **OpenAI API Docs**: https://platform.openai.com/docs
-- **Pixabay API Docs**: https://pixabay.com/api/docs/
-- **FFmpeg Docs**: https://ffmpeg.org/documentation.html
-- **Canvas API**: https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API
+- **Jamendo API Docs**: https://developer.jamendo.com/v3.0
+- **Remotion Docs**: https://www.remotion.dev/docs
 - **Radix UI**: https://www.radix-ui.com/
 - **shadcn/ui**: https://ui.shadcn.com/
 

@@ -7,7 +7,7 @@ const router = express.Router();
 // Generate videos
 router.post('/generate', async (req, res) => {
   try {
-    const { recipients, theme, format, musicUrl } = req.body as VideoGenerationRequest;
+    const { recipients, theme, format, musicUrl, senderName } = req.body as VideoGenerationRequest;
 
     if (!recipients || !Array.isArray(recipients) || recipients.length === 0) {
       return res.status(400).json({ error: 'Recipients array is required' });
@@ -21,7 +21,7 @@ router.post('/generate', async (req, res) => {
       return res.status(400).json({ error: 'Format is required' });
     }
 
-    const result = await generateVideoBatch({ recipients, theme, format, musicUrl });
+    const result = await generateVideoBatch({ recipients, theme, format, musicUrl, senderName });
     res.json(result);
   } catch (error) {
     console.error('Video generation error:', error);

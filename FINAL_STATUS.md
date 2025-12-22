@@ -45,9 +45,9 @@ This launches both frontend and backend simultaneously with colored output:
 - [x] Express.js server with TypeScript
 - [x] 6 API endpoints (validate, upload, messages, music, videos, status)
 - [x] OpenAI GPT-4 integration
-- [x] Pixabay music API integration
-- [x] Advanced canvas renderer (17 holiday themes)
-- [x] FFmpeg video encoding
+- [x] Jamendo music API integration
+- [x] Remotion video renderer (17 holiday themes)
+- [x] Dynamic video duration based on message length
 - [x] Batch processing with job tracking
 - [x] CSV/Excel parsing with smart column detection
 - [x] Error handling throughout
@@ -136,7 +136,7 @@ docker-compose up       # Run with Docker
 
 ### Technologies
 - **Frontend:** React 19, Vite, TypeScript, TailwindCSS, shadcn/ui, Zustand, Framer Motion
-- **Backend:** Node.js 20, Express, TypeScript, FFmpeg, node-canvas, OpenAI, Pixabay
+- **Backend:** Node.js 20, Express, TypeScript, Remotion, OpenAI, Jamendo
 - **Infrastructure:** Docker, docker-compose, nginx
 - **Tools:** ESLint, concurrently, Multer, papaparse
 
@@ -160,8 +160,8 @@ docker-compose up       # Run with Docker
 - ✅ Manual entry
 - ✅ API key validation
 - ✅ Message generation with AI
-- ✅ Music fetching from Pixabay
-- ✅ Video rendering (900 frames per video)
+- ✅ Music fetching from Jamendo
+- ✅ Video rendering (Remotion-based compositions)
 - ✅ Progress tracking
 - ✅ Video preview and download
 - ✅ Dark/light mode
@@ -264,8 +264,7 @@ Run with: `docker-compose up --build`
 ## 🎓 Technology Highlights
 
 ### Advanced Features
-- **Canvas Rendering**: 900 frames, real-time particles, dynamic gradients
-- **FFmpeg Integration**: H.264 encoding, audio mixing, quality optimization
+- **Remotion Rendering**: React-based compositions, dynamic duration, particle effects
 - **AI-Powered**: OpenAI GPT-4 for personalized messages
 - **Modern React**: Zustand state, Framer Motion animations, shadcn/ui
 - **Type Safety**: TypeScript throughout, shared types package

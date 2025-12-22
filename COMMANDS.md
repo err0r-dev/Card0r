@@ -155,7 +155,7 @@ curl http://localhost:3001/health
 # Test API key validation
 curl -X POST http://localhost:3001/api/validate-keys \
   -H "Content-Type: application/json" \
-  -d '{"openai":"test","pixabay":"test"}'
+  -d '{"openai":"test","jamendo":"test"}'
 
 # View generated videos
 ls -lh backend/videos/
@@ -262,8 +262,8 @@ npm run install:all
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# Install FFmpeg and canvas dependencies
-sudo apt-get install -y ffmpeg libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
+# Install dependencies
+sudo apt-get install -y build-essential
 
 # Install dependencies
 npm run install:all

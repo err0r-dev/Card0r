@@ -5,10 +5,12 @@ interface SettingsState {
   openaiKey: string;
   jamendoKey: string;
   darkMode: boolean;
+  hasCompletedSetup: boolean;
   setOpenaiKey: (key: string) => void;
   setJamendoKey: (key: string) => void;
   toggleDarkMode: () => void;
   setDarkMode: (enabled: boolean) => void;
+  setHasCompletedSetup: (completed: boolean) => void;
 }
 
 export const useSettingsStore = create<SettingsState>()(
@@ -17,10 +19,12 @@ export const useSettingsStore = create<SettingsState>()(
       openaiKey: '',
       jamendoKey: '',
       darkMode: true,
+      hasCompletedSetup: false,
       setOpenaiKey: (key) => set({ openaiKey: key }),
       setJamendoKey: (key) => set({ jamendoKey: key }),
       toggleDarkMode: () => set((state) => ({ darkMode: !state.darkMode })),
       setDarkMode: (enabled) => set({ darkMode: enabled }),
+      setHasCompletedSetup: (hasCompletedSetup) => set({ hasCompletedSetup }),
     }),
     {
       name: 'card0r-settings',

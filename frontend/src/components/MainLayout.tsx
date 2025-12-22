@@ -20,7 +20,7 @@ export function MainLayout({ children }: MainLayoutProps) {
           <button
             onClick={() => {
               setShowSplash(true);
-              setCurrentStep('upload');
+              setCurrentStep(1);
             }}
             className="flex items-center gap-2 hover:opacity-80 transition-opacity"
           >

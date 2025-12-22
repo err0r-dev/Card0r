@@ -10,12 +10,12 @@ Card0r is a full-stack web application that generates personalized, animated vid
 - **Manual Entry**: Add recipients one by one through the UI
 - **17 Holiday Themes**: Christmas, New Year, Easter, Valentine's, Halloween, Thanksgiving, Jewish holidays (Rosh Hashanah, Hanukkah, Passover, Yom Kippur), Islamic holidays (Eid al-Fitr, Eid al-Adha, Ramadan), Asian holidays (Chinese New Year, Diwali, Lunar New Year)
 - **AI-Powered Messages**: OpenAI GPT-4 generates personalized messages
-- **Holiday Visual Effects**: Particle effects (snow, fireworks, confetti), character animations, seasonal overlays, dynamic backgrounds
+- **Theme-Specific Decorations**: Each theme has unique animated decorations (snow, fireworks, hearts, bats, lanterns, etc.)
 - **Multiple Export Formats**: 1080p, 4K, Square (Instagram), Social (Stories)
-- **Background Music**: Pixabay music integration
+- **Background Music**: Jamendo music integration
 - **Dark/Light Mode**: Full theme support
+- **Auto-Generation**: Automatic message and video generation when prerequisites are met
 - **Docker Ready**: Containerized deployment
-- **Electron Compatible**: Desktop app capability
 
 ## Architecture
 
@@ -24,8 +24,10 @@ Card0r is a full-stack web application that generates personalized, animated vid
 ```
 Card0r/
 ├── frontend/          # Vite + React + TypeScript + shadcn/ui
-├── backend/           # Node.js + Express + TypeScript + FFmpeg
-└── shared/            # Shared TypeScript types
+├── backend/           # Node.js + Express + TypeScript + Remotion
+├── remotion/          # Remotion video compositions and decorations
+├── shared/            # Shared TypeScript types
+└── docker-compose.yml # Container orchestration
 ```
 
 ### Technology Stack
@@ -46,15 +48,58 @@ Card0r/
 - Node.js 20+
 - Express 4.x
 - TypeScript 5.x
-- FFmpeg (video encoding)
-- node-canvas (frame generation)
+- Remotion (React-based video rendering)
 - OpenAI API (GPT-4)
-- Pixabay API (music)
+- Jamendo API (music)
 - Multer (file uploads)
 
-## What's Been Built
+**Remotion (Video Rendering):**
+- React-based video compositions
+- Theme-specific decoration components
+- Particle systems with pre-seeded positions
+- Dynamic video duration based on message length
 
-### ✅ Complete Backend (100%)
+## Features Implemented
+
+### Frontend (100%)
+
+1. **Project Setup**
+   - Vite + React + TypeScript configured
+   - TailwindCSS with dark mode support
+   - shadcn/ui components installed
+   - Custom CSS variables for theming
+
+2. **State Management** (`frontend/src/stores/`)
+   - `settingsStore.ts` - API keys, dark mode (persisted to localStorage)
+   - `recipientsStore.ts` - Recipient management with sender name
+   - `videoStore.ts` - Theme, format, music, job tracking
+   - `uiStore.ts` - UI state, splash screen, current step
+
+3. **UI Components** (`frontend/src/components/ui/`)
+   - Button, Card, Dialog, Input, Label, Textarea
+   - Progress, RadioGroup, Separator, Select, Sonner (toasts)
+
+4. **Feature Components** (`frontend/src/components/`)
+   - `SplashScreen.tsx` - Animated entrance with Framer Motion particles
+   - `MainLayout.tsx` - Top nav, dark mode toggle, settings button
+   - `SettingsModal.tsx` - API key management with validation
+   - `FileUploader.tsx` - Drag-drop CSV/Excel upload
+   - `RecipientForm.tsx` - Manual entry form with sender name
+   - `RecipientTable.tsx` - List of recipients with edit/delete
+   - `HolidaySelector.tsx` - 17 holiday cards in 4 categories
+   - `FormatPicker.tsx` - Radio group for export formats
+   - `MusicSelector.tsx` - Music track selection from Jamendo
+   - `VideoGenerator.tsx` - Auto-triggering message and video generation
+   - `VideoGallery.tsx` - Grid with preview and download
+   - `DownloadStep.tsx` - Final download interface
+
+5. **Auto-Generation Flow**
+   - Automatic message generation when recipients, theme, and API key are ready
+   - Automatic video generation when messages are complete
+   - Progress tracking with polling
+   - Auto-navigation to download step on completion
+
+### Backend (100%)
 
 1. **Express Server** (`backend/src/server.ts`)
    - CORS configured
@@ -63,10 +108,10 @@ Card0r/
    - Health check endpoint
 
 2. **API Routes** (`backend/src/routes/`)
-   - `/api/validate-keys` - Validate OpenAI/Pixabay API keys
+   - `/api/validate-keys` - Validate OpenAI/Jamendo API keys
    - `/api/upload-csv` - Parse CSV/Excel files
    - `/api/generate-messages` - Generate personalized messages with OpenAI
-   - `/api/music/:theme` - Fetch holiday music from Pixabay
+   - `/api/music/:theme` - Fetch holiday music from Jamendo
    - `/api/videos/generate` - Start batch video generation
    - `/api/videos/status/:jobId` - Check generation progress
 
@@ -74,18 +119,44 @@ Card0r/
    - `validation.ts` - API key validation
    - `csv-parser.ts` - CSV/Excel parsing with flexible column detection
    - `openai-service.ts` - GPT-4 message generation with holiday-specific prompts
-   - `pixabay-service.ts` - Music search and retrieval
-   - `canvas-renderer.ts` - **Advanced canvas-based frame generation**:
-     - Holiday-specific color schemes (17 themes)
-     - Particle systems (snow, confetti, fireworks, stars)
-     - Dynamic backgrounds with gradients
-     - Text animations (fade-in, word-by-word reveal)
-     - Character/icon animations per theme
-     - 30-second video structure (intro → name → message → outro)
-   - `ffmpeg-service.ts` - Video encoding with audio mixing
+   - `jamendo-service.ts` - Music search and retrieval
+   - `remotion-renderer.ts` - Remotion-based video rendering
    - `video-generator.ts` - Batch processing orchestrator
 
-### ✅ Shared Types Package (100%)
+### Remotion Video System (100%)
+
+1. **Compositions** (`remotion/src/`)
+   - `Root.tsx` - Remotion composition registration
+   - `CardComposition.tsx` - Main video composition with sequences
+   - `types.ts` - Type definitions and theme colors
+
+2. **Slides** (`remotion/src/slides/`)
+   - `IntroSlide.tsx` - Theme name introduction (transparent background)
+   - `NameRevealSlide.tsx` - Recipient name reveal (transparent background)
+   - `MessageSlide.tsx` - Animated message display (transparent background)
+   - `SenderSlide.tsx` - "From: [sender]" display (transparent background)
+   - `OutroSlide.tsx` - Closing animation (transparent background)
+
+3. **Decorations** (`remotion/src/decorations/`)
+   - `ParticleDecoration.tsx` - Generic particle system (fallback)
+   - `ChristmasDecoration.tsx` - Snow, Santa sleigh, lights, ornaments
+   - `NewYearDecoration.tsx` - Fireworks, confetti, champagne bubbles
+   - `ValentinesDecoration.tsx` - Hearts, rose petals, Cupid arrows
+   - `EasterDecoration.tsx` - Easter eggs, bunnies, butterflies
+   - `HalloweenDecoration.tsx` - Bats, ghosts, spiders, pumpkins
+   - `ThanksgivingDecoration.tsx` - Autumn leaves, acorns, pumpkins
+   - `HanukkahDecoration.tsx` - Menorah, Stars of David, dreidels, gelt
+   - `DiwaliDecoration.tsx` - Diyas, rangoli, fireworks, sparklers
+   - `ChineseNewYearDecoration.tsx` - Lanterns, dragon, red envelopes
+   - `IslamicDecoration.tsx` - Crescents, lanterns, geometric patterns
+
+4. **Animation System**
+   - Pre-seeded Y/X positions for immediate visibility from frame 0
+   - Reduced delays (30 frames vs 150-300) for faster appearance
+   - Relative timing for special animations (Santa, Cupid arrows, sparklers)
+   - Continuous particle animations throughout entire video
+
+### Shared Types Package (100%)
 
 - `shared/src/index.ts` - Complete TypeScript type definitions:
   - `HolidayTheme` enum (17 holidays)
@@ -94,50 +165,14 @@ Card0r/
   - API request/response types
   - Video generation job types
 
-### ⚠️ Partial Frontend (40%)
-
-**Completed:**
-1. **Project Setup**
-   - Vite + React + TypeScript configured
-   - TailwindCSS with dark mode support
-   - shadcn/ui dependencies installed
-   - Custom CSS variables for theming
-
-2. **State Management** (`frontend/src/stores/`)
-   - `settingsStore.ts` - API keys, dark mode (persisted to localStorage)
-   - `recipientsStore.ts` - Recipient management
-   - `videoStore.ts` - Theme, format, job tracking
-   - `uiStore.ts` - UI state, splash screen, current step
-
-3. **Utilities**
-   - `lib/utils.ts` - cn() helper for Tailwind class merging
-   - `lib/api.ts` - Complete API client for backend communication
-
-4. **UI Components Started**
-   - `components/ui/button.tsx` - Button component with variants
-
-**Still Needed:**
-1. Additional shadcn/ui components (Dialog, Input, Label, Select, Progress, etc.)
-2. Splash screen component
-3. Main app layout with dark mode toggle
-4. Settings modal for API keys
-5. File uploader with drag-drop
-6. Manual recipient entry form
-7. Recipient list/table manager
-8. Holiday theme selector (visual cards for 17 holidays)
-9. Export format picker
-10. Video generation interface with progress tracking
-11. Video gallery with preview and download
-12. Main App.tsx router/flow
-
 ## Getting Started
 
 ### Prerequisites
 
 - Node.js 20+
-- FFmpeg installed on your system
+- FFmpeg (for video encoding)
 - OpenAI API key
-- Pixabay API key
+- Jamendo API key (get from https://devportal.jamendo.com/)
 
 ### Installation
 
@@ -145,14 +180,8 @@ Card0r/
 # Install dependencies (monorepo)
 npm install
 
-# Build shared types
-cd shared && npm run build
-
-# Install frontend dependencies
-cd ../frontend && npm install
-
-# Install backend dependencies
-cd ../backend && npm install
+# Build all packages
+npm run build
 ```
 
 ### Development
@@ -182,129 +211,32 @@ npm run dev
 ### Building for Production
 
 ```bash
-# Single command builds all packages (shared, frontend, backend)
+# Single command builds all packages (shared, remotion, frontend, backend)
 npm run build
 
 # Then start both services
 npm start
-
-# Or manually:
-# cd backend && npm start
-# cd frontend && npm run preview
 ```
 
-## Docker Deployment (To Be Implemented)
-
-The project is structured for Docker but requires `Dockerfile`s and `docker-compose.yml`:
+## Docker Deployment
 
 ```bash
 # Build and run with Docker Compose
 docker-compose up --build
+
+# Run detached
+docker-compose up -d
 ```
 
-## Electron App (To Be Implemented)
+## User Workflow
 
-The project can be packaged as a desktop app with Electron:
-
-```bash
-npm run electron:build
-```
-
-## Next Steps for Development
-
-### Critical Frontend Components Needed
-
-1. **Create remaining shadcn/ui components** in `frontend/src/components/ui/`:
-   - Dialog (for Settings modal)
-   - Input (for API keys, recipient form)
-   - Label (for form fields)
-   - Select (for dropdown menus)
-   - Progress (for video generation progress)
-   - Card (for holiday themes display)
-   - RadioGroup (for format selection)
-   - Separator (for visual dividers)
-
-2. **Build SplashScreen component** (`frontend/src/components/SplashScreen.tsx`):
-   - Animated logo/title
-   - Particle effects using Framer Motion
-   - Click-to-enter interaction
-   - Fade transition to main app
-
-3. **Build MainLayout component** (`frontend/src/components/MainLayout.tsx`):
-   - Top navigation bar
-   - Settings cog button (top-right)
-   - Dark/light mode toggle (top-right)
-   - Responsive container
-   - Step indicator
-
-4. **Build SettingsModal component** (`frontend/src/components/SettingsModal.tsx`):
-   - OpenAI API key input
-   - Pixabay API key input
-   - Validation on save
-   - Encrypted localStorage storage
-
-5. **Build FileUploader component** (`frontend/src/components/FileUploader.tsx`):
-   - Drag-and-drop zone
-   - CSV/Excel file validation
-   - Parse and display preview
-   - Add to recipients list
-
-6. **Build RecipientForm component** (`frontend/src/components/RecipientForm.tsx`):
-   - Name input
-   - Message guidance textarea
-   - Add button
-   - Form validation
-
-7. **Build RecipientTable component** (`frontend/src/components/RecipientTable.tsx`):
-   - Display all recipients
-   - Edit inline
-   - Delete button
-   - Empty state
-
-8. **Build HolidaySelector component** (`frontend/src/components/HolidaySelector.tsx`):
-   - Grid of 17 holiday cards
-   - Visual preview for each theme
-   - Selected state styling
-   - Category grouping (Western, Jewish, Islamic, Asian)
-
-9. **Build FormatPicker component** (`frontend/src/components/FormatPicker.tsx`):
-   - Radio group for 4 formats
-   - Show dimensions for each
-   - Visual preview
-
-10. **Build VideoGenerator component** (`frontend/src/components/VideoGenerator.tsx`):
-    - Generate button
-    - Progress bars per recipient
-    - Overall progress
-    - Cancel option
-    - Error handling
-
-11. **Build VideoGallery component** (`frontend/src/components/VideoGallery.tsx`):
-    - Grid of video thumbnails
-    - Preview modal
-    - Download button per video
-    - Download all (ZIP)
-
-12. **Build Main App.tsx**:
-    - Conditional splash screen
-    - Settings modal state
-    - Step-based workflow
-    - Dark mode class toggle on `<html>`
-
-### Docker Configuration
-
-Create the following files:
-
-1. `frontend/Dockerfile`
-2. `backend/Dockerfile`
-3. `docker-compose.yml` (root)
-
-### Electron Configuration
-
-1. Install Electron dependencies
-2. Create `electron/main.ts`
-3. Create `electron/preload.ts`
-4. Update `package.json` with Electron scripts
+1. **Enter API Keys** - Settings modal for OpenAI and Jamendo keys
+2. **Add Recipients** - Upload CSV/Excel or add manually with sender name
+3. **Select Theme** - Choose from 17 holiday themes with visual previews
+4. **Select Format** - Choose video dimensions (1080p, 4K, Square, Social)
+5. **Select Music** - Browse and select background music (optional)
+6. **Generate** - Auto-generates messages then videos with progress tracking
+7. **Download** - Preview and download individual videos or all as ZIP
 
 ## API Endpoints Reference
 
@@ -344,8 +276,8 @@ MIT
 
 ## Credits
 
-Built with world-class UX/UI in mind, featuring:
-- 17 holiday themes with custom visual effects
+Built with:
+- 17 holiday themes with custom animated decorations
 - AI-powered personalization via OpenAI GPT-4
-- Professional video encoding with FFmpeg
+- React-based video rendering with Remotion
 - Modern, responsive React interface with shadcn/ui

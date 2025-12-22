@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Wand2, Loader2, CheckCircle, XCircle } from 'lucide-react';
 import { useRecipientsStore } from '../stores/recipientsStore';
 import { useVideoStore } from '../stores/videoStore';
@@ -12,7 +12,7 @@ import { Separator } from './ui/separator';
 import { toast } from 'sonner';
 
 export function VideoGenerator() {
-  const { recipients, recipientsWithMessages, setRecipientsWithMessages } = useRecipientsStore();
+  const { recipients, recipientsWithMessages, setRecipientsWithMessages, senderName } = useRecipientsStore();
   const { selectedTheme, selectedFormat, selectedMusicUrl, currentJobId, jobs, setCurrentJobId, setJobs } = useVideoStore();
   const { openaiKey } = useSettingsStore();
   const { setCurrentStep } = useUIStore();
@@ -20,42 +20,11 @@ export function VideoGenerator() {
   const [isGeneratingMessages, setIsGeneratingMessages] = useState(false);
   const [isGeneratingVideos, setIsGeneratingVideos] = useState(false);
 
-  // Poll job status
-  useEffect(() => {
-    if (!currentJobId || !isGeneratingVideos) return;
+  // Refs to track if auto-generation has been triggered (prevent re-triggering)
+  const hasAutoTriggeredMessages = useRef(false);
+  const hasAutoTriggeredVideos = useRef(false);
 
-    const interval = setInterval(async () => {
-      try {
-        const status = await apiClient.getJobStatus(currentJobId);
-        setJobs(status.jobs);
-
-        // Check if all jobs are complete or failed
-        const allDone = status.jobs.every(
-          (job) => job.status === 'completed' || job.status === 'failed'
-        );
-
-        if (allDone) {
-          setIsGeneratingVideos(false);
-          const successCount = status.jobs.filter((j) => j.status === 'completed').length;
-          const failCount = status.jobs.filter((j) => j.status === 'failed').length;
-
-          // Auto-navigate to download section
-          setCurrentStep('complete');
-
-          if (failCount > 0) {
-            toast.warning(`Generated ${successCount} videos, ${failCount} failed. Scroll down to download.`);
-          } else {
-            toast.success(`All ${successCount} videos generated successfully! Scroll down to download.`);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch job status:', error);
-      }
-    }, 2000); // Poll every 2 seconds
-
-    return () => clearInterval(interval);
-  }, [currentJobId, isGeneratingVideos]);
-
+  // Handler functions (defined before useEffects that reference them)
   const handleGenerateMessages = async () => {
     if (!openaiKey) {
       toast.error('Please add your OpenAI API key in settings');
@@ -70,7 +39,7 @@ export function VideoGenerator() {
     setIsGeneratingMessages(true);
     try {
       const result = await apiClient.generateMessages(
-        { recipients, theme: selectedTheme },
+        { recipients, theme: selectedTheme, senderName: senderName || undefined },
         openaiKey
       );
 
@@ -102,6 +71,7 @@ export function VideoGenerator() {
         theme: selectedTheme,
         format: selectedFormat,
         musicUrl: selectedMusicUrl || undefined,
+        senderName: senderName || undefined,
       });
 
       setCurrentJobId(result.jobId);
@@ -113,6 +83,74 @@ export function VideoGenerator() {
       setIsGeneratingVideos(false);
     }
   };
+
+  // Auto-trigger message generation when component mounts with valid prerequisites
+  useEffect(() => {
+    const canAutoGenerate =
+      recipients.length > 0 &&
+      selectedTheme &&
+      openaiKey &&
+      recipientsWithMessages.length === 0 &&
+      !isGeneratingMessages &&
+      !hasAutoTriggeredMessages.current;
+
+    if (canAutoGenerate) {
+      hasAutoTriggeredMessages.current = true;
+      handleGenerateMessages();
+    }
+  }, [recipients.length, selectedTheme, openaiKey, recipientsWithMessages.length, isGeneratingMessages]);
+
+  // Auto-trigger video generation once messages are ready
+  useEffect(() => {
+    const canAutoGenerate =
+      recipientsWithMessages.length > 0 &&
+      selectedTheme &&
+      selectedFormat &&
+      !currentJobId &&
+      !isGeneratingVideos &&
+      !hasAutoTriggeredVideos.current;
+
+    if (canAutoGenerate) {
+      hasAutoTriggeredVideos.current = true;
+      handleGenerateVideos();
+    }
+  }, [recipientsWithMessages.length, selectedTheme, selectedFormat, currentJobId, isGeneratingVideos]);
+
+  // Poll job status
+  useEffect(() => {
+    if (!currentJobId || !isGeneratingVideos) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const status = await apiClient.getJobStatus(currentJobId);
+        setJobs(status.jobs);
+
+        // Check if all jobs are complete or failed
+        const allDone = status.jobs.every(
+          (job) => job.status === 'completed' || job.status === 'failed'
+        );
+
+        if (allDone) {
+          setIsGeneratingVideos(false);
+          const successCount = status.jobs.filter((j) => j.status === 'completed').length;
+          const failCount = status.jobs.filter((j) => j.status === 'failed').length;
+
+          // Auto-navigate to download step (step 4)
+          setCurrentStep(4);
+
+          if (failCount > 0) {
+            toast.warning(`Generated ${successCount} videos, ${failCount} failed. Scroll down to download.`);
+          } else {
+            toast.success(`All ${successCount} videos generated successfully! Scroll down to download.`);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch job status:', error);
+      }
+    }, 2000); // Poll every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [currentJobId, isGeneratingVideos]);
 
   const messagesReady = recipientsWithMessages.length > 0;
   const videosGenerating = isGeneratingVideos;

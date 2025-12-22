@@ -26,7 +26,7 @@ export async function generateMessages(
   apiKey: string
 ): Promise<MessageGenerationResponse> {
   const openai = new OpenAI({ apiKey });
-  const { recipients, theme } = request;
+  const { recipients, theme, senderName } = request;
 
   const holidayPrompt = HOLIDAY_PROMPTS[theme];
   const recipientsWithMessages: RecipientWithMessage[] = [];
@@ -34,7 +34,8 @@ export async function generateMessages(
   // Generate messages for each recipient
   for (const recipient of recipients) {
     try {
-      const prompt = `${holidayPrompt} for ${recipient.name}.
+      const senderInfo = senderName ? `\nFrom: ${senderName}` : '';
+      const prompt = `${holidayPrompt} for ${recipient.name}.${senderInfo}
 
 Guidance: ${recipient.messageGuidance}
 
@@ -44,6 +45,7 @@ Requirements:
 - Focus on the person and the guidance provided
 - Use appropriate tone for the holiday
 - Make it feel genuine and heartfelt
+${senderName ? `- The message is from "${senderName}" - you may reference this naturally but don't end with a signature line (the video will show the sender separately)` : ''}
 
 Return ONLY the message text, no additional commentary.`;
 

@@ -76,6 +76,7 @@ export interface VideoGenerationRequest {
   theme: HolidayTheme;
   format: VideoFormat;
   musicUrl?: string;
+  senderName?: string;
 }
 
 export interface VideoGenerationJob {
@@ -96,6 +97,7 @@ export interface BatchVideoResponse {
 export interface MessageGenerationRequest {
   recipients: Recipient[];
   theme: HolidayTheme;
+  senderName?: string;
 }
 
 export interface MessageGenerationResponse {

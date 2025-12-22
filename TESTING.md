@@ -3,10 +3,9 @@
 ## Manual Testing Checklist
 
 ### Prerequisites
-- [ ] FFmpeg installed and accessible
 - [ ] Node.js 20+ installed
 - [ ] OpenAI API key (for full testing)
-- [ ] Pixabay API key (for full testing)
+- [ ] Jamendo API key (for full testing)
 
 ### Backend Testing
 
@@ -90,7 +89,7 @@ npm run dev
 #### 3. Settings Modal
 - [ ] Click settings cog (top-right)
 - [ ] Modal opens
-- [ ] OpenAI and Pixabay input fields visible
+- [ ] OpenAI and Jamendo input fields visible
 - [ ] Links to API providers work
 - [ ] Validation works with test keys
 - [ ] Keys persist after page reload
@@ -216,7 +215,7 @@ npm run dev
 
 #### Invalid API Keys
 - [ ] Enter invalid OpenAI key → Error message shown
-- [ ] Enter invalid Pixabay key → Error message shown
+- [ ] Enter invalid Jamendo key → Error message shown
 - [ ] Cannot proceed without valid keys
 
 #### Invalid CSV
@@ -276,7 +275,7 @@ Test at different screen sizes:
 
 1. **Sequential Processing:** Videos generated one at a time (parallel processing not implemented)
 2. **No Progress Persistence:** Refresh loses progress (job storage in memory only)
-3. **Limited Music Options:** Pixabay returns 5 tracks per theme
+3. **Limited Music Options:** Jamendo returns 5 tracks per theme
 4. **No Video Preview in Gallery:** Thumbnail only, full preview requires click
 
 ### Debug Mode

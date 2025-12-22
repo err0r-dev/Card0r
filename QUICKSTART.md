@@ -7,12 +7,8 @@ Get Card0r running in minutes!
 Before you start, make sure you have:
 
 1. **Node.js 20+** installed
-2. **FFmpeg** installed on your system
-   - macOS: `brew install ffmpeg`
-   - Ubuntu/Debian: `sudo apt-get install ffmpeg`
-   - Windows: Download from https://ffmpeg.org/download.html
-3. **OpenAI API Key** from https://platform.openai.com/api-keys
-4. **Pixabay API Key** from https://pixabay.com/api/docs/
+2. **OpenAI API Key** from https://platform.openai.com/api-keys
+3. **Jamendo API Key** from https://devportal.jamendo.com/
 
 ## Installation
 
@@ -104,7 +100,7 @@ npm start
 
 2. **Click the Settings cog** (top-right) to add your API keys:
    - OpenAI API Key (required for message generation)
-   - Pixabay API Key (required for music)
+   - Jamendo API Key (required for music)
 
 3. **You're ready!** Follow the 5-step workflow:
    - Step 1: Add Recipients (CSV upload or manual entry)
@@ -127,7 +123,6 @@ Bob Johnson,Hope your holidays are filled with joy
 ## Troubleshooting
 
 ### Backend won't start
-- Make sure FFmpeg is installed: `ffmpeg -version`
 - Check that port 3001 is not in use
 - Verify Node.js version: `node --version` (should be 20+)
 
@@ -140,17 +135,7 @@ Bob Johnson,Hope your holidays are filled with joy
 - Verify API keys are correct in settings
 - Check backend console for detailed error messages
 - Ensure enough disk space for video files
-- Check FFmpeg is accessible: `which ffmpeg`
-
-### Canvas/FFmpeg errors
-If you see canvas or FFmpeg errors:
-```bash
-# macOS
-brew install cairo pango libpng jpeg giflib librsvg
-
-# Ubuntu/Debian
-sudo apt-get install libcairo2-dev libjpeg-dev libpango1.0-dev libgif-dev librsvg2-dev
-```
+- Make sure Remotion bundle exists (run `npm run build:remotion` from root)
 
 ## Project Structure
 
@@ -180,9 +165,9 @@ Card0r/
 3. **Format Selection** → Video dimensions selected
 4. **Generate Messages** → OpenAI GPT-4 creates personalized messages
 5. **Generate Videos** → For each recipient:
-   - Canvas renders 900 frames (30 fps × 30 seconds)
-   - Frames include: theme animations, particles, text reveals
-   - FFmpeg encodes frames + audio into MP4
+   - Remotion renders React-based video compositions
+   - Dynamic duration based on message word count
+   - Includes: intro, name reveal, message, sender, outro slides
    - Videos saved to backend/videos/
 6. **Download** → Videos available for preview and download
 

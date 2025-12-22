@@ -6,7 +6,7 @@ const router = express.Router();
 
 router.post('/', async (req, res) => {
   try {
-    const { recipients, theme } = req.body as MessageGenerationRequest;
+    const { recipients, theme, senderName } = req.body as MessageGenerationRequest;
     const apiKey = req.headers['x-openai-key'] as string;
 
     if (!apiKey) {
@@ -21,7 +21,7 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Theme is required' });
     }
 
-    const result = await generateMessages({ recipients, theme }, apiKey);
+    const result = await generateMessages({ recipients, theme, senderName }, apiKey);
     res.json(result);
   } catch (error) {
     console.error('Message generation error:', error);
