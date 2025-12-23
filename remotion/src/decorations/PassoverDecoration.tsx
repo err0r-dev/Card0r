@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, SwayMotion } from '../utils/decorationAnimations';
 
 interface PassoverDecorationProps {
   width: number;
@@ -187,6 +188,9 @@ export function PassoverDecoration({ width, height }: PassoverDecorationProps) {
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Soft gold sparkle overlay */}
+      <SparkleOverlay count={20} color="#DAA520" minSize={2} maxSize={5} seed="passover-gold" />
+
       {/* Warm beige gradient overlay */}
       <div
         style={{

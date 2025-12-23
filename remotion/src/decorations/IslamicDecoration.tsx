@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, SwayMotion, Flicker } from '../utils/decorationAnimations';
 
 interface IslamicDecorationProps {
   width: number;
@@ -140,6 +141,10 @@ export function IslamicDecoration({ width, height, isRamadan = false }: IslamicD
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Gold and green sparkle overlay */}
+      <SparkleOverlay count={30} color="#FFD700" minSize={2} maxSize={6} seed="islamic-gold" />
+      <SparkleOverlay count={15} color="#2E7D32" minSize={2} maxSize={5} seed="islamic-green" />
+
       {/* Deep blue night sky gradient */}
       <div
         style={{

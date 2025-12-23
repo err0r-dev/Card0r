@@ -2,7 +2,7 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 6724:
+/***/ 9457:
 /***/ ((__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) => {
 
 
@@ -44,7 +44,7 @@ var VideoFormat;
 
 ;// ./src/types.ts
 
-const HOLIDAY_COLORS = {
+const types_HOLIDAY_COLORS = {
   christmas: { bg: "#1a472a", primary: "#d42426", secondary: "#2e7d32", accent: "#ffd700" },
   new_year: { bg: "#0a0a2e", primary: "#ffd700", secondary: "#ff6b9d", accent: "#00d4ff" },
   easter: { bg: "#fff9e6", primary: "#ff99cc", secondary: "#99ccff", accent: "#ffeb3b" },
@@ -109,11 +109,10 @@ function calculateMessageDuration(message) {
 }
 function calculateTotalDuration(message) {
   const INTRO_DURATION = 5;
-  const NAME_REVEAL_DURATION = 3;
   const SENDER_REVEAL_DURATION = 3;
   const OUTRO_DURATION = 3;
   const messageDuration = calculateMessageDuration(message);
-  const total = INTRO_DURATION + NAME_REVEAL_DURATION + messageDuration + SENDER_REVEAL_DURATION + OUTRO_DURATION;
+  const total = INTRO_DURATION + messageDuration + SENDER_REVEAL_DURATION + OUTRO_DURATION;
   return Math.min(60, Math.max(20, total));
 }
 function useAnimationProgress(delayFrames = 0, durationFrames) {
@@ -246,9 +245,9 @@ function seededRandom(seed) {
     return seed / 233280;
   };
 }
-function useOscillate(options) {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+function animations_useOscillate(options) {
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
   const frequency = (options == null ? void 0 : options.frequency) ?? 0.5;
   const amplitude = (options == null ? void 0 : options.amplitude) ?? 1;
   const phase = (options == null ? void 0 : options.phase) ?? 0;
@@ -315,7 +314,7 @@ function getGreetingMessage(theme, name) {
 function IntroSlide({ theme, recipientName }) {
   const frame = (0,esm.useCurrentFrame)();
   const { fps, durationInFrames } = (0,esm.useVideoConfig)();
-  const colors = HOLIDAY_COLORS[theme];
+  const colors = types_HOLIDAY_COLORS[theme];
   const greetingMessage = getGreetingMessage(theme, recipientName);
   const progress = frame / durationInFrames;
   const alpha = Math.sin(progress * Math.PI);
@@ -364,30 +363,30 @@ function IntroSlide({ theme, recipientName }) {
 
 
 function NameRevealSlide({ name, theme }) {
-  const frame = (0,esm.useCurrentFrame)();
-  const { fps, durationInFrames } = (0,esm.useVideoConfig)();
+  const frame = useCurrentFrame();
+  const { fps, durationInFrames } = useVideoConfig();
   const colors = HOLIDAY_COLORS[theme];
-  const scale = (0,esm.interpolate)(
+  const scale = interpolate(
     frame,
     [0, fps * 2],
     [0.5, 1],
     { extrapolateRight: "clamp" }
   );
-  const opacity = (0,esm.interpolate)(
+  const opacity = interpolate(
     frame,
     [0, fps * 0.5],
     [0, 1],
     { extrapolateRight: "clamp" }
   );
-  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
-    esm.AbsoluteFill,
+  return /* @__PURE__ */ jsx(
+    AbsoluteFill,
     {
       style: {
         display: "flex",
         alignItems: "center",
         justifyContent: "center"
       },
-      children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      children: /* @__PURE__ */ jsx(
         "h1",
         {
           style: {
@@ -415,11 +414,11 @@ function NameRevealSlide({ name, theme }) {
 function MessageSlide({ name, message, theme }) {
   const frame = (0,esm.useCurrentFrame)();
   const { fps, width } = (0,esm.useVideoConfig)();
-  const colors = HOLIDAY_COLORS[theme];
+  const colors = types_HOLIDAY_COLORS[theme];
   const maxCharsPerLine = Math.floor(width / 30);
   const lines = wrapText(message, maxCharsPerLine);
   const REVEAL_TIME_PER_LINE = fps * 0.8;
-  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
     esm.AbsoluteFill,
     {
       style: {
@@ -429,66 +428,51 @@ function MessageSlide({ name, message, theme }) {
         justifyContent: "center",
         padding: "40px 60px"
       },
-      children: [
-        /* @__PURE__ */ (0,jsx_runtime.jsx)(
-          "h2",
-          {
-            style: {
-              fontSize: 48,
-              fontWeight: "bold",
-              color: colors.primary,
-              marginBottom: 40,
-              textShadow: `0 2px 10px ${colors.primary}40`
-            },
-            children: name
-          }
-        ),
-        /* @__PURE__ */ (0,jsx_runtime.jsx)(
-          "div",
-          {
-            style: {
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: 16
-            },
-            children: lines.map((line, index) => {
-              const lineStartFrame = index * REVEAL_TIME_PER_LINE;
-              const lineEndFrame = lineStartFrame + REVEAL_TIME_PER_LINE;
-              let lineOpacity = 0;
-              if (frame >= lineEndFrame) {
-                lineOpacity = 1;
-              } else if (frame >= lineStartFrame) {
-                lineOpacity = (frame - lineStartFrame) / REVEAL_TIME_PER_LINE;
-              }
-              const slideY = (0,esm.interpolate)(
-                frame,
-                [lineStartFrame, lineEndFrame],
-                [20, 0],
-                { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
-              );
-              return /* @__PURE__ */ (0,jsx_runtime.jsx)(
-                "p",
-                {
-                  style: {
-                    fontSize: 42,
-                    fontWeight: "500",
-                    color: colors.accent,
-                    textAlign: "center",
-                    opacity: lineOpacity,
-                    transform: `translateY(${slideY}px)`,
-                    textShadow: `0 2px 15px ${colors.bg}80`,
-                    margin: 0,
-                    lineHeight: 1.4
-                  },
-                  children: line
+      children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 16
+          },
+          children: lines.map((line, index) => {
+            const lineStartFrame = index * REVEAL_TIME_PER_LINE;
+            const lineEndFrame = lineStartFrame + REVEAL_TIME_PER_LINE;
+            let lineOpacity = 0;
+            if (frame >= lineEndFrame) {
+              lineOpacity = 1;
+            } else if (frame >= lineStartFrame) {
+              lineOpacity = (frame - lineStartFrame) / REVEAL_TIME_PER_LINE;
+            }
+            const slideY = (0,esm.interpolate)(
+              frame,
+              [lineStartFrame, lineEndFrame],
+              [20, 0],
+              { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+            );
+            return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+              "p",
+              {
+                style: {
+                  fontSize: 42,
+                  fontWeight: "500",
+                  color: colors.accent,
+                  textAlign: "center",
+                  opacity: lineOpacity,
+                  transform: `translateY(${slideY}px)`,
+                  textShadow: `0 2px 15px ${colors.bg}80`,
+                  margin: 0,
+                  lineHeight: 1.4
                 },
-                index
-              );
-            })
-          }
-        )
-      ]
+                children: line
+              },
+              index
+            );
+          })
+        }
+      )
     }
   );
 }
@@ -501,7 +485,7 @@ function MessageSlide({ name, message, theme }) {
 function SenderSlide({ senderName, theme }) {
   const frame = (0,esm.useCurrentFrame)();
   const { fps } = (0,esm.useVideoConfig)();
-  const colors = HOLIDAY_COLORS[theme];
+  const colors = types_HOLIDAY_COLORS[theme];
   const fromOpacity = (0,esm.interpolate)(
     frame,
     [fps * 0.3, fps * 1],
@@ -589,7 +573,7 @@ const THEME_CLOSINGS = {
 function OutroSlide({ theme }) {
   const frame = (0,esm.useCurrentFrame)();
   const { durationInFrames } = (0,esm.useVideoConfig)();
-  const colors = HOLIDAY_COLORS[theme];
+  const colors = types_HOLIDAY_COLORS[theme];
   const closingMessage = THEME_CLOSINGS[theme] || "Best Wishes";
   const opacity = (0,esm.interpolate)(
     frame,
@@ -636,7 +620,284 @@ function OutroSlide({ theme }) {
 
 // EXTERNAL MODULE: ../node_modules/react/index.js
 var react = __webpack_require__(3696);
+;// ./src/utils/decorationAnimations.tsx
+
+
+
+
+
+function SparkleOverlay({
+  count = 30,
+  color = "white",
+  minSize = 3,
+  maxSize = 8,
+  seed = "sparkle"
+}) {
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps, durationInFrames, width, height } = (0,esm.useVideoConfig)();
+  const sparkles = (0,react.useMemo)(() => {
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push({
+        id: i,
+        x: (0,esm.random)(`${seed}-x-${i}`) * width,
+        y: (0,esm.random)(`${seed}-y-${i}`) * height,
+        size: (0,esm.random)(`${seed}-size-${i}`) * (maxSize - minSize) + minSize,
+        delay: (0,esm.random)(`${seed}-delay-${i}`) * durationInFrames * 0.5,
+        duration: ((0,esm.random)(`${seed}-dur-${i}`) * 1 + 0.5) * fps,
+        rotation: (0,esm.random)(`${seed}-rot-${i}`) * 360
+      });
+    }
+    return result;
+  }, [count, width, height, minSize, maxSize, seed, fps, durationInFrames]);
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.AbsoluteFill, { style: { pointerEvents: "none" }, children: sparkles.map((sparkle) => {
+    const cycleFrame = (frame + sparkle.delay) % (sparkle.duration * 2);
+    const opacity = cycleFrame < sparkle.duration ? (0,esm.interpolate)(cycleFrame, [0, sparkle.duration * 0.3, sparkle.duration], [0, 1, 0]) : 0;
+    const scale = (0,esm.interpolate)(cycleFrame, [0, sparkle.duration * 0.5, sparkle.duration], [0.5, 1.2, 0.5]);
+    return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          left: sparkle.x,
+          top: sparkle.y,
+          opacity,
+          transform: `rotate(${sparkle.rotation}deg) scale(${scale})`
+        },
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: sparkle.size * 2, height: sparkle.size * 2, viewBox: "0 0 24 24", children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+          "path",
+          {
+            d: "M12 0L14 10L24 12L14 14L12 24L10 14L0 12L10 10Z",
+            fill: color,
+            filter: `drop-shadow(0 0 ${sparkle.size}px ${color})`
+          }
+        ) })
+      },
+      sparkle.id
+    );
+  }) });
+}
+function GlowPulse({
+  children,
+  color = "rgba(255, 255, 255, 0.5)",
+  minGlow = 5,
+  maxGlow = 20,
+  frequency = 0.5,
+  phase = 0
+}) {
+  const pulse = usePulse({ frequency, min: 0, max: 1, phase });
+  const glowSize = minGlow + pulse * (maxGlow - minGlow);
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "div",
+    {
+      style: {
+        filter: `drop-shadow(0 0 ${glowSize}px ${color})`
+      },
+      children
+    }
+  );
+}
+function SwayMotion({
+  children,
+  amplitude = 5,
+  frequency = 0.3,
+  phase = 0,
+  originX = "center",
+  originY = "top"
+}) {
+  const sway = animations_useOscillate({ frequency, amplitude, phase });
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "div",
+    {
+      style: {
+        transform: `rotate(${sway}deg)`,
+        transformOrigin: `${originX} ${originY}`
+      },
+      children
+    }
+  );
+}
+function FloatMotion({
+  children,
+  amplitude = 10,
+  frequency = 0.4,
+  phase = 0,
+  includeHorizontal = false,
+  horizontalAmplitude = 5
+}) {
+  const verticalFloat = useOscillate({ frequency, amplitude, phase });
+  const horizontalFloat = useOscillate({ frequency: frequency * 0.7, amplitude: horizontalAmplitude, phase: phase + 0.25 });
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      style: {
+        transform: `translateY(${verticalFloat}px)${includeHorizontal ? ` translateX(${horizontalFloat}px)` : ""}`
+      },
+      children
+    }
+  );
+}
+function ScalePulse({
+  children,
+  minScale = 1,
+  maxScale = 1.05,
+  frequency = 0.5,
+  phase = 0
+}) {
+  const pulse = usePulse({ frequency, min: 0, max: 1, phase });
+  const scale = minScale + pulse * (maxScale - minScale);
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "div",
+    {
+      style: {
+        transform: `scale(${scale})`
+      },
+      children
+    }
+  );
+}
+function TrailEffect({
+  x,
+  y,
+  count = 8,
+  color = "rgba(255, 255, 255, 0.6)",
+  spread = 30,
+  seed = "trail"
+}) {
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const particles = (0,react.useMemo)(() => {
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      result.push({
+        id: i,
+        offsetX: ((0,esm.random)(`${seed}-ox-${i}`) - 0.5) * spread,
+        offsetY: ((0,esm.random)(`${seed}-oy-${i}`) - 0.5) * spread,
+        size: (0,esm.random)(`${seed}-size-${i}`) * 6 + 2,
+        opacity: (0,esm.random)(`${seed}-op-${i}`) * 0.5 + 0.3,
+        delay: i * 2
+      });
+    }
+    return result;
+  }, [count, spread, seed]);
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(jsx_runtime.Fragment, { children: particles.map((particle) => {
+    const age = (frame - particle.delay) / fps;
+    const fadeOut = Math.max(0, 1 - age * 2);
+    const drift = age * 20;
+    return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          left: x + particle.offsetX - drift,
+          top: y + particle.offsetY,
+          width: particle.size,
+          height: particle.size,
+          backgroundColor: color,
+          borderRadius: "50%",
+          opacity: particle.opacity * fadeOut,
+          filter: `blur(${particle.size / 3}px)`,
+          pointerEvents: "none"
+        }
+      },
+      particle.id
+    );
+  }) });
+}
+function Flicker({
+  children,
+  intensity = 0.3,
+  speed = 8,
+  seed = "flicker"
+}) {
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const time = frame / fps;
+  const flicker1 = Math.sin(time * speed * Math.PI * 2) * 0.5;
+  const flicker2 = Math.sin(time * speed * 1.7 * Math.PI * 2) * 0.3;
+  const flicker3 = Math.sin(time * speed * 2.3 * Math.PI * 2) * 0.2;
+  const combinedFlicker = (flicker1 + flicker2 + flicker3) * intensity;
+  const opacity = 0.7 + combinedFlicker * 0.3 + 0.3;
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: { opacity: Math.max(0.5, Math.min(1, opacity)) }, children });
+}
+function getBezierPoint(t, p0, p1, p2, p3) {
+  const u = 1 - t;
+  const tt = t * t;
+  const uu = u * u;
+  const uuu = uu * u;
+  const ttt = tt * t;
+  return {
+    x: uuu * p0.x + 3 * uu * t * p1.x + 3 * u * tt * p2.x + ttt * p3.x,
+    y: uuu * p0.y + 3 * uu * t * p1.y + 3 * u * tt * p2.y + ttt * p3.y
+  };
+}
+function getBezierAngle(t, p0, p1, p2, p3) {
+  const delta = 1e-3;
+  const p1Pos = getBezierPoint(Math.max(0, t - delta), p0, p1, p2, p3);
+  const p2Pos = getBezierPoint(Math.min(1, t + delta), p0, p1, p2, p3);
+  return Math.atan2(p2Pos.y - p1Pos.y, p2Pos.x - p1Pos.x) * (180 / Math.PI);
+}
+function ConfettiBurst({
+  originX,
+  originY,
+  count = 30,
+  colors = ["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#ff00ff", "#00ffff", "#ffd700"],
+  spread = 200,
+  gravity = 400,
+  seed = "confetti",
+  triggerFrame = 0
+}) {
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps } = (0,esm.useVideoConfig)();
+  const pieces = (0,react.useMemo)(() => {
+    const result = [];
+    for (let i = 0; i < count; i++) {
+      const angle = (0,esm.random)(`${seed}-angle-${i}`) * Math.PI * 2;
+      const speed = (0,esm.random)(`${seed}-speed-${i}`) * spread + spread * 0.5;
+      result.push({
+        id: i,
+        x: originX,
+        y: originY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - spread * 0.5,
+        rotation: (0,esm.random)(`${seed}-rot-${i}`) * 360,
+        rotationSpeed: ((0,esm.random)(`${seed}-rotspd-${i}`) - 0.5) * 720,
+        color: colors[Math.floor((0,esm.random)(`${seed}-color-${i}`) * colors.length)],
+        size: (0,esm.random)(`${seed}-size-${i}`) * 8 + 4,
+        shape: (0,esm.random)(`${seed}-shape-${i}`) > 0.5 ? "rect" : "circle"
+      });
+    }
+    return result;
+  }, [count, originX, originY, spread, colors, seed]);
+  const elapsed = Math.max(0, frame - triggerFrame) / fps;
+  if (frame < triggerFrame) return null;
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.AbsoluteFill, { style: { pointerEvents: "none" }, children: pieces.map((piece) => {
+    const x = piece.x + piece.vx * elapsed;
+    const y = piece.y + piece.vy * elapsed + 0.5 * gravity * elapsed * elapsed;
+    const rotation = piece.rotation + piece.rotationSpeed * elapsed;
+    const opacity = Math.max(0, 1 - elapsed * 0.5);
+    return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          left: x,
+          top: y,
+          width: piece.size,
+          height: piece.shape === "rect" ? piece.size * 0.6 : piece.size,
+          backgroundColor: piece.color,
+          borderRadius: piece.shape === "circle" ? "50%" : "2px",
+          transform: `rotate(${rotation}deg)`,
+          opacity
+        }
+      },
+      piece.id
+    );
+  }) });
+}
+
 ;// ./src/decorations/ChristmasDecoration.tsx
+
 
 
 
@@ -659,41 +920,68 @@ function SnowflakeSVG({ size, opacity }) {
     /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "12", cy: "12", r: "2", fill: "white" })
   ] }) });
 }
-function SantaSleigh({ progress, width }) {
-  const x = (0,esm.interpolate)(progress, [0, 1], [-200, width + 200]);
-  const y = 80 + Math.sin(progress * Math.PI * 4) * 15;
-  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
-    "div",
-    {
-      style: {
-        position: "absolute",
-        left: x,
-        top: y,
-        opacity: progress > 0 && progress < 1 ? 0.9 : 0,
-        filter: "drop-shadow(0 0 20px rgba(255,255,255,0.5))"
-      },
-      children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: "180", height: "80", viewBox: "0 0 180 80", fill: "#1a1a2e", children: [
-        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M40,60 Q30,60 25,50 L20,50 Q15,50 15,45 L15,40 Q15,35 20,35 L100,35 Q110,35 115,40 L120,45 Q125,50 120,55 L115,60 Q110,65 100,60 Z" }),
-        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M10,65 Q5,65 5,60 L5,55 Q5,50 10,50 L120,50 Q130,50 135,55 L140,60 Q145,65 140,70 L10,70 Q5,70 5,65 Z", fill: "#8B4513" }),
-        /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "70", cy: "25", rx: "20", ry: "18", fill: "#cc0000" }),
-        /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "70", cy: "8", r: "10", fill: "#FFE4C4" }),
-        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M60,8 Q65,0 75,2 L90,8 Q85,15 80,10 Z", fill: "#cc0000" }),
-        /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "88", cy: "5", r: "4", fill: "white" }),
-        /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "70", cy: "15", rx: "8", ry: "6", fill: "white" }),
-        /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "95", cy: "25", rx: "15", ry: "20", fill: "#8B0000" }),
-        /* @__PURE__ */ (0,jsx_runtime.jsxs)("g", { transform: "translate(130, 30)", children: [
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "15", cy: "20", rx: "18", ry: "12", fill: "#8B4513" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "35", cy: "12", r: "8", fill: "#8B4513" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M32,5 L28,-5 L25,0 M32,5 L35,-8 L38,-3", stroke: "#5D4037", strokeWidth: "2", fill: "none" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M38,5 L42,-5 L45,0 M38,5 L41,-8 L44,-3", stroke: "#5D4037", strokeWidth: "2", fill: "none" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "5", y1: "30", x2: "5", y2: "45", stroke: "#8B4513", strokeWidth: "3" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "25", y1: "30", x2: "25", y2: "45", stroke: "#8B4513", strokeWidth: "3" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "42", cy: "14", r: "3", fill: "#cc0000" })
-        ] }),
-        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M100,30 Q115,25 135,35", stroke: "#FFD700", strokeWidth: "2", fill: "none" })
-      ] })
-    }
-  );
+function SantaSleigh({ progress, width, height }) {
+  const p0 = { x: -200, y: height * 0.15 };
+  const p1 = { x: width * 0.3, y: height * 0.05 };
+  const p2 = { x: width * 0.7, y: height * 0.08 };
+  const p3 = { x: width + 200, y: height * 0.12 };
+  const pos = getBezierPoint(progress, p0, p1, p2, p3);
+  const angle = getBezierAngle(progress, p0, p1, p2, p3);
+  const bobOffset = Math.sin(progress * Math.PI * 6) * 8;
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(jsx_runtime.Fragment, { children: [
+    progress > 0.05 && progress < 0.95 && /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      TrailEffect,
+      {
+        x: pos.x - 100,
+        y: pos.y + bobOffset + 30,
+        count: 12,
+        color: "rgba(255, 215, 0, 0.6)",
+        spread: 40,
+        seed: "sleigh-trail"
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          left: pos.x,
+          top: pos.y + bobOffset,
+          opacity: progress > 0 && progress < 1 ? 0.95 : 0,
+          filter: "drop-shadow(0 0 30px rgba(255,255,255,0.6))",
+          transform: `rotate(${angle * 0.3}deg)`,
+          transformOrigin: "center center"
+        },
+        children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: "180", height: "80", viewBox: "0 0 180 80", fill: "#1a1a2e", children: [
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M40,60 Q30,60 25,50 L20,50 Q15,50 15,45 L15,40 Q15,35 20,35 L100,35 Q110,35 115,40 L120,45 Q125,50 120,55 L115,60 Q110,65 100,60 Z" }),
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M10,65 Q5,65 5,60 L5,55 Q5,50 10,50 L120,50 Q130,50 135,55 L140,60 Q145,65 140,70 L10,70 Q5,70 5,65 Z", fill: "#8B4513" }),
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "70", cy: "25", rx: "20", ry: "18", fill: "#cc0000" }),
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "70", cy: "8", r: "10", fill: "#FFE4C4" }),
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M60,8 Q65,0 75,2 L90,8 Q85,15 80,10 Z", fill: "#cc0000" }),
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "88", cy: "5", r: "4", fill: "white" }),
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "70", cy: "15", rx: "8", ry: "6", fill: "white" }),
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "95", cy: "25", rx: "15", ry: "20", fill: "#8B0000" }),
+          /* @__PURE__ */ (0,jsx_runtime.jsxs)("g", { transform: "translate(130, 30)", children: [
+            /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "15", cy: "20", rx: "18", ry: "12", fill: "#8B4513" }),
+            /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "35", cy: "12", r: "8", fill: "#8B4513" }),
+            /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M32,5 L28,-5 L25,0 M32,5 L35,-8 L38,-3", stroke: "#5D4037", strokeWidth: "2", fill: "none" }),
+            /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M38,5 L42,-5 L45,0 M38,5 L41,-8 L44,-3", stroke: "#5D4037", strokeWidth: "2", fill: "none" }),
+            /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "5", y1: "30", x2: "5", y2: "45", stroke: "#8B4513", strokeWidth: "3" }),
+            /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "25", y1: "30", x2: "25", y2: "45", stroke: "#8B4513", strokeWidth: "3" }),
+            /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "42", cy: "14", r: "4", fill: "#ff0000", filter: "url(#noseGlow)" })
+          ] }),
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M100,30 Q115,25 135,35", stroke: "#FFD700", strokeWidth: "2", fill: "none" }),
+          /* @__PURE__ */ (0,jsx_runtime.jsx)("defs", { children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("filter", { id: "noseGlow", x: "-50%", y: "-50%", width: "200%", height: "200%", children: [
+            /* @__PURE__ */ (0,jsx_runtime.jsx)("feGaussianBlur", { stdDeviation: "2", result: "blur" }),
+            /* @__PURE__ */ (0,jsx_runtime.jsxs)("feMerge", { children: [
+              /* @__PURE__ */ (0,jsx_runtime.jsx)("feMergeNode", { in: "blur" }),
+              /* @__PURE__ */ (0,jsx_runtime.jsx)("feMergeNode", { in: "SourceGraphic" })
+            ] })
+          ] }) })
+        ] })
+      }
+    )
+  ] });
 }
 function LightBulb({ color, brightness }) {
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: "20", height: "30", viewBox: "0 0 20 30", children: [
@@ -707,8 +995,8 @@ function LightBulb({ color, brightness }) {
         rx: "8",
         ry: "10",
         fill: color,
-        opacity: 0.3 + brightness * 0.7,
-        filter: `drop-shadow(0 0 ${8 * brightness}px ${color})`
+        opacity: 0.4 + brightness * 0.6,
+        filter: `drop-shadow(0 0 ${12 * brightness}px ${color}) drop-shadow(0 0 ${6 * brightness}px ${color})`
       }
     )
   ] });
@@ -739,6 +1027,25 @@ function OrnamentBall({ size, color, swing }) {
     )
   ] });
 }
+function AnimatedHolly() {
+  const berryPulse = usePulse({ frequency: 0.8, min: 0.6, max: 1, phase: 0 });
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(SwayMotion, { amplitude: 3, frequency: 0.25, originX: "50%", originY: "100%", children: /* @__PURE__ */ (0,jsx_runtime.jsx)(ScalePulse, { minScale: 1, maxScale: 1.03, frequency: 0.4, children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: "120", height: "120", viewBox: "0 0 120 120", children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: "M80,20 Q100,30 90,50 Q110,40 100,60 Q120,70 90,80 Q100,100 70,90 Q60,110 50,80 Q20,90 40,60 Q10,50 40,40 Q30,20 60,30 Q70,10 80,20 Z",
+        fill: "#228B22",
+        filter: "drop-shadow(2px 2px 4px rgba(0,0,0,0.3))"
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(GlowPulse, { color: "rgba(255, 0, 0, 0.8)", minGlow: 3, maxGlow: 10, frequency: 0.8, children: /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "65", cy: "50", r: "8", fill: "#cc0000", opacity: berryPulse }) }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(GlowPulse, { color: "rgba(255, 0, 0, 0.8)", minGlow: 3, maxGlow: 10, frequency: 0.8, phase: 0.33, children: /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "55", cy: "60", r: "8", fill: "#cc0000", opacity: berryPulse }) }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(GlowPulse, { color: "rgba(255, 0, 0, 0.8)", minGlow: 3, maxGlow: 10, frequency: 0.8, phase: 0.66, children: /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "75", cy: "60", r: "8", fill: "#cc0000", opacity: berryPulse }) }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "62", cy: "47", r: "2", fill: "rgba(255,255,255,0.7)" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "52", cy: "57", r: "2", fill: "rgba(255,255,255,0.7)" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "72", cy: "57", r: "2", fill: "rgba(255,255,255,0.7)" })
+  ] }) }) });
+}
 function ChristmasDecoration({ width, height }) {
   const frame = (0,esm.useCurrentFrame)();
   const { fps, durationInFrames } = (0,esm.useVideoConfig)();
@@ -750,11 +1057,9 @@ function ChristmasDecoration({ width, height }) {
         id: i,
         x: (0,esm.random)(`snow-x-${i}`) * width,
         startY: (0,esm.random)(`snow-startY-${i}`) * (height + 100),
-        // Pre-seeded for immediate visibility
         size: (0,esm.random)(`snow-size-${i}`) * 8 + 4,
         speed: (0,esm.random)(`snow-speed-${i}`) * 1.5 + 0.5,
         delay: (0,esm.random)(`snow-delay-${i}`) * 30,
-        // Reduced from 200 for faster appearance
         swayAmplitude: (0,esm.random)(`snow-sway-${i}`) * 30 + 10,
         swaySpeed: (0,esm.random)(`snow-sway-speed-${i}`) * 0.03 + 0.01,
         opacity: (0,esm.random)(`snow-opacity-${i}`) * 0.5 + 0.5,
@@ -795,16 +1100,16 @@ function ChristmasDecoration({ width, height }) {
     }
     return result;
   }, [width, durationInFrames]);
-  const santaStartFrame = Math.floor(durationInFrames * 0.3);
-  const santaDuration = Math.floor(durationInFrames * 0.25);
+  const santaStartFrame = Math.floor(durationInFrames * 0.25);
+  const santaDuration = Math.floor(durationInFrames * 0.35);
   const santaProgress = (0,esm.interpolate)(
     frame,
     [santaStartFrame, santaStartFrame + santaDuration],
     [0, 1],
     { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
   );
-  const lightPulse = usePulse({ frequency: 3, min: 0.4, max: 1 });
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 25, color: "white", minSize: 2, maxSize: 6, seed: "xmas-sparkle" }),
     snowflakes.map((snow) => {
       const yOffset = (snow.startY + (frame + snow.delay) * snow.speed) % (height + 100);
       const currentY = yOffset - 50;
@@ -858,7 +1163,7 @@ function ChristmasDecoration({ width, height }) {
               children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
                 "path",
                 {
-                  d: `M0,10 ${lights.map((l, i) => `Q${l.x - 20},25 ${l.x},15`).join(" ")}`,
+                  d: `M0,10 ${lights.map((l) => `Q${l.x - 20},25 ${l.x},15`).join(" ")}`,
                   stroke: "#2d2d2d",
                   strokeWidth: "3",
                   fill: "none"
@@ -867,7 +1172,7 @@ function ChristmasDecoration({ width, height }) {
             }
           ),
           lights.map((light) => {
-            const brightness = (Math.sin(frame * 0.1 + light.phase) + 1) / 2;
+            const brightness = (Math.sin(frame * 0.15 + light.phase) + 1) / 2;
             return /* @__PURE__ */ (0,jsx_runtime.jsx)(
               "div",
               {
@@ -884,7 +1189,7 @@ function ChristmasDecoration({ width, height }) {
         ]
       }
     ),
-    /* @__PURE__ */ (0,jsx_runtime.jsx)(SantaSleigh, { progress: santaProgress, width }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SantaSleigh, { progress: santaProgress, width, height }),
     ornaments.map((ornament) => {
       const fallProgress = (0,esm.interpolate)(
         frame,
@@ -916,25 +1221,9 @@ function ChristmasDecoration({ width, height }) {
         style: {
           position: "absolute",
           top: 0,
-          right: 0,
-          opacity: 0.8
+          right: 0
         },
-        children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: "120", height: "120", viewBox: "0 0 120 120", children: [
-          /* @__PURE__ */ (0,jsx_runtime.jsx)(
-            "path",
-            {
-              d: "M80,20 Q100,30 90,50 Q110,40 100,60 Q120,70 90,80 Q100,100 70,90 Q60,110 50,80 Q20,90 40,60 Q10,50 40,40 Q30,20 60,30 Q70,10 80,20 Z",
-              fill: "#228B22",
-              filter: "drop-shadow(2px 2px 4px rgba(0,0,0,0.3))"
-            }
-          ),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "65", cy: "50", r: "8", fill: "#cc0000" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "55", cy: "60", r: "8", fill: "#cc0000" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "75", cy: "60", r: "8", fill: "#cc0000" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "62", cy: "47", r: "2", fill: "rgba(255,255,255,0.6)" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "52", cy: "57", r: "2", fill: "rgba(255,255,255,0.6)" }),
-          /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "72", cy: "57", r: "2", fill: "rgba(255,255,255,0.6)" })
-        ] })
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(AnimatedHolly, {})
       }
     ),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
@@ -946,7 +1235,7 @@ function ChristmasDecoration({ width, height }) {
           left: 0,
           right: 0,
           height: 60,
-          background: "linear-gradient(to top, rgba(255,255,255,0.9), rgba(255,255,255,0))"
+          background: "linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0))"
         }
       }
     )
@@ -954,6 +1243,7 @@ function ChristmasDecoration({ width, height }) {
 }
 
 ;// ./src/decorations/NewYearDecoration.tsx
+
 
 
 
@@ -1133,7 +1423,22 @@ function NewYearDecoration({ width, height }) {
     }
     return result;
   }, [width, height]);
+  const textGlow = usePulse({ frequency: 0.3, min: 0.03, max: 0.08 });
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 40, color: "#FFD700", minSize: 3, maxSize: 8, seed: "newyear-sparkle" }),
+    fireworks.slice(0, 4).map((fw) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      ConfettiBurst,
+      {
+        originX: fw.x,
+        originY: fw.y,
+        count: 20,
+        colors: ["#FFD700", "#FF6B6B", "#4ECDC4", "#9B59B6"],
+        spread: 150,
+        triggerFrame: fw.startFrame + 5,
+        seed: `burst-${fw.id}`
+      },
+      `burst-${fw.id}`
+    )),
     fireworks.map((firework) => /* @__PURE__ */ (0,jsx_runtime.jsx)(FireworkBurst, { firework, frame }, firework.id)),
     confetti.map((conf) => {
       const yOffset = (conf.startY + (frame + conf.delay) * conf.speed) % (height + 100);
@@ -1179,7 +1484,7 @@ function NewYearDecoration({ width, height }) {
       }
     ),
     bubbles.map((bubble) => /* @__PURE__ */ (0,jsx_runtime.jsx)(ChampagneBubble, { bubble, frame, height }, bubble.id)),
-    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(GlowPulse, { color: "rgba(255, 215, 0, 0.5)", minGlow: 20, maxGlow: 50, frequency: 0.3, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
         style: {
@@ -1190,13 +1495,13 @@ function NewYearDecoration({ width, height }) {
           fontSize: 200,
           fontWeight: "bold",
           fontFamily: "sans-serif",
-          opacity: 0.05,
+          opacity: textGlow,
           color: "#FFD700",
           textShadow: "0 0 50px rgba(255,215,0,0.3)"
         },
         children: "2025"
       }
-    ),
+    ) }),
     Array.from({ length: 30 }).map((_, i) => {
       const sparkleFrame = frame - i * 2;
       if (sparkleFrame < 0) return null;
@@ -1225,6 +1530,7 @@ function NewYearDecoration({ width, height }) {
 }
 
 ;// ./src/decorations/ValentinesDecoration.tsx
+
 
 
 
@@ -1370,13 +1676,14 @@ function ValentinesDecoration({ width, height }) {
     ];
   }, [durationInFrames, width, height]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 35, color: "#FF69B4", minSize: 3, maxSize: 7, seed: "valentines-sparkle" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
         style: {
           position: "absolute",
           inset: 0,
-          background: "radial-gradient(ellipse at center, rgba(255,182,193,0.1) 0%, transparent 70%)"
+          background: "radial-gradient(ellipse at center, rgba(255,182,193,0.15) 0%, transparent 70%)"
         }
       }
     ),
@@ -1495,6 +1802,7 @@ function ValentinesDecoration({ width, height }) {
 
 
 
+
 function EasterEgg({ size, pattern, colors }) {
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size * 1.3, viewBox: "0 0 40 52", children: [
     /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "20", cy: "28", rx: "18", ry: "23", fill: colors[0] }),
@@ -1606,6 +1914,7 @@ function EasterDecoration({ width, height }) {
     }));
   }, [width, height]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 30, color: "#FFB6C1", minSize: 3, maxSize: 7, seed: "easter-sparkle" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -1667,16 +1976,19 @@ function EasterDecoration({ width, height }) {
       );
     }),
     bunnies.map((bunny, i) => {
-      const hop = Math.abs(Math.sin(frame * 0.1)) * 10;
+      const hop = Math.abs(Math.sin(frame * 0.1)) * 15;
+      const squish = 1 + Math.sin(frame * 0.1) * 0.05;
       return /* @__PURE__ */ (0,jsx_runtime.jsx)(
         "div",
         {
           style: {
             position: "absolute",
             left: bunny.x,
-            top: bunny.y - hop
+            top: bunny.y - hop,
+            transform: `scaleY(${squish}) scaleX(${1 + (1 - squish) * 0.5})`,
+            transformOrigin: "bottom center"
           },
-          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(BunnySVG, { size: bunny.size, flip: bunny.flip })
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(GlowPulse, { color: "rgba(255, 255, 255, 0.3)", minGlow: 0, maxGlow: 10, frequency: 0.3, phase: i * 0.5, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(BunnySVG, { size: bunny.size, flip: bunny.flip }) })
         },
         i
       );
@@ -1728,6 +2040,7 @@ function EasterDecoration({ width, height }) {
 }
 
 ;// ./src/decorations/HalloweenDecoration.tsx
+
 
 
 
@@ -1859,6 +2172,7 @@ function HalloweenDecoration({ width, height }) {
     return result;
   }, [width, durationInFrames]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 25, color: "#9B59B6", minSize: 2, maxSize: 6, seed: "halloween-sparkle" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -1966,7 +2280,7 @@ function HalloweenDecoration({ width, height }) {
           bottom: 20,
           transform: `scale(${0.9 + pumpkinGlow * 0.1})`
         },
-        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(PumpkinSVG, { size: 80, glowIntensity: pumpkinGlow })
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(GlowPulse, { color: "rgba(255, 100, 0, 0.6)", minGlow: 10, maxGlow: 30, frequency: 0.5, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(Flicker, { intensity: 0.2, speed: 6, seed: "pumpkin1", children: /* @__PURE__ */ (0,jsx_runtime.jsx)(PumpkinSVG, { size: 80, glowIntensity: pumpkinGlow }) }) })
       }
     ),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
@@ -1978,7 +2292,7 @@ function HalloweenDecoration({ width, height }) {
           bottom: 30,
           transform: `scale(${0.9 + pumpkinGlow * 0.1})`
         },
-        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(PumpkinSVG, { size: 100, glowIntensity: pumpkinGlow })
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(GlowPulse, { color: "rgba(255, 100, 0, 0.6)", minGlow: 15, maxGlow: 40, frequency: 0.4, phase: 0.5, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(Flicker, { intensity: 0.25, speed: 7, seed: "pumpkin2", children: /* @__PURE__ */ (0,jsx_runtime.jsx)(PumpkinSVG, { size: 100, glowIntensity: pumpkinGlow }) }) })
       }
     ),
     /* @__PURE__ */ (0,jsx_runtime.jsxs)(
@@ -2061,6 +2375,7 @@ function HalloweenDecoration({ width, height }) {
 
 
 
+
 function LeafSVG({ size, color, type }) {
   if (type === 0) {
     return /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: size, height: size, viewBox: "0 0 40 40", children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
@@ -2138,6 +2453,7 @@ function ThanksgivingDecoration({ width, height }) {
     { x: width * 0.88, size: 55 }
   ], [width]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 25, color: "#FFD700", minSize: 2, maxSize: 6, seed: "thanksgiving-sparkle" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -2256,6 +2572,7 @@ function ThanksgivingDecoration({ width, height }) {
 }
 
 ;// ./src/decorations/HanukkahDecoration.tsx
+
 
 
 
@@ -2404,6 +2721,8 @@ function HanukkahDecoration({ width, height }) {
     }));
   }, [width, height]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 30, color: "#4169E1", minSize: 2, maxSize: 6, seed: "hanukkah-sparkle" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 15, color: "#FFD700", minSize: 3, maxSize: 5, seed: "hanukkah-gold" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -2492,7 +2811,7 @@ function HanukkahDecoration({ width, height }) {
           bottom: 20,
           transform: "translateX(-50%)"
         },
-        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(MenorahSVG, { size: 200, litCandles, flameIntensity: flameFlicker })
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(GlowPulse, { color: "rgba(255, 215, 0, 0.5)", minGlow: 15, maxGlow: 40, frequency: 0.4, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(Flicker, { intensity: 0.15, speed: 8, seed: "menorah", children: /* @__PURE__ */ (0,jsx_runtime.jsx)(MenorahSVG, { size: 200, litCandles, flameIntensity: flameFlicker }) }) })
       }
     ),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
@@ -2528,6 +2847,7 @@ function HanukkahDecoration({ width, height }) {
 }
 
 ;// ./src/decorations/DiwaliDecoration.tsx
+
 
 
 
@@ -2710,6 +3030,8 @@ function DiwaliDecoration({ width, height }) {
     { x: width * 0.7, y: height * 0.45, startFrame: Math.floor(durationInFrames * 0.65) }
   ], [width, height, durationInFrames]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 40, color: "#FFD700", minSize: 3, maxSize: 8, seed: "diwali-sparkle" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 20, color: "#FF6B6B", minSize: 2, maxSize: 5, seed: "diwali-color" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -2840,6 +3162,7 @@ function DiwaliDecoration({ width, height }) {
 }
 
 ;// ./src/decorations/ChineseNewYearDecoration.tsx
+
 
 
 
@@ -2988,6 +3311,8 @@ function ChineseNewYearDecoration({ width, height }) {
     }).filter(Boolean);
   }, [dragonProgress, width, height]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 30, color: "#FFD700", minSize: 3, maxSize: 7, seed: "cny-gold" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 20, color: "#FF0000", minSize: 2, maxSize: 5, seed: "cny-red" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -3161,6 +3486,7 @@ function ChineseNewYearDecoration({ width, height }) {
 
 
 
+
 function CrescentStar({ size, color, opacity }) {
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size, viewBox: "0 0 50 50", style: { opacity }, children: [
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
@@ -3267,6 +3593,8 @@ function IslamicDecoration({ width, height, isRamadan = false }) {
     }));
   }, [width, height]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 30, color: "#FFD700", minSize: 2, maxSize: 6, seed: "islamic-gold" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 15, color: "#2E7D32", minSize: 2, maxSize: 5, seed: "islamic-green" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -3469,7 +3797,7 @@ function getThemeParticleTypes(theme) {
 function ParticleDecoration({ theme, particleCount = 100, enableSparkle = true }) {
   const frame = (0,esm.useCurrentFrame)();
   const { width, height, fps } = (0,esm.useVideoConfig)();
-  const colors = HOLIDAY_COLORS[theme];
+  const colors = types_HOLIDAY_COLORS[theme];
   const sparkleIntensity = usePulse({ frequency: 2, min: 0.6, max: 1 });
   const particles = (0,react.useMemo)(() => {
     const particleColors = [colors.primary, colors.secondary, colors.accent, "#ffffff"];
@@ -3595,6 +3923,7 @@ function ParticleDecoration({ theme, particleCount = 100, enableSparkle = true }
 }
 
 ;// ./src/decorations/RoshHashanahDecoration.tsx
+
 
 
 
@@ -3766,6 +4095,8 @@ function RoshHashanahDecoration({ width, height }) {
     }));
   }, [width, height]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 25, color: "#FFD700", minSize: 2, maxSize: 6, seed: "rosh-hashanah-gold" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 15, color: "#DAA520", minSize: 3, maxSize: 5, seed: "rosh-hashanah-honey" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -3894,6 +4225,7 @@ function RoshHashanahDecoration({ width, height }) {
 }
 
 ;// ./src/decorations/PassoverDecoration.tsx
+
 
 
 
@@ -4033,6 +4365,7 @@ function PassoverDecoration({ width, height }) {
     }));
   }, [width, height]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 20, color: "#DAA520", minSize: 2, maxSize: 5, seed: "passover-gold" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -4160,6 +4493,7 @@ function PassoverDecoration({ width, height }) {
 }
 
 ;// ./src/decorations/ThankYouDecoration.tsx
+
 
 
 
@@ -4332,6 +4666,8 @@ function ThankYouDecoration({ width, height }) {
     }));
   }, [width, height]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 30, color: "#FF69B4", minSize: 3, maxSize: 7, seed: "thankyou-pink" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 20, color: "#FFD700", minSize: 2, maxSize: 5, seed: "thankyou-gold" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -4485,6 +4821,7 @@ function ThankYouDecoration({ width, height }) {
 }
 
 ;// ./src/decorations/CongratulationsDecoration.tsx
+
 
 
 
@@ -4717,6 +5054,8 @@ function CongratulationsDecoration({ width, height }) {
     }));
   }, [width, height, durationInFrames]);
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 35, color: "#FFD700", minSize: 3, maxSize: 8, seed: "congrats-gold" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleOverlay, { count: 25, color: "#805ad5", minSize: 2, maxSize: 6, seed: "congrats-purple" }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(
       "div",
       {
@@ -4913,10 +5252,10 @@ function getDecorationComponent(theme) {
 
 
 
+const FADE_DURATION = 1;
 
 
 const INTRO_DURATION = 5;
-const NAME_REVEAL_DURATION = 3;
 const SENDER_REVEAL_DURATION = 3;
 const OUTRO_DURATION = 3;
 function CardComposition({
@@ -4926,29 +5265,40 @@ function CardComposition({
   theme,
   audioSrc
 }) {
-  const { fps, width, height } = (0,esm.useVideoConfig)();
-  const colors = HOLIDAY_COLORS[theme];
+  const { fps, width, height, durationInFrames } = (0,esm.useVideoConfig)();
+  const frame = (0,esm.useCurrentFrame)();
+  const colors = types_HOLIDAY_COLORS[theme];
   const ThemeDecoration = getDecorationComponent(theme);
+  const fadeFrames = FADE_DURATION * fps;
   const introFrames = INTRO_DURATION * fps;
-  const nameRevealFrames = NAME_REVEAL_DURATION * fps;
   const messageDuration = calculateMessageDuration(message);
   const messageFrames = messageDuration * fps;
   const senderRevealFrames = SENDER_REVEAL_DURATION * fps;
   const outroFrames = OUTRO_DURATION * fps;
-  let currentFrame = 0;
+  let currentFrame = fadeFrames;
   const introStart = currentFrame;
   currentFrame += introFrames;
-  const nameRevealStart = currentFrame;
-  currentFrame += nameRevealFrames;
   const messageStart = currentFrame;
   currentFrame += messageFrames;
   const senderRevealStart = currentFrame;
   currentFrame += senderRevealFrames;
   const outroStart = currentFrame;
-  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { backgroundColor: colors.bg }, children: [
+  const fadeInOpacity = (0,esm.interpolate)(
+    frame,
+    [0, fadeFrames],
+    [0, 1],
+    { extrapolateRight: "clamp" }
+  );
+  const fadeOutOpacity = (0,esm.interpolate)(
+    frame,
+    [durationInFrames - fadeFrames, durationInFrames],
+    [1, 0],
+    { extrapolateLeft: "clamp" }
+  );
+  const opacity = Math.min(fadeInOpacity, fadeOutOpacity);
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { backgroundColor: colors.bg, opacity }, children: [
     ThemeDecoration ? /* @__PURE__ */ (0,jsx_runtime.jsx)(ThemeDecoration, { width, height }) : /* @__PURE__ */ (0,jsx_runtime.jsx)(ParticleDecoration, { theme, particleCount: 120, enableSparkle: true }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: introStart, durationInFrames: introFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(IntroSlide, { theme, recipientName }) }),
-    /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: nameRevealStart, durationInFrames: nameRevealFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(NameRevealSlide, { name: recipientName, theme }) }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: messageStart, durationInFrames: messageFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(MessageSlide, { name: recipientName, message, theme }) }),
     senderName && /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: senderRevealStart, durationInFrames: senderRevealFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(SenderSlide, { senderName, theme }) }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: outroStart, durationInFrames: outroFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(OutroSlide, { theme }) }),
@@ -4956,15 +5306,15 @@ function CardComposition({
       esm.Audio,
       {
         src: audioSrc,
-        volume: (frame) => {
-          const totalFrames = introFrames + nameRevealFrames + messageFrames + senderRevealFrames + outroFrames;
+        volume: (frame2) => {
+          const totalFrames = introFrames + messageFrames + senderRevealFrames + outroFrames;
           const fadeInEnd = fps * 2;
           const fadeOutStart = totalFrames - fps * 2;
-          if (frame < fadeInEnd) {
-            return frame / fadeInEnd * 0.4;
+          if (frame2 < fadeInEnd) {
+            return frame2 / fadeInEnd * 0.4;
           }
-          if (frame > fadeOutStart) {
-            return (totalFrames - frame) / (fps * 2) * 0.4;
+          if (frame2 > fadeOutStart) {
+            return (totalFrames - frame2) / (fps * 2) * 0.4;
           }
           return 0.4;
         }
@@ -4974,7 +5324,7 @@ function CardComposition({
 }
 function calculateTotalFrames(message, fps = FPS) {
   const messageDuration = calculateMessageDuration(message);
-  const total = INTRO_DURATION + NAME_REVEAL_DURATION + messageDuration + SENDER_REVEAL_DURATION + OUTRO_DURATION;
+  const total = FADE_DURATION + INTRO_DURATION + messageDuration + SENDER_REVEAL_DURATION + OUTRO_DURATION + FADE_DURATION;
   return Math.min(60, Math.max(20, total)) * fps;
 }
 
@@ -32237,7 +32587,7 @@ var NoReactInternals = {
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	__webpack_require__(4255);
-/******/ 	__webpack_require__(6724);
+/******/ 	__webpack_require__(9457);
 /******/ 	__webpack_require__(3902);
 /******/ 	var __webpack_exports__ = __webpack_require__(1640);
 /******/ 	

@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random, interpolate } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, ScalePulse, FloatMotion } from '../utils/decorationAnimations';
 
 interface ThankYouDecorationProps {
   width: number;
@@ -217,6 +218,10 @@ export function ThankYouDecoration({ width, height }: ThankYouDecorationProps) {
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Pink and gold sparkle overlay */}
+      <SparkleOverlay count={30} color="#FF69B4" minSize={3} maxSize={7} seed="thankyou-pink" />
+      <SparkleOverlay count={20} color="#FFD700" minSize={2} maxSize={5} seed="thankyou-gold" />
+
       {/* Soft pink gradient overlay */}
       <div
         style={{

@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random, interpolate } from 'remotion';
 import { useMemo } from 'react';
-import { EASING } from '../utils/animations';
+import { EASING, usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, ConfettiBurst } from '../utils/decorationAnimations';
 
 interface NewYearDecorationProps {
   width: number;
@@ -232,8 +233,28 @@ export function NewYearDecoration({ width, height }: NewYearDecorationProps) {
     return result;
   }, [width, height]);
 
+  // Glow pulse for 2025 text
+  const textGlow = usePulse({ frequency: 0.3, min: 0.03, max: 0.08 });
+
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Golden sparkle overlay */}
+      <SparkleOverlay count={40} color="#FFD700" minSize={3} maxSize={8} seed="newyear-sparkle" />
+
+      {/* Additional confetti bursts at firework positions */}
+      {fireworks.slice(0, 4).map((fw) => (
+        <ConfettiBurst
+          key={`burst-${fw.id}`}
+          originX={fw.x}
+          originY={fw.y}
+          count={20}
+          colors={['#FFD700', '#FF6B6B', '#4ECDC4', '#9B59B6']}
+          spread={150}
+          triggerFrame={fw.startFrame + 5}
+          seed={`burst-${fw.id}`}
+        />
+      ))}
+
       {/* Fireworks */}
       {fireworks.map((firework) => (
         <FireworkBurst key={firework.id} firework={firework} frame={frame} />
@@ -288,23 +309,25 @@ export function NewYearDecoration({ width, height }: NewYearDecorationProps) {
         <ChampagneBubble key={bubble.id} bubble={bubble} frame={frame} height={height} />
       ))}
 
-      {/* "2025" watermark */}
-      <div
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
-          fontSize: 200,
-          fontWeight: 'bold',
-          fontFamily: 'sans-serif',
-          opacity: 0.05,
-          color: '#FFD700',
-          textShadow: '0 0 50px rgba(255,215,0,0.3)',
-        }}
-      >
-        2025
-      </div>
+      {/* "2025" watermark with pulsing glow */}
+      <GlowPulse color="rgba(255, 215, 0, 0.5)" minGlow={20} maxGlow={50} frequency={0.3}>
+        <div
+          style={{
+            position: 'absolute',
+            left: '50%',
+            top: '50%',
+            transform: 'translate(-50%, -50%)',
+            fontSize: 200,
+            fontWeight: 'bold',
+            fontFamily: 'sans-serif',
+            opacity: textGlow,
+            color: '#FFD700',
+            textShadow: '0 0 50px rgba(255,215,0,0.3)',
+          }}
+        >
+          2025
+        </div>
+      </GlowPulse>
 
       {/* Sparkle trail effect */}
       {Array.from({ length: 30 }).map((_, i) => {

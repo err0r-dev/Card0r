@@ -1,10 +1,12 @@
-import { AbsoluteFill, Sequence, Audio, useVideoConfig } from 'remotion';
+import { AbsoluteFill, Sequence, Audio, useVideoConfig, useCurrentFrame, interpolate } from 'remotion';
 import { HolidayTheme } from '@card0r/shared';
 import { CardCompositionProps, HOLIDAY_COLORS, FPS } from './types';
 import { calculateMessageDuration } from './utils/animations';
+
+// Fade duration in seconds
+const FADE_DURATION = 1;
 import {
   IntroSlide,
-  NameRevealSlide,
   MessageSlide,
   SenderSlide,
   OutroSlide,
@@ -13,7 +15,6 @@ import { getDecorationComponent, ParticleDecoration } from './decorations';
 
 // Duration constants (in seconds)
 const INTRO_DURATION = 5;
-const NAME_REVEAL_DURATION = 3;
 const SENDER_REVEAL_DURATION = 3;
 const OUTRO_DURATION = 3;
 
@@ -24,28 +25,28 @@ export function CardComposition({
   theme,
   audioSrc,
 }: CardCompositionProps) {
-  const { fps, width, height } = useVideoConfig();
+  const { fps, width, height, durationInFrames } = useVideoConfig();
+  const frame = useCurrentFrame();
   const colors = HOLIDAY_COLORS[theme];
 
   // Get theme-specific decoration component, fall back to enhanced particles
   const ThemeDecoration = getDecorationComponent(theme);
 
+  // Calculate fade frames
+  const fadeFrames = FADE_DURATION * fps;
+
   // Calculate durations in frames
   const introFrames = INTRO_DURATION * fps;
-  const nameRevealFrames = NAME_REVEAL_DURATION * fps;
   const messageDuration = calculateMessageDuration(message);
   const messageFrames = messageDuration * fps;
   const senderRevealFrames = SENDER_REVEAL_DURATION * fps;
   const outroFrames = OUTRO_DURATION * fps;
 
-  // Calculate sequence start frames
-  let currentFrame = 0;
+  // Calculate sequence start frames (content starts after fade-in)
+  let currentFrame = fadeFrames; // Start after fade-in
 
   const introStart = currentFrame;
   currentFrame += introFrames;
-
-  const nameRevealStart = currentFrame;
-  currentFrame += nameRevealFrames;
 
   const messageStart = currentFrame;
   currentFrame += messageFrames;
@@ -55,8 +56,25 @@ export function CardComposition({
 
   const outroStart = currentFrame;
 
+  // Calculate fade opacity
+  const fadeInOpacity = interpolate(
+    frame,
+    [0, fadeFrames],
+    [0, 1],
+    { extrapolateRight: 'clamp' }
+  );
+
+  const fadeOutOpacity = interpolate(
+    frame,
+    [durationInFrames - fadeFrames, durationInFrames],
+    [1, 0],
+    { extrapolateLeft: 'clamp' }
+  );
+
+  const opacity = Math.min(fadeInOpacity, fadeOutOpacity);
+
   return (
-    <AbsoluteFill style={{ backgroundColor: colors.bg }}>
+    <AbsoluteFill style={{ backgroundColor: colors.bg, opacity }}>
       {/* Theme-specific decoration or enhanced particles as fallback */}
       {ThemeDecoration ? (
         <ThemeDecoration width={width} height={height} />
@@ -67,11 +85,6 @@ export function CardComposition({
       {/* Intro Slide */}
       <Sequence from={introStart} durationInFrames={introFrames}>
         <IntroSlide theme={theme} recipientName={recipientName} />
-      </Sequence>
-
-      {/* Name Reveal Slide */}
-      <Sequence from={nameRevealStart} durationInFrames={nameRevealFrames}>
-        <NameRevealSlide name={recipientName} theme={theme} />
       </Sequence>
 
       {/* Message Slide */}
@@ -96,7 +109,7 @@ export function CardComposition({
         <Audio
           src={audioSrc}
           volume={(frame) => {
-            const totalFrames = introFrames + nameRevealFrames + messageFrames +
+            const totalFrames = introFrames + messageFrames +
                                senderRevealFrames + outroFrames;
             // Fade in first 2 seconds
             const fadeInEnd = fps * 2;
@@ -120,7 +133,8 @@ export function CardComposition({
 // Helper to calculate total duration for a given message
 export function calculateTotalFrames(message: string, fps: number = FPS): number {
   const messageDuration = calculateMessageDuration(message);
-  const total = INTRO_DURATION + NAME_REVEAL_DURATION + messageDuration +
-                SENDER_REVEAL_DURATION + OUTRO_DURATION;
+  // Add fade in/out time to total duration
+  const total = FADE_DURATION + INTRO_DURATION + messageDuration +
+                SENDER_REVEAL_DURATION + OUTRO_DURATION + FADE_DURATION;
   return Math.min(60, Math.max(20, total)) * fps;
 }

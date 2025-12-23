@@ -28,7 +28,7 @@ Card0r/
 ├── remotion/           # Remotion video compositions and decorations
 ├── shared/             # Shared TypeScript types
 ├── docker-compose.yml  # Orchestrates both services
-└── [docs]              # README, QUICKSTART, TESTING, BUILD_SUMMARY
+└── [docs]              # README, ai.md
 ```
 
 ### Data Flow
@@ -77,6 +77,7 @@ Located in `backend/src/services/`:
    - Passes props (name, message, theme, senderName) to compositions
    - Supports multiple resolutions (1080p, 4K, square, social)
    - H.264 encoding with quality optimization
+   - Videos stored in `backend/videos/` directory
 
 6. **video-generator.ts**
    - Orchestrates entire video generation pipeline
@@ -84,6 +85,11 @@ Located in `backend/src/services/`:
    - Tracks progress for each video
    - Handles batch processing
    - Cleanup after completion
+
+7. **zip-generator.ts**
+   - Creates ZIP archives of completed videos
+   - Tracks ZIP generation progress
+   - Supports batch downloads
 
 ### Backend Routes
 
@@ -93,7 +99,12 @@ Located in `backend/src/routes/`:
 - **upload.ts** - `POST /api/upload-csv` (with Multer middleware)
 - **messages.ts** - `POST /api/generate-messages` (requires x-openai-key header)
 - **music.ts** - `GET /api/music/:theme` (requires x-jamendo-key header)
-- **videos.ts** - `POST /api/videos/generate`, `GET /api/videos/status/:jobId`
+- **videos.ts**:
+  - `POST /api/videos/generate` - Start video generation
+  - `GET /api/videos/status/:jobId` - Check job status
+  - `POST /api/videos/download-zip/:jobId` - Start ZIP generation
+  - `GET /api/videos/download-zip/:jobId/progress` - Check ZIP progress
+  - `DELETE /api/videos/delete/:filename` - Delete a video file
 
 ### Remotion Video System
 
@@ -102,17 +113,24 @@ Located in `remotion/src/`:
 **Core Compositions:**
 
 1. **Root.tsx** - Registers Remotion compositions
-2. **CardComposition.tsx** - Main composition orchestrating all slides and decorations
+2. **CardComposition.tsx** - Main composition orchestrating all slides, decorations, and fade transitions
 3. **types.ts** - Type definitions and `HOLIDAY_COLORS` for all 17 themes
 
 **Slides** (`remotion/src/slides/`):
-- **IntroSlide.tsx** - Theme name introduction with fade animation
-- **NameRevealSlide.tsx** - Recipient name reveal with scale animation
+- **IntroSlide.tsx** - Theme name and recipient greeting with fade animation
 - **MessageSlide.tsx** - Animated message display (line-by-line reveal)
 - **SenderSlide.tsx** - "From: [senderName]" display
 - **OutroSlide.tsx** - Closing animation with pulse effect
 
 **Important**: All slides have transparent backgrounds to allow decorations to show through.
+
+**Video Structure:**
+- 1-second fade in (content starts after fade completes)
+- Intro slide: 5 seconds
+- Message slide: Dynamic duration based on message length
+- Sender reveal: 3 seconds
+- Outro: 3 seconds
+- 1-second fade out
 
 **Decorations** (`remotion/src/decorations/`):
 
@@ -120,7 +138,7 @@ Each theme has its own decoration component with theme-specific animations:
 
 | File | Theme | Animations |
 |------|-------|------------|
-| `ChristmasDecoration.tsx` | Christmas | Snow particles, Santa sleigh, lights, ornaments |
+| `ChristmasDecoration.tsx` | Christmas | Snow particles, Santa sleigh, lights, ornaments, sparkle overlay |
 | `NewYearDecoration.tsx` | New Year | Fireworks, confetti, champagne bubbles |
 | `ValentinesDecoration.tsx` | Valentine's | Hearts, rose petals, Cupid arrows |
 | `EasterDecoration.tsx` | Easter | Easter eggs, bunnies, butterflies |
@@ -130,7 +148,20 @@ Each theme has its own decoration component with theme-specific animations:
 | `DiwaliDecoration.tsx` | Diwali | Diyas, rangoli, fireworks, sparklers |
 | `ChineseNewYearDecoration.tsx` | Chinese New Year | Lanterns, dragon, red envelopes |
 | `IslamicDecoration.tsx` | Islamic holidays | Crescents, lanterns, geometric patterns |
+| `RoshHashanahDecoration.tsx` | Rosh Hashanah | Honey, apples, shofar, pomegranates |
+| `PassoverDecoration.tsx` | Passover | Matzah, wine, seder plate elements |
+| `ThankYouDecoration.tsx` | Thank You | Hearts, flowers, ribbons, gifts |
+| `CongratulationsDecoration.tsx` | Congratulations | Balloons, confetti, streamers, fireworks |
 | `ParticleDecoration.tsx` | Fallback | Generic particle system |
+
+**Animation Utilities** (`remotion/src/utils/`):
+- `animations.ts` - Core animation helpers (usePulse, wrapText, calculateMessageDuration)
+- `decorationAnimations.tsx` - Shared animation components:
+  - `SparkleOverlay` - Random twinkling stars
+  - `GlowPulse` - Breathing glow effect
+  - `ConfettiBurst` - Confetti explosion
+  - `ScalePulse` - Scale breathing animation
+  - `FloatMotion` - Vertical bobbing
 
 **Animation System:**
 - Pre-seeded Y/X positions for immediate particle visibility from frame 0
@@ -138,6 +169,7 @@ Each theme has its own decoration component with theme-specific animations:
 - Relative timing using `durationInFrames` for special animations (Santa, Cupid, sparklers)
 - Modulo-based wrapping: `(startY + (frame + delay) * speed) % (height + 100)`
 - Continuous animations throughout entire video duration
+- SparkleOverlay added to most decoration components for enhanced visual appeal
 
 ### Frontend Components
 
@@ -150,24 +182,28 @@ Located in `frontend/src/components/`:
 - All based on Radix UI primitives with Tailwind styling
 
 **Feature Components**:
-1. **SplashScreen.tsx** - Animated entrance with Framer Motion particles
+1. **SplashScreen.tsx** - Animated entrance with Mail icon (greeting card) and Framer Motion particles
 2. **MainLayout.tsx** - Top nav, dark mode toggle, settings button
 3. **SettingsModal.tsx** - API key management with validation
-4. **FileUploader.tsx** - Drag-drop CSV/Excel upload
+4. **FileUploader.tsx** - Drag-drop CSV/Excel upload with FileSpreadsheet icon
 5. **RecipientForm.tsx** - Manual entry form with sender name field
 6. **RecipientTable.tsx** - List of recipients with edit/delete
 7. **HolidaySelector.tsx** - 17 holiday cards in 4 categories
 8. **FormatPicker.tsx** - Radio group for export formats
 9. **MusicSelector.tsx** - Music track selection from Jamendo
-10. **VideoGenerator.tsx** - Auto-triggering generation with progress polling
-11. **VideoGallery.tsx** - Grid with preview and download
-12. **DownloadStep.tsx** - Final download interface
+10. **VideoGenerator.tsx** - Three-step process: generate messages, review/edit/confirm, generate videos
+11. **VideoGallery.tsx** - Grid with preview, download, and delete functionality
+12. **DownloadStep.tsx** - Final download interface with batch ZIP download
+13. **ConfirmStartOverDialog.tsx** - Warning dialog when starting over with completed videos
+14. **ConfirmModeChangeDialog.tsx** - Confirmation when switching input modes
+15. **InputModeToggle.tsx** - Toggle between CSV upload and manual entry
 
-**Auto-Generation Flow** (VideoGenerator.tsx):
-- Automatic message generation when recipients, theme, and API key are ready
-- Automatic video generation when messages complete
-- Uses `useRef` to prevent infinite re-triggering
-- Auto-navigates to download step on completion
+**Generation Flow** (VideoGenerator.tsx):
+1. **Step 1: Generate Messages** - Auto-triggers when prerequisites are met (recipients, theme, API key)
+2. **Step 2: Review & Edit** - User reviews AI-generated messages, can edit inline, must click "Confirm Messages & Generate Videos"
+3. **Step 3: Generate Videos** - Only starts after user confirms messages; tracks progress with polling
+
+**Important**: Videos do NOT auto-generate. User must explicitly confirm messages before video generation begins.
 
 ### Frontend Stores
 
@@ -175,27 +211,28 @@ Located in `frontend/src/stores/`:
 
 1. **settingsStore.ts**
    - Persisted to localStorage
-   - Stores: openaiKey, jamendoKey, darkMode
+   - Stores: openaiKey, jamendoKey, darkMode, hasCompletedSetup
    - Actions: setters and toggleDarkMode
 
 2. **recipientsStore.ts**
-   - Stores: recipients[], recipientsWithMessages[], senderName
-   - Actions: add, remove, update, setRecipients, setSenderName, clear
+   - Stores: recipients[], recipientsWithMessages[], senderName, messagesConfirmed
+   - Actions: add, remove, update, setRecipients, setSenderName, setMessagesConfirmed, updateRecipientMessage, clear
+   - Note: `messagesConfirmed` must be true before videos can generate
 
 3. **videoStore.ts**
    - Stores: selectedTheme, selectedFormat, selectedMusicUrl, currentJobId, jobs[]
-   - Actions: setters, updateJobProgress, clearVideoState
+   - Actions: setters, updateJobProgress, removeJob, clearVideoState
 
 4. **uiStore.ts**
-   - Stores: showSplash, showSettings, isLoading, currentStep
-   - Actions: setters for each
+   - Stores: showSplash, showSetup, isLoading, currentStep
+   - Actions: setters, goBack, goForward, canGoBack, resetWizard
 
 ### Shared Types
 
 Located in `shared/src/index.ts`:
 
 **Key Enums:**
-- `HolidayTheme` - 17 holiday values (christmas, new_year, etc.)
+- `HolidayTheme` - 17 holiday values (christmas, new_year, valentines_day, easter, halloween, thanksgiving, hanukkah, diwali, chinese_new_year, eid_al_fitr, eid_al_adha, ramadan, rosh_hashanah, passover, yom_kippur, lunar_new_year, thank_you, congratulations)
 - `VideoFormat` - 4 format values (1080p, 4k, square, social)
 
 **Key Interfaces:**
@@ -203,6 +240,8 @@ Located in `shared/src/index.ts`:
 - `RecipientWithMessage` - extends Recipient with generatedMessage
 - `VideoGenerationJob` - { id, status, progress, recipientName, videoUrl, error }
 - `BatchVideoResponse` - { jobId, jobs[] }
+- `ZipGenerationResponse` - { status, message, totalVideos }
+- `ZipProgressResponse` - { status, progress, zipPath, error }
 - All API request/response types
 
 ---
@@ -212,7 +251,7 @@ Located in `shared/src/index.ts`:
 17 themes with unique visual effects:
 
 ### Western (6)
-- `christmas` - Snow particles, Santa sleigh, lights, ornaments
+- `christmas` - Snow particles, Santa sleigh, lights, ornaments, sparkle overlay
 - `new_year` - Fireworks, confetti, champagne bubbles
 - `easter` - Easter eggs, bunnies, butterflies
 - `valentines_day` - Hearts, rose petals, Cupid arrows
@@ -220,9 +259,9 @@ Located in `shared/src/index.ts`:
 - `thanksgiving` - Autumn leaves, acorns, pumpkins
 
 ### Jewish (4)
-- `rosh_hashanah` - Honey, apples, gold/amber
+- `rosh_hashanah` - Honey, apples, shofar, pomegranates, gold/amber
 - `hanukkah` - Menorah, Stars of David, dreidels, gelt
-- `passover` - Wheat, wine, earth tones
+- `passover` - Matzah, wine, seder plate, earth tones
 - `yom_kippur` - Doves, peaceful gray/white
 
 ### Islamic (3)
@@ -230,10 +269,14 @@ Located in `shared/src/index.ts`:
 - `eid_al_adha` - Crescent moons, lanterns, geometric patterns
 - `ramadan` - Crescent moons, lanterns, geometric patterns
 
-### Asian (4)
+### Asian (2)
 - `chinese_new_year` - Lanterns, dragon, red envelopes
 - `diwali` - Diyas, rangoli, fireworks, sparklers
 - `lunar_new_year` - Lanterns, red/gold particles
+
+### General (2)
+- `thank_you` - Hearts, flowers, ribbons, gifts
+- `congratulations` - Balloons, confetti, streamers, fireworks, trophy
 
 ---
 
@@ -282,7 +325,8 @@ Located in `shared/src/index.ts`:
 ```json
 {
   "recipients": [...],
-  "theme": "christmas"
+  "theme": "christmas",
+  "senderName": "John"
 }
 ```
 **Response:**
@@ -329,6 +373,35 @@ Located in `shared/src/index.ts`:
 }
 ```
 
+### POST /api/videos/download-zip/:jobId
+**Response:**
+```json
+{
+  "status": "processing",
+  "message": "ZIP generation started",
+  "totalVideos": 5
+}
+```
+
+### GET /api/videos/download-zip/:jobId/progress
+**Response:**
+```json
+{
+  "status": "completed",
+  "progress": 100,
+  "zipPath": "/videos/card0r_batch_123.zip"
+}
+```
+
+### DELETE /api/videos/delete/:filename
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Video deleted successfully"
+}
+```
+
 ---
 
 ## Development Guidelines
@@ -353,9 +426,11 @@ Located in `shared/src/index.ts`:
 
 3. **Create Decoration Component** (`remotion/src/decorations/NewHolidayDecoration.tsx`)
    ```typescript
-   export function NewHolidayDecoration({ theme }: DecorationProps) {
+   import { SparkleOverlay } from '../utils/decorationAnimations';
+
+   export function NewHolidayDecoration({ width, height }: DecorationProps) {
      const frame = useCurrentFrame();
-     const { width, height, durationInFrames } = useVideoConfig();
+     const { durationInFrames } = useVideoConfig();
 
      // Generate particles with pre-seeded positions
      const particles = useMemo(() =>
@@ -364,11 +439,15 @@ Located in `shared/src/index.ts`:
          startY: random(`startY-${i}`) * (height + 100),
          speed: 0.5 + random(`speed-${i}`) * 1.5,
          delay: random(`delay-${i}`) * 30,
-         // ... other properties
        })), [width, height]
      );
 
-     // Render particles...
+     return (
+       <AbsoluteFill>
+         <SparkleOverlay count={25} color="#FFD700" seed="new-holiday" />
+         {/* Render particles... */}
+       </AbsoluteFill>
+     );
    }
    ```
 
@@ -376,10 +455,10 @@ Located in `shared/src/index.ts`:
    ```typescript
    import { NewHolidayDecoration } from './NewHolidayDecoration';
 
-   export function getDecorationForTheme(theme: HolidayTheme) {
+   export function getDecorationComponent(theme: HolidayTheme) {
      switch (theme) {
        // ...existing
-       case HolidayTheme.NEW_HOLIDAY:
+       case 'new_holiday':
          return NewHolidayDecoration;
      }
    }
@@ -409,68 +488,52 @@ Located in `shared/src/index.ts`:
    ]
    ```
 
-### Adding a New Video Format
-
-1. **Update Shared Types** (`shared/src/index.ts`)
-2. **Add to FORMAT_CONFIGS** in `remotion-renderer.ts`
-3. **Add to FormatPicker** component with icon and description
-
 ### Modifying Video Structure
 
 The video structure in `remotion/src/CardComposition.tsx`:
-- Background: Full duration with theme gradient
-- Decorations: Full duration with theme-specific animations (snow, fireworks, etc.)
-- Intro: 5s (theme name fade in/out)
-- Name Reveal: 3s (recipient name scales up)
+- Fade in: 1 second
+- Intro: 5 seconds (theme name, recipient greeting)
 - Message: Dynamic duration based on word count (~3.5 words/second)
-- Sender: 3s (displays "From: [senderName]")
-- Outro: 3s (sparkle effect)
+- Sender: 3 seconds (displays "From: [senderName]")
+- Outro: 3 seconds (sparkle effect)
+- Fade out: 1 second
 
-To modify, update the timing constants and Sequence components in CardComposition.tsx.
+To modify, update the timing constants and Sequence components in CardComposition.tsx. Remember to update `calculateTotalFrames()` if changing durations.
 
-### Adding New Particle Effects
+### Adding New Animation Effects
 
-To create a new decoration component:
+To add shared animations, update `remotion/src/utils/decorationAnimations.tsx`:
 
-1. Create `remotion/src/decorations/YourDecoration.tsx`
-2. Use `useMemo` to generate particles with pre-seeded positions:
-   ```typescript
-   const particles = useMemo(() =>
-     Array.from({ length: COUNT }, (_, i) => ({
-       x: random(`x-${i}`) * width,
-       startY: random(`startY-${i}`) * (height + 100), // Pre-seeded Y
-       speed: 0.5 + random(`speed-${i}`) * 1.5,
-       delay: random(`delay-${i}`) * 30, // Max 30 frames delay
-     })), [width, height]
-   );
-   ```
+```typescript
+export function NewEffect({ /* props */ }) {
+  const frame = useCurrentFrame();
+  const { width, height } = useVideoConfig();
 
-3. Calculate positions with modulo wrapping:
-   ```typescript
-   const yOffset = (particle.startY + (frame + particle.delay) * particle.speed) % (height + 100);
-   const currentY = yOffset - 50;
-   ```
+  // Animation logic...
 
-4. For special animations (like Santa), use relative timing:
-   ```typescript
-   const startFrame = Math.floor(durationInFrames * 0.3); // 30% into video
-   const duration = Math.floor(durationInFrames * 0.25);
-   ```
+  return <AbsoluteFill>...</AbsoluteFill>;
+}
+```
+
+Then import and use in decoration components.
 
 ---
 
 ## Common Tasks
 
-### Running Tests
-```bash
-# Backend tests (not implemented yet)
-cd backend && npm test
+### Running Development
 
-# Frontend tests (not implemented yet)
-cd frontend && npm test
+```bash
+# From root - starts both frontend and backend
+npm run dev
+
+# Or individually
+npm run dev:frontend
+npm run dev:backend
 ```
 
 ### Building for Production
+
 ```bash
 # Single command builds all
 npm run build
@@ -483,6 +546,7 @@ npm run build:backend
 ```
 
 ### Docker Deployment
+
 ```bash
 # Build and run
 docker-compose up --build
@@ -498,6 +562,7 @@ docker-compose down
 ```
 
 ### Previewing Videos in Remotion Studio
+
 ```bash
 cd remotion
 npx remotion studio
@@ -513,7 +578,6 @@ npx remotion studio
 
 **Frontend:**
 - React DevTools extension
-- Redux DevTools for Zustand (enable in store)
 - Console logs for API calls
 - Network tab for API debugging
 
@@ -521,6 +585,22 @@ npx remotion studio
 - Use `npx remotion studio` to preview compositions
 - Check particle visibility from frame 0
 - Verify decoration components render before slides
+
+---
+
+## File Paths (Important!)
+
+All video-related paths use `__dirname` relative paths for consistency:
+
+```typescript
+// In routes/videos.ts, services/remotion-renderer.ts, services/zip-generator.ts:
+const VIDEOS_DIR = path.join(__dirname, '../../videos');
+
+// In server.ts:
+app.use('/videos', express.static(path.join(__dirname, '../videos')));
+```
+
+This ensures videos are stored and served from the same location regardless of where the process is started.
 
 ---
 
@@ -581,6 +661,7 @@ VITE_API_URL=http://localhost:3001/api
 - `multer` - File upload handling
 - `csv-parse` - CSV parsing
 - `xlsx` - Excel parsing
+- `archiver` - ZIP file creation
 
 ### Remotion Critical
 - `remotion` - Core framework
@@ -603,40 +684,19 @@ VITE_API_URL=http://localhost:3001/api
 ## File Naming Conventions
 
 - **Components**: PascalCase (e.g., `SplashScreen.tsx`)
-- **Utilities**: camelCase (e.g., `utils.ts`)
+- **Utilities**: camelCase (e.g., `animations.ts`)
 - **Stores**: camelCase with Store suffix (e.g., `settingsStore.ts`)
 - **Services**: kebab-case (e.g., `openai-service.ts`)
 - **Decorations**: PascalCase with Decoration suffix (e.g., `ChristmasDecoration.tsx`)
 - **Types**: PascalCase interfaces/types
-- **API routes**: kebab-case (e.g., `api-keys.ts`)
-
----
-
-## Testing Strategy
-
-### Unit Tests (To Implement)
-- Services: Test each service function independently
-- Stores: Test state mutations
-- Components: Test rendering and interactions
-- Utilities: Test helper functions
-
-### Integration Tests (To Implement)
-- API endpoints: Test request/response cycles
-- Video generation: Test full pipeline
-- File upload: Test CSV/Excel parsing
-
-### E2E Tests (To Implement)
-- User flows: Complete video generation workflow
-- Error handling: Invalid inputs, API failures
-- UI interactions: Forms, modals, navigation
+- **API routes**: kebab-case (e.g., `videos.ts`)
 
 ---
 
 ## Code Style
 
 - **TypeScript**: Strict mode enabled
-- **Imports**: Absolute imports with `@/` alias in frontend
-- **Formatting**: Prettier (not configured yet, but recommended)
+- **Formatting**: Prettier (recommended)
 - **Linting**: ESLint configured
 - **Comments**: JSDoc for complex functions
 - **Error Handling**: Try-catch with proper error messages
@@ -657,9 +717,6 @@ npm run build:shared    # Build shared types
 npm run build:remotion  # Build Remotion bundle
 npm run build:frontend  # Build frontend
 npm run build:backend   # Build backend
-
-# Installing
-npm run install:all     # Install all dependencies
 
 # Production
 npm start              # Run both in production mode
@@ -704,5 +761,5 @@ When working on this project, consider asking:
 
 ---
 
-Last Updated: 2025-12-22
-Version: 1.0.0
+Last Updated: 2025-12-23
+Version: 1.1.0

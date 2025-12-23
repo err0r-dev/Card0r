@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random, interpolate } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse, useOscillate } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, Flicker, FloatMotion } from '../utils/decorationAnimations';
 
 interface HalloweenDecorationProps {
   width: number;
@@ -199,6 +200,9 @@ export function HalloweenDecoration({ width, height }: HalloweenDecorationProps)
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Spooky sparkle overlay - purple/orange tones */}
+      <SparkleOverlay count={25} color="#9B59B6" minSize={2} maxSize={6} seed="halloween-sparkle" />
+
       {/* Spooky fog at bottom */}
       <div
         style={{
@@ -306,7 +310,7 @@ export function HalloweenDecoration({ width, height }: HalloweenDecorationProps)
         );
       })}
 
-      {/* Pumpkins at bottom corners */}
+      {/* Pumpkins at bottom corners with enhanced glow and flicker */}
       <div
         style={{
           position: 'absolute',
@@ -315,7 +319,11 @@ export function HalloweenDecoration({ width, height }: HalloweenDecorationProps)
           transform: `scale(${0.9 + pumpkinGlow * 0.1})`,
         }}
       >
-        <PumpkinSVG size={80} glowIntensity={pumpkinGlow} />
+        <GlowPulse color="rgba(255, 100, 0, 0.6)" minGlow={10} maxGlow={30} frequency={0.5}>
+          <Flicker intensity={0.2} speed={6} seed="pumpkin1">
+            <PumpkinSVG size={80} glowIntensity={pumpkinGlow} />
+          </Flicker>
+        </GlowPulse>
       </div>
       <div
         style={{
@@ -325,7 +333,11 @@ export function HalloweenDecoration({ width, height }: HalloweenDecorationProps)
           transform: `scale(${0.9 + pumpkinGlow * 0.1})`,
         }}
       >
-        <PumpkinSVG size={100} glowIntensity={pumpkinGlow} />
+        <GlowPulse color="rgba(255, 100, 0, 0.6)" minGlow={15} maxGlow={40} frequency={0.4} phase={0.5}>
+          <Flicker intensity={0.25} speed={7} seed="pumpkin2">
+            <PumpkinSVG size={100} glowIntensity={pumpkinGlow} />
+          </Flicker>
+        </GlowPulse>
       </div>
 
       {/* Cobweb in corner */}

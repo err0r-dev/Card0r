@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random, interpolate } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, Flicker, ConfettiBurst } from '../utils/decorationAnimations';
 
 interface DiwaliDecorationProps {
   width: number;
@@ -252,6 +253,10 @@ export function DiwaliDecoration({ width, height }: DiwaliDecorationProps) {
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Golden sparkle overlay for festival of lights */}
+      <SparkleOverlay count={40} color="#FFD700" minSize={3} maxSize={8} seed="diwali-sparkle" />
+      <SparkleOverlay count={20} color="#FF6B6B" minSize={2} maxSize={5} seed="diwali-color" />
+
       {/* Warm golden overlay */}
       <div
         style={{

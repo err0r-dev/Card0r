@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random, interpolate } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, ConfettiBurst, ScalePulse } from '../utils/decorationAnimations';
 
 interface CongratulationsDecorationProps {
   width: number;
@@ -267,6 +268,10 @@ export function CongratulationsDecoration({ width, height }: CongratulationsDeco
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Colorful sparkle overlay */}
+      <SparkleOverlay count={35} color="#FFD700" minSize={3} maxSize={8} seed="congrats-gold" />
+      <SparkleOverlay count={25} color="#805ad5" minSize={2} maxSize={6} seed="congrats-purple" />
+
       {/* Celebratory gradient overlay */}
       <div
         style={{

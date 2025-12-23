@@ -32,19 +32,6 @@ export function MessageSlide({ name, message, theme }: MessageSlideProps) {
         padding: '40px 60px',
       }}
     >
-      {/* Name at top */}
-      <h2
-        style={{
-          fontSize: 48,
-          fontWeight: 'bold',
-          color: colors.primary,
-          marginBottom: 40,
-          textShadow: `0 2px 10px ${colors.primary}40`,
-        }}
-      >
-        {name}
-      </h2>
-
       {/* Message lines */}
       <div
         style={{

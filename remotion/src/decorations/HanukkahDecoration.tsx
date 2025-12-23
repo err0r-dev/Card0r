@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random, interpolate } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, Flicker } from '../utils/decorationAnimations';
 
 interface HanukkahDecorationProps {
   width: number;
@@ -171,6 +172,10 @@ export function HanukkahDecoration({ width, height }: HanukkahDecorationProps) {
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Blue and gold sparkle overlay */}
+      <SparkleOverlay count={30} color="#4169E1" minSize={2} maxSize={6} seed="hanukkah-sparkle" />
+      <SparkleOverlay count={15} color="#FFD700" minSize={3} maxSize={5} seed="hanukkah-gold" />
+
       {/* Blue gradient overlay */}
       <div
         style={{
@@ -258,7 +263,7 @@ export function HanukkahDecoration({ width, height }: HanukkahDecorationProps) {
         );
       })}
 
-      {/* Menorah at bottom center */}
+      {/* Menorah at bottom center with enhanced glow */}
       <div
         style={{
           position: 'absolute',
@@ -267,7 +272,11 @@ export function HanukkahDecoration({ width, height }: HanukkahDecorationProps) {
           transform: 'translateX(-50%)',
         }}
       >
-        <MenorahSVG size={200} litCandles={litCandles} flameIntensity={flameFlicker} />
+        <GlowPulse color="rgba(255, 215, 0, 0.5)" minGlow={15} maxGlow={40} frequency={0.4}>
+          <Flicker intensity={0.15} speed={8} seed="menorah">
+            <MenorahSVG size={200} litCandles={litCandles} flameIntensity={flameFlicker} />
+          </Flicker>
+        </GlowPulse>
       </div>
 
       {/* Light rays from menorah */}

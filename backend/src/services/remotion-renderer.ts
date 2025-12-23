@@ -1,10 +1,14 @@
 import { bundle } from '@remotion/bundler';
 import { renderMedia, selectComposition } from '@remotion/renderer';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import fs from 'fs';
 import os from 'os';
 import { v4 as uuid } from 'uuid';
 import type { HolidayTheme, VideoFormat } from '@card0r/shared';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const FPS = 30;
 const WORDS_PER_SECOND = 3.5;
@@ -87,7 +91,7 @@ export async function renderCard(options: RenderCardOptions): Promise<string> {
   } = options;
 
   const videoId = uuid();
-  const outputDir = path.join(process.cwd(), 'videos');
+  const outputDir = path.join(__dirname, '../../videos');
   const outputPath = path.join(outputDir, `${videoId}.mp4`);
 
   // Ensure output directory exists

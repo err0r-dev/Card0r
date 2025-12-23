@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
 import { useUIStore } from './stores/uiStore';
@@ -11,6 +11,7 @@ import { MainLayout } from './components/MainLayout';
 import { SettingsModal } from './components/SettingsModal';
 import { StepProgress } from './components/StepProgress';
 import { GuidedStepCard } from './components/GuidedStepCard';
+import { ConfirmStartOverDialog } from './components/ConfirmStartOverDialog';
 import {
   RecipientsStep,
   CustomizeStep,
@@ -54,7 +55,10 @@ function App() {
   } = useUIStore();
   const { darkMode, openaiKey, jamendoKey, hasCompletedSetup } = useSettingsStore();
   const { recipients, senderName, clearRecipients } = useRecipientsStore();
-  const { selectedTheme, jobs, clearVideoState } = useVideoStore();
+  const { selectedTheme, jobs, currentJobId, clearVideoState } = useVideoStore();
+
+  // State for start over confirmation dialog
+  const [showStartOverDialog, setShowStartOverDialog] = useState(false);
 
   // Apply dark mode class to html element
   useEffect(() => {
@@ -116,7 +120,13 @@ function App() {
       return;
     }
     if (currentStep === 4) {
-      // Reset and start over
+      // Check if there are completed videos - show warning dialog
+      const completedVideos = jobs.filter(j => j.status === 'completed' && j.videoUrl);
+      if (completedVideos.length > 0) {
+        setShowStartOverDialog(true);
+        return;
+      }
+      // No videos to warn about, just start over
       handleStartOver();
       return;
     }
@@ -128,6 +138,14 @@ function App() {
     clearRecipients();
     clearVideoState();
     resetWizard();
+    setShowStartOverDialog(false);
+  };
+
+  // Handle download first from dialog
+  const handleDownloadFirst = () => {
+    setShowStartOverDialog(false);
+    // Stay on download page so user can download
+    toast.info('Download your videos, then click Start Over again');
   };
 
   // Get forward button label
@@ -214,6 +232,16 @@ function App() {
           </AnimatePresence>
         </MainLayout>
       )}
+
+      {/* Start Over Confirmation Dialog */}
+      <ConfirmStartOverDialog
+        open={showStartOverDialog}
+        onOpenChange={setShowStartOverDialog}
+        videoCount={jobs.filter(j => j.status === 'completed' && j.videoUrl).length}
+        onDownloadFirst={handleDownloadFirst}
+        onConfirm={handleStartOver}
+        onCancel={() => setShowStartOverDialog(false)}
+      />
 
       <Toaster richColors position="top-right" />
     </>

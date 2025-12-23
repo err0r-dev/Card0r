@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random, interpolate } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, ScalePulse, FloatMotion } from '../utils/decorationAnimations';
 
 interface ValentinesDecorationProps {
   width: number;
@@ -196,12 +197,15 @@ export function ValentinesDecoration({ width, height }: ValentinesDecorationProp
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Pink sparkle overlay */}
+      <SparkleOverlay count={35} color="#FF69B4" minSize={3} maxSize={7} seed="valentines-sparkle" />
+
       {/* Soft pink gradient overlay */}
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'radial-gradient(ellipse at center, rgba(255,182,193,0.1) 0%, transparent 70%)',
+          background: 'radial-gradient(ellipse at center, rgba(255,182,193,0.15) 0%, transparent 70%)',
         }}
       />
 

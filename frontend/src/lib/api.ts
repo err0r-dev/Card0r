@@ -108,6 +108,14 @@ class ApiClient {
       method: 'GET',
     });
   }
+
+  async deleteVideo(videoUrl: string): Promise<{ success: boolean; message: string }> {
+    // Extract filename from URL (e.g., "/videos/abc123.mp4" -> "abc123.mp4")
+    const filename = videoUrl.split('/').pop() || '';
+    return this.fetch<{ success: boolean; message: string }>(`/videos/delete/${filename}`, {
+      method: 'DELETE',
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

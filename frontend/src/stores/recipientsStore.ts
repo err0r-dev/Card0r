@@ -5,12 +5,15 @@ interface RecipientsState {
   recipients: Recipient[];
   recipientsWithMessages: RecipientWithMessage[];
   senderName: string;
+  messagesConfirmed: boolean;
   addRecipient: (recipient: Recipient) => void;
   removeRecipient: (id: string) => void;
   updateRecipient: (id: string, updates: Partial<Recipient>) => void;
   setRecipients: (recipients: Recipient[]) => void;
   setRecipientsWithMessages: (recipients: RecipientWithMessage[]) => void;
+  updateRecipientMessage: (id: string, message: string) => void;
   setSenderName: (name: string) => void;
+  setMessagesConfirmed: (confirmed: boolean) => void;
   clearRecipients: () => void;
 }
 
@@ -18,6 +21,7 @@ export const useRecipientsStore = create<RecipientsState>((set) => ({
   recipients: [],
   recipientsWithMessages: [],
   senderName: '',
+  messagesConfirmed: false,
   addRecipient: (recipient) =>
     set((state) => ({ recipients: [...state.recipients, recipient] })),
   removeRecipient: (id) =>
@@ -32,7 +36,14 @@ export const useRecipientsStore = create<RecipientsState>((set) => ({
     })),
   setRecipients: (recipients) => set({ recipients }),
   setRecipientsWithMessages: (recipientsWithMessages) =>
-    set({ recipientsWithMessages }),
+    set({ recipientsWithMessages, messagesConfirmed: false }),
+  updateRecipientMessage: (id, message) =>
+    set((state) => ({
+      recipientsWithMessages: state.recipientsWithMessages.map((r) =>
+        r.id === id ? { ...r, generatedMessage: message } : r
+      ),
+    })),
   setSenderName: (senderName) => set({ senderName }),
-  clearRecipients: () => set({ recipients: [], recipientsWithMessages: [], senderName: '' }),
+  setMessagesConfirmed: (messagesConfirmed) => set({ messagesConfirmed }),
+  clearRecipients: () => set({ recipients: [], recipientsWithMessages: [], senderName: '', messagesConfirmed: false }),
 }));

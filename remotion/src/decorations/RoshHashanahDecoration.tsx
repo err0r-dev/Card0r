@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, FloatMotion } from '../utils/decorationAnimations';
 
 interface RoshHashanahDecorationProps {
   width: number;
@@ -217,6 +218,10 @@ export function RoshHashanahDecoration({ width, height }: RoshHashanahDecoration
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Golden honey sparkle overlay */}
+      <SparkleOverlay count={25} color="#FFD700" minSize={2} maxSize={6} seed="rosh-hashanah-gold" />
+      <SparkleOverlay count={15} color="#DAA520" minSize={3} maxSize={5} seed="rosh-hashanah-honey" />
+
       {/* Warm golden gradient overlay */}
       <div
         style={{

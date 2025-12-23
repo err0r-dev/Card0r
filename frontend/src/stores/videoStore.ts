@@ -14,6 +14,7 @@ interface VideoState {
   setCurrentJobId: (jobId: string | null) => void;
   setJobs: (jobs: VideoGenerationJob[]) => void;
   updateJobProgress: (jobId: string, progress: number) => void;
+  removeJob: (jobId: string) => void;
   clearVideoState: () => void;
 }
 
@@ -33,6 +34,10 @@ export const useVideoStore = create<VideoState>((set) => ({
       jobs: state.jobs.map((job) =>
         job.id === jobId ? { ...job, progress } : job
       ),
+    })),
+  removeJob: (jobId) =>
+    set((state) => ({
+      jobs: state.jobs.filter((job) => job.id !== jobId),
     })),
   clearVideoState: () =>
     set({

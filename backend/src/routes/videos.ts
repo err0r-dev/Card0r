@@ -1,9 +1,16 @@
 import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs/promises';
 import { generateVideoBatch, getJobStatus } from '../services/video-generator.js';
 import { generateZipForJob, getZipProgress } from '../services/zip-generator.js';
 import type { VideoGenerationRequest } from '@card0r/shared';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 const router = express.Router();
+const VIDEOS_DIR = path.join(__dirname, '../../videos');
 
 // Generate videos
 router.post('/generate', async (req, res) => {
@@ -104,6 +111,37 @@ router.get('/download-zip/:jobId/progress', async (req, res) => {
   } catch (error) {
     console.error('ZIP progress check error:', error);
     res.status(500).json({ error: 'Failed to check progress' });
+  }
+});
+
+// Delete a video file
+router.delete('/delete/:filename', async (req, res) => {
+  try {
+    const { filename } = req.params;
+
+    // Sanitize filename to prevent directory traversal
+    const sanitizedFilename = path.basename(filename);
+    const videoPath = path.join(VIDEOS_DIR, sanitizedFilename);
+
+    // Check if file exists
+    try {
+      await fs.access(videoPath);
+    } catch {
+      // File doesn't exist, but that's okay - return success
+      return res.json({ success: true, message: 'Video already deleted or not found' });
+    }
+
+    // Delete the file
+    await fs.unlink(videoPath);
+    console.log(`[Videos] Deleted video: ${sanitizedFilename}`);
+
+    res.json({ success: true, message: 'Video deleted successfully' });
+  } catch (error) {
+    console.error('Video deletion error:', error);
+    res.status(500).json({
+      error: 'Video deletion failed',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 });
 

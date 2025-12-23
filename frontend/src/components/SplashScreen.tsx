@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Mail, Heart, Sparkles } from 'lucide-react';
+import { Mail } from 'lucide-react';
 
 interface SplashScreenProps {
   onEnter: () => void;
@@ -52,12 +52,7 @@ export function SplashScreen({ onEnter }: SplashScreenProps) {
           className="mb-8 flex justify-center"
         >
           <div className="relative">
-            {/* Greeting Card Icon */}
-            <div className="relative w-24 h-24">
-              <Mail className="w-24 h-24 text-yellow-300" strokeWidth={2} />
-              <Heart className="w-8 h-8 text-red-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-              <Sparkles className="w-6 h-6 text-yellow-200 absolute top-2 right-2" />
-            </div>
+            <Mail className="w-24 h-24 text-yellow-300" strokeWidth={1.5} />
             <motion.div
               animate={{
                 scale: [1, 1.2, 1],
@@ -67,7 +62,7 @@ export function SplashScreen({ onEnter }: SplashScreenProps) {
                 duration: 2,
                 repeat: Infinity,
               }}
-              className="absolute inset-0 rounded-full bg-yellow-400 blur-2xl"
+              className="absolute inset-0 rounded-full bg-yellow-400 blur-2xl -z-10"
             />
           </div>
         </motion.div>

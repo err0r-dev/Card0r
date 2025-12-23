@@ -1,5 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random } from 'remotion';
 import { useMemo } from 'react';
+import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, SwayMotion } from '../utils/decorationAnimations';
 
 interface ThanksgivingDecorationProps {
   width: number;
@@ -110,6 +112,9 @@ export function ThanksgivingDecoration({ width, height }: ThanksgivingDecoration
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Golden autumn sparkle overlay */}
+      <SparkleOverlay count={25} color="#FFD700" minSize={2} maxSize={6} seed="thanksgiving-sparkle" />
+
       {/* Warm autumn gradient */}
       <div
         style={{

@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, SwayMotion, ScalePulse, FloatMotion } from '../utils/decorationAnimations';
 
 interface EasterDecorationProps {
   width: number;
@@ -152,6 +153,9 @@ export function EasterDecoration({ width, height }: EasterDecorationProps) {
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Pastel sparkle overlay */}
+      <SparkleOverlay count={30} color="#FFB6C1" minSize={3} maxSize={7} seed="easter-sparkle" />
+
       {/* Soft pastel gradient */}
       <div
         style={{
@@ -216,9 +220,10 @@ export function EasterDecoration({ width, height }: EasterDecorationProps) {
         );
       })}
 
-      {/* Bunnies */}
+      {/* Bunnies with hopping animation */}
       {bunnies.map((bunny, i) => {
-        const hop = Math.abs(Math.sin(frame * 0.1)) * 10;
+        const hop = Math.abs(Math.sin(frame * 0.1)) * 15;
+        const squish = 1 + Math.sin(frame * 0.1) * 0.05;
         return (
           <div
             key={i}
@@ -226,9 +231,13 @@ export function EasterDecoration({ width, height }: EasterDecorationProps) {
               position: 'absolute',
               left: bunny.x,
               top: bunny.y - hop,
+              transform: `scaleY(${squish}) scaleX(${1 + (1 - squish) * 0.5})`,
+              transformOrigin: 'bottom center',
             }}
           >
-            <BunnySVG size={bunny.size} flip={bunny.flip} />
+            <GlowPulse color="rgba(255, 255, 255, 0.3)" minGlow={0} maxGlow={10} frequency={0.3} phase={i * 0.5}>
+              <BunnySVG size={bunny.size} flip={bunny.flip} />
+            </GlowPulse>
           </div>
         );
       })}

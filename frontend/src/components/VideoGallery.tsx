@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, Play, Video, X, CheckCircle2, Loader2, Archive } from 'lucide-react';
+import { Download, Play, Video, X, CheckCircle2, Loader2, Archive, Trash2 } from 'lucide-react';
 import { useVideoStore } from '../stores/videoStore';
 import { apiClient } from '../lib/api';
 import { Card, CardContent } from './ui/card';
@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
 export function VideoGallery() {
-  const { jobs, currentJobId } = useVideoStore();
+  const { jobs, currentJobId, removeJob } = useVideoStore();
   const [downloadedIds, setDownloadedIds] = useState<Set<string>>(new Set());
   const [previewVideo, setPreviewVideo] = useState<{ url: string; name: string } | null>(null);
   const [zipState, setZipState] = useState<{
@@ -32,6 +32,28 @@ export function VideoGallery() {
     // Mark as downloaded
     setDownloadedIds(prev => new Set([...prev, jobId]));
     toast.success(`Downloaded video for ${name}!`);
+  };
+
+  const handleDelete = async (jobId: string, name: string, videoUrl: string | undefined) => {
+    // Delete from server if we have a URL
+    if (videoUrl) {
+      try {
+        await apiClient.deleteVideo(videoUrl);
+      } catch (error) {
+        console.error('Failed to delete video from server:', error);
+        // Continue with UI removal even if server delete fails
+      }
+    }
+
+    // Remove from UI state
+    removeJob(jobId);
+    // Also remove from downloaded tracking
+    setDownloadedIds(prev => {
+      const next = new Set(prev);
+      next.delete(jobId);
+      return next;
+    });
+    toast.success(`Removed video for ${name}`);
   };
 
   const handleDownloadAllAsZip = async () => {
@@ -185,7 +207,17 @@ export function VideoGallery() {
 
                 {/* Info and Actions */}
                 <CardContent className="p-4">
-                  <h4 className="font-semibold text-lg mb-3 truncate">{job.recipientName}</h4>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-semibold text-lg truncate">{job.recipientName}</h4>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDelete(job.id, job.recipientName, job.videoUrl)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
 
                   <div className="flex gap-2">
                     <Button

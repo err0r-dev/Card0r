@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random, interpolate } from 'remotion';
 import { useMemo } from 'react';
-import { usePulse, useOscillate, EASING } from '../utils/animations';
+import { usePulse, useOscillate } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, SwayMotion, ScalePulse, TrailEffect, getBezierPoint, getBezierAngle } from '../utils/decorationAnimations';
 
 interface ChristmasDecorationProps {
   width: number;
@@ -11,7 +12,7 @@ interface ChristmasDecorationProps {
 interface Snowflake {
   id: number;
   x: number;
-  startY: number; // Pre-seeded Y position for immediate visibility
+  startY: number;
   size: number;
   speed: number;
   delay: number;
@@ -49,7 +50,6 @@ function SnowflakeSVG({ size, opacity }: { size: number; opacity: number }) {
         <line x1="1" y1="12" x2="23" y2="12" />
         <line x1="4" y1="4" x2="20" y2="20" />
         <line x1="20" y1="4" x2="4" y2="20" />
-        {/* Branches */}
         <line x1="12" y1="5" x2="9" y2="2" />
         <line x1="12" y1="5" x2="15" y2="2" />
         <line x1="12" y1="19" x2="9" y2="22" />
@@ -64,76 +64,104 @@ function SnowflakeSVG({ size, opacity }: { size: number; opacity: number }) {
   );
 }
 
-// Santa Sleigh silhouette
-function SantaSleigh({ progress, width }: { progress: number; width: number }) {
-  const x = interpolate(progress, [0, 1], [-200, width + 200]);
-  const y = 80 + Math.sin(progress * Math.PI * 4) * 15; // Gentle bob
+// Improved Santa Sleigh with bezier curve path
+function SantaSleigh({ progress, width, height }: { progress: number; width: number; height: number }) {
+  // Bezier curve control points for smooth arc path
+  const p0 = { x: -200, y: height * 0.15 };
+  const p1 = { x: width * 0.3, y: height * 0.05 };
+  const p2 = { x: width * 0.7, y: height * 0.08 };
+  const p3 = { x: width + 200, y: height * 0.12 };
+
+  const pos = getBezierPoint(progress, p0, p1, p2, p3);
+  const angle = getBezierAngle(progress, p0, p1, p2, p3);
+
+  // Gentle bob on top of the path
+  const bobOffset = Math.sin(progress * Math.PI * 6) * 8;
 
   return (
-    <div
-      style={{
-        position: 'absolute',
-        left: x,
-        top: y,
-        opacity: progress > 0 && progress < 1 ? 0.9 : 0,
-        filter: 'drop-shadow(0 0 20px rgba(255,255,255,0.5))',
-      }}
-    >
-      <svg width="180" height="80" viewBox="0 0 180 80" fill="#1a1a2e">
-        {/* Sleigh */}
-        <path d="M40,60 Q30,60 25,50 L20,50 Q15,50 15,45 L15,40 Q15,35 20,35 L100,35 Q110,35 115,40 L120,45 Q125,50 120,55 L115,60 Q110,65 100,60 Z" />
-        {/* Runner */}
-        <path d="M10,65 Q5,65 5,60 L5,55 Q5,50 10,50 L120,50 Q130,50 135,55 L140,60 Q145,65 140,70 L10,70 Q5,70 5,65 Z" fill="#8B4513" />
-        {/* Santa body */}
-        <ellipse cx="70" cy="25" rx="20" ry="18" fill="#cc0000" />
-        {/* Santa head */}
-        <circle cx="70" cy="8" r="10" fill="#FFE4C4" />
-        {/* Santa hat */}
-        <path d="M60,8 Q65,0 75,2 L90,8 Q85,15 80,10 Z" fill="#cc0000" />
-        <circle cx="88" cy="5" r="4" fill="white" />
-        {/* Beard */}
-        <ellipse cx="70" cy="15" rx="8" ry="6" fill="white" />
-        {/* Gift sack */}
-        <ellipse cx="95" cy="25" rx="15" ry="20" fill="#8B0000" />
-        {/* Reindeer */}
-        <g transform="translate(130, 30)">
-          {/* Body */}
-          <ellipse cx="15" cy="20" rx="18" ry="12" fill="#8B4513" />
-          {/* Head */}
-          <circle cx="35" cy="12" r="8" fill="#8B4513" />
-          {/* Antlers */}
-          <path d="M32,5 L28,-5 L25,0 M32,5 L35,-8 L38,-3" stroke="#5D4037" strokeWidth="2" fill="none" />
-          <path d="M38,5 L42,-5 L45,0 M38,5 L41,-8 L44,-3" stroke="#5D4037" strokeWidth="2" fill="none" />
-          {/* Legs */}
-          <line x1="5" y1="30" x2="5" y2="45" stroke="#8B4513" strokeWidth="3" />
-          <line x1="25" y1="30" x2="25" y2="45" stroke="#8B4513" strokeWidth="3" />
-          {/* Nose */}
-          <circle cx="42" cy="14" r="3" fill="#cc0000" />
-        </g>
-        {/* Reins */}
-        <path d="M100,30 Q115,25 135,35" stroke="#FFD700" strokeWidth="2" fill="none" />
-      </svg>
-    </div>
+    <>
+      {/* Sparkle trail behind sleigh */}
+      {progress > 0.05 && progress < 0.95 && (
+        <TrailEffect
+          x={pos.x - 100}
+          y={pos.y + bobOffset + 30}
+          count={12}
+          color="rgba(255, 215, 0, 0.6)"
+          spread={40}
+          seed="sleigh-trail"
+        />
+      )}
+
+      <div
+        style={{
+          position: 'absolute',
+          left: pos.x,
+          top: pos.y + bobOffset,
+          opacity: progress > 0 && progress < 1 ? 0.95 : 0,
+          filter: 'drop-shadow(0 0 30px rgba(255,255,255,0.6))',
+          transform: `rotate(${angle * 0.3}deg)`,
+          transformOrigin: 'center center',
+        }}
+      >
+        <svg width="180" height="80" viewBox="0 0 180 80" fill="#1a1a2e">
+          {/* Sleigh */}
+          <path d="M40,60 Q30,60 25,50 L20,50 Q15,50 15,45 L15,40 Q15,35 20,35 L100,35 Q110,35 115,40 L120,45 Q125,50 120,55 L115,60 Q110,65 100,60 Z" />
+          {/* Runner */}
+          <path d="M10,65 Q5,65 5,60 L5,55 Q5,50 10,50 L120,50 Q130,50 135,55 L140,60 Q145,65 140,70 L10,70 Q5,70 5,65 Z" fill="#8B4513" />
+          {/* Santa body */}
+          <ellipse cx="70" cy="25" rx="20" ry="18" fill="#cc0000" />
+          {/* Santa head */}
+          <circle cx="70" cy="8" r="10" fill="#FFE4C4" />
+          {/* Santa hat */}
+          <path d="M60,8 Q65,0 75,2 L90,8 Q85,15 80,10 Z" fill="#cc0000" />
+          <circle cx="88" cy="5" r="4" fill="white" />
+          {/* Beard */}
+          <ellipse cx="70" cy="15" rx="8" ry="6" fill="white" />
+          {/* Gift sack */}
+          <ellipse cx="95" cy="25" rx="15" ry="20" fill="#8B0000" />
+          {/* Reindeer */}
+          <g transform="translate(130, 30)">
+            <ellipse cx="15" cy="20" rx="18" ry="12" fill="#8B4513" />
+            <circle cx="35" cy="12" r="8" fill="#8B4513" />
+            <path d="M32,5 L28,-5 L25,0 M32,5 L35,-8 L38,-3" stroke="#5D4037" strokeWidth="2" fill="none" />
+            <path d="M38,5 L42,-5 L45,0 M38,5 L41,-8 L44,-3" stroke="#5D4037" strokeWidth="2" fill="none" />
+            <line x1="5" y1="30" x2="5" y2="45" stroke="#8B4513" strokeWidth="3" />
+            <line x1="25" y1="30" x2="25" y2="45" stroke="#8B4513" strokeWidth="3" />
+            {/* Glowing red nose */}
+            <circle cx="42" cy="14" r="4" fill="#ff0000" filter="url(#noseGlow)" />
+          </g>
+          {/* Reins */}
+          <path d="M100,30 Q115,25 135,35" stroke="#FFD700" strokeWidth="2" fill="none" />
+          {/* Define glow filter */}
+          <defs>
+            <filter id="noseGlow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="2" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+        </svg>
+      </div>
+    </>
   );
 }
 
-// Christmas light bulb
+// Christmas light bulb with enhanced glow
 function LightBulb({ color, brightness }: { color: string; brightness: number }) {
   return (
     <svg width="20" height="30" viewBox="0 0 20 30">
-      {/* Wire */}
       <line x1="10" y1="0" x2="10" y2="8" stroke="#333" strokeWidth="2" />
-      {/* Socket */}
       <rect x="6" y="6" width="8" height="6" fill="#555" rx="1" />
-      {/* Bulb */}
       <ellipse
         cx="10"
         cy="20"
         rx="8"
         ry="10"
         fill={color}
-        opacity={0.3 + brightness * 0.7}
-        filter={`drop-shadow(0 0 ${8 * brightness}px ${color})`}
+        opacity={0.4 + brightness * 0.6}
+        filter={`drop-shadow(0 0 ${12 * brightness}px ${color}) drop-shadow(0 0 ${6 * brightness}px ${color})`}
       />
     </svg>
   );
@@ -143,11 +171,8 @@ function LightBulb({ color, brightness }: { color: string; brightness: number })
 function OrnamentBall({ size, color, swing }: { size: number; color: string; swing: number }) {
   return (
     <svg width={size + 10} height={size + 20} viewBox={`0 0 ${size + 10} ${size + 20}`}>
-      {/* String */}
       <line x1={(size + 10) / 2} y1="0" x2={(size + 10) / 2} y2="15" stroke="#555" strokeWidth="1" />
-      {/* Cap */}
       <rect x={(size + 10) / 2 - 4} y="12" width="8" height="6" fill="#FFD700" rx="1" />
-      {/* Ball */}
       <circle
         cx={(size + 10) / 2}
         cy={size / 2 + 18}
@@ -155,7 +180,6 @@ function OrnamentBall({ size, color, swing }: { size: number; color: string; swi
         fill={color}
         filter={`drop-shadow(0 2px 4px rgba(0,0,0,0.3))`}
       />
-      {/* Shine */}
       <ellipse
         cx={(size + 10) / 2 - size / 5}
         cy={size / 2 + 15}
@@ -164,6 +188,40 @@ function OrnamentBall({ size, color, swing }: { size: number; color: string; swi
         fill="rgba(255,255,255,0.4)"
       />
     </svg>
+  );
+}
+
+// Animated Holly with berries
+function AnimatedHolly() {
+  const berryPulse = usePulse({ frequency: 0.8, min: 0.6, max: 1, phase: 0 });
+
+  return (
+    <SwayMotion amplitude={3} frequency={0.25} originX="50%" originY="100%">
+      <ScalePulse minScale={1} maxScale={1.03} frequency={0.4}>
+        <svg width="120" height="120" viewBox="0 0 120 120">
+          {/* Holly leaves */}
+          <path
+            d="M80,20 Q100,30 90,50 Q110,40 100,60 Q120,70 90,80 Q100,100 70,90 Q60,110 50,80 Q20,90 40,60 Q10,50 40,40 Q30,20 60,30 Q70,10 80,20 Z"
+            fill="#228B22"
+            filter="drop-shadow(2px 2px 4px rgba(0,0,0,0.3))"
+          />
+          {/* Animated glowing berries */}
+          <GlowPulse color="rgba(255, 0, 0, 0.8)" minGlow={3} maxGlow={10} frequency={0.8}>
+            <circle cx="65" cy="50" r="8" fill="#cc0000" opacity={berryPulse} />
+          </GlowPulse>
+          <GlowPulse color="rgba(255, 0, 0, 0.8)" minGlow={3} maxGlow={10} frequency={0.8} phase={0.33}>
+            <circle cx="55" cy="60" r="8" fill="#cc0000" opacity={berryPulse} />
+          </GlowPulse>
+          <GlowPulse color="rgba(255, 0, 0, 0.8)" minGlow={3} maxGlow={10} frequency={0.8} phase={0.66}>
+            <circle cx="75" cy="60" r="8" fill="#cc0000" opacity={berryPulse} />
+          </GlowPulse>
+          {/* Shine on berries */}
+          <circle cx="62" cy="47" r="2" fill="rgba(255,255,255,0.7)" />
+          <circle cx="52" cy="57" r="2" fill="rgba(255,255,255,0.7)" />
+          <circle cx="72" cy="57" r="2" fill="rgba(255,255,255,0.7)" />
+        </svg>
+      </ScalePulse>
+    </SwayMotion>
   );
 }
 
@@ -180,10 +238,10 @@ export function ChristmasDecoration({ width, height }: ChristmasDecorationProps)
       result.push({
         id: i,
         x: random(`snow-x-${i}`) * width,
-        startY: random(`snow-startY-${i}`) * (height + 100), // Pre-seeded for immediate visibility
+        startY: random(`snow-startY-${i}`) * (height + 100),
         size: random(`snow-size-${i}`) * 8 + 4,
         speed: random(`snow-speed-${i}`) * 1.5 + 0.5,
-        delay: random(`snow-delay-${i}`) * 30, // Reduced from 200 for faster appearance
+        delay: random(`snow-delay-${i}`) * 30,
         swayAmplitude: random(`snow-sway-${i}`) * 30 + 10,
         swaySpeed: random(`snow-sway-speed-${i}`) * 0.03 + 0.01,
         opacity: random(`snow-opacity-${i}`) * 0.5 + 0.5,
@@ -212,7 +270,7 @@ export function ChristmasDecoration({ width, height }: ChristmasDecorationProps)
     return result;
   }, [width]);
 
-  // Generate ornaments (falling occasionally)
+  // Generate ornaments
   const ornaments = useMemo(() => {
     const colors = ['#cc0000', '#00cc00', '#FFD700', '#0066cc', '#cc00cc'];
     const result: Ornament[] = [];
@@ -231,9 +289,9 @@ export function ChristmasDecoration({ width, height }: ChristmasDecorationProps)
     return result;
   }, [width, durationInFrames]);
 
-  // Santa progress (crosses screen mid-video) - relative to video duration
-  const santaStartFrame = Math.floor(durationInFrames * 0.3); // Start at 30% of video
-  const santaDuration = Math.floor(durationInFrames * 0.25); // Cross takes 25% of video
+  // Santa progress - smoother timing
+  const santaStartFrame = Math.floor(durationInFrames * 0.25);
+  const santaDuration = Math.floor(durationInFrames * 0.35);
   const santaProgress = interpolate(
     frame,
     [santaStartFrame, santaStartFrame + santaDuration],
@@ -241,14 +299,13 @@ export function ChristmasDecoration({ width, height }: ChristmasDecorationProps)
     { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }
   );
 
-  // Light twinkling
-  const lightPulse = usePulse({ frequency: 3, min: 0.4, max: 1 });
-
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Sparkle overlay */}
+      <SparkleOverlay count={25} color="white" minSize={2} maxSize={6} seed="xmas-sparkle" />
+
       {/* Snow layer */}
       {snowflakes.map((snow) => {
-        // Pre-seeded Y position for immediate visibility
         const yOffset = (snow.startY + (frame + snow.delay) * snow.speed) % (height + 100);
         const currentY = yOffset - 50;
         const xSway = Math.sin((frame + snow.delay) * snow.swaySpeed) * snow.swayAmplitude;
@@ -283,7 +340,7 @@ export function ChristmasDecoration({ width, height }: ChristmasDecorationProps)
         );
       })}
 
-      {/* Christmas lights at top */}
+      {/* Christmas lights at top with enhanced glow */}
       <div
         style={{
           position: 'absolute',
@@ -294,22 +351,20 @@ export function ChristmasDecoration({ width, height }: ChristmasDecorationProps)
           justifyContent: 'space-around',
         }}
       >
-        {/* Wire */}
         <svg
           width={width}
           height="50"
           style={{ position: 'absolute', top: 0 }}
         >
           <path
-            d={`M0,10 ${lights.map((l, i) => `Q${l.x - 20},25 ${l.x},15`).join(' ')}`}
+            d={`M0,10 ${lights.map((l) => `Q${l.x - 20},25 ${l.x},15`).join(' ')}`}
             stroke="#2d2d2d"
             strokeWidth="3"
             fill="none"
           />
         </svg>
-        {/* Bulbs */}
         {lights.map((light) => {
-          const brightness = (Math.sin(frame * 0.1 + light.phase) + 1) / 2;
+          const brightness = (Math.sin(frame * 0.15 + light.phase) + 1) / 2;
           return (
             <div
               key={light.id}
@@ -325,8 +380,8 @@ export function ChristmasDecoration({ width, height }: ChristmasDecorationProps)
         })}
       </div>
 
-      {/* Santa sleigh (crosses mid-video) */}
-      <SantaSleigh progress={santaProgress} width={width} />
+      {/* Santa sleigh with improved path */}
+      <SantaSleigh progress={santaProgress} width={width} height={height} />
 
       {/* Falling ornaments */}
       {ornaments.map((ornament) => {
@@ -358,34 +413,18 @@ export function ChristmasDecoration({ width, height }: ChristmasDecorationProps)
         );
       })}
 
-      {/* Corner decorations - Holly */}
+      {/* Corner decoration - Animated Holly */}
       <div
         style={{
           position: 'absolute',
           top: 0,
           right: 0,
-          opacity: 0.8,
         }}
       >
-        <svg width="120" height="120" viewBox="0 0 120 120">
-          {/* Holly leaves */}
-          <path
-            d="M80,20 Q100,30 90,50 Q110,40 100,60 Q120,70 90,80 Q100,100 70,90 Q60,110 50,80 Q20,90 40,60 Q10,50 40,40 Q30,20 60,30 Q70,10 80,20 Z"
-            fill="#228B22"
-            filter="drop-shadow(2px 2px 4px rgba(0,0,0,0.3))"
-          />
-          {/* Berries */}
-          <circle cx="65" cy="50" r="8" fill="#cc0000" />
-          <circle cx="55" cy="60" r="8" fill="#cc0000" />
-          <circle cx="75" cy="60" r="8" fill="#cc0000" />
-          {/* Shine on berries */}
-          <circle cx="62" cy="47" r="2" fill="rgba(255,255,255,0.6)" />
-          <circle cx="52" cy="57" r="2" fill="rgba(255,255,255,0.6)" />
-          <circle cx="72" cy="57" r="2" fill="rgba(255,255,255,0.6)" />
-        </svg>
+        <AnimatedHolly />
       </div>
 
-      {/* Bottom snow bank */}
+      {/* Bottom snow bank with shimmer */}
       <div
         style={{
           position: 'absolute',
@@ -393,7 +432,7 @@ export function ChristmasDecoration({ width, height }: ChristmasDecorationProps)
           left: 0,
           right: 0,
           height: 60,
-          background: 'linear-gradient(to top, rgba(255,255,255,0.9), rgba(255,255,255,0))',
+          background: 'linear-gradient(to top, rgba(255,255,255,0.95), rgba(255,255,255,0))',
         }}
       />
     </AbsoluteFill>

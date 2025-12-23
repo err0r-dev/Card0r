@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Upload, FileSpreadsheet, Loader2 } from 'lucide-react';
+import { FileSpreadsheet, Loader2 } from 'lucide-react';
 import { useRecipientsStore } from '../stores/recipientsStore';
 import { apiClient } from '../lib/api';
 import { Card, CardContent } from './ui/card';
@@ -90,10 +90,7 @@ export function FileUploader() {
             {isUploading ? (
               <Loader2 className="h-12 w-12 text-primary animate-spin" />
             ) : (
-              <div className="relative">
-                <Upload className="h-12 w-12 text-muted-foreground" />
-                <FileSpreadsheet className="h-6 w-6 text-primary absolute -bottom-1 -right-1" />
-              </div>
+              <FileSpreadsheet className="h-12 w-12 text-muted-foreground" />
             )}
 
             <div>

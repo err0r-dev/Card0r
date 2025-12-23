@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Wand2, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Wand2, Loader2, CheckCircle, XCircle, Edit2, Save, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useRecipientsStore } from '../stores/recipientsStore';
 import { useVideoStore } from '../stores/videoStore';
 import { useSettingsStore } from '../stores/settingsStore';
@@ -9,16 +9,20 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { Progress } from './ui/progress';
 import { Separator } from './ui/separator';
+import { Textarea } from './ui/textarea';
 import { toast } from 'sonner';
 
 export function VideoGenerator() {
-  const { recipients, recipientsWithMessages, setRecipientsWithMessages, senderName } = useRecipientsStore();
+  const { recipients, recipientsWithMessages, setRecipientsWithMessages, updateRecipientMessage, messagesConfirmed, setMessagesConfirmed, senderName } = useRecipientsStore();
   const { selectedTheme, selectedFormat, selectedMusicUrl, currentJobId, jobs, setCurrentJobId, setJobs } = useVideoStore();
   const { openaiKey } = useSettingsStore();
   const { setCurrentStep } = useUIStore();
 
   const [isGeneratingMessages, setIsGeneratingMessages] = useState(false);
   const [isGeneratingVideos, setIsGeneratingVideos] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingMessage, setEditingMessage] = useState('');
+  const [showAllMessages, setShowAllMessages] = useState(false);
 
   // Refs to track if auto-generation has been triggered (prevent re-triggering)
   const hasAutoTriggeredMessages = useRef(false);
@@ -100,10 +104,11 @@ export function VideoGenerator() {
     }
   }, [recipients.length, selectedTheme, openaiKey, recipientsWithMessages.length, isGeneratingMessages]);
 
-  // Auto-trigger video generation once messages are ready
+  // Auto-trigger video generation once messages are confirmed
   useEffect(() => {
     const canAutoGenerate =
       recipientsWithMessages.length > 0 &&
+      messagesConfirmed &&
       selectedTheme &&
       selectedFormat &&
       !currentJobId &&
@@ -114,7 +119,32 @@ export function VideoGenerator() {
       hasAutoTriggeredVideos.current = true;
       handleGenerateVideos();
     }
-  }, [recipientsWithMessages.length, selectedTheme, selectedFormat, currentJobId, isGeneratingVideos]);
+  }, [recipientsWithMessages.length, messagesConfirmed, selectedTheme, selectedFormat, currentJobId, isGeneratingVideos]);
+
+  // Message editing handlers
+  const handleStartEdit = (id: string, message: string) => {
+    setEditingId(id);
+    setEditingMessage(message);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingId) {
+      updateRecipientMessage(editingId, editingMessage);
+      setEditingId(null);
+      setEditingMessage('');
+      toast.success('Message updated');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingMessage('');
+  };
+
+  const handleConfirmMessages = () => {
+    setMessagesConfirmed(true);
+    toast.success('Messages confirmed! Starting video generation...');
+  };
 
   // Poll job status
   useEffect(() => {
@@ -198,26 +228,129 @@ export function VideoGenerator() {
         </CardContent>
       </Card>
 
-      {/* Step 2: Generate Videos */}
-      <Card>
+      {/* Step 2: Review & Edit Messages */}
+      {messagesReady && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                2
+              </span>
+              Review & Edit Messages
+              {messagesConfirmed && <CheckCircle className="h-5 w-5 text-green-500 ml-auto" />}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-4">
+              Review the AI-generated messages below. Click edit to make changes, then confirm to proceed.
+            </p>
+
+            <div className="space-y-3">
+              {(showAllMessages ? recipientsWithMessages : recipientsWithMessages.slice(0, 3)).map((recipient) => (
+                <div
+                  key={recipient.id}
+                  className="border rounded-lg p-4 bg-muted/30"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="font-medium text-sm">{recipient.name}</span>
+                    {editingId !== recipient.id && !messagesConfirmed && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleStartEdit(recipient.id, recipient.generatedMessage)}
+                        className="h-7 px-2"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </Button>
+                    )}
+                  </div>
+
+                  {editingId === recipient.id ? (
+                    <div className="space-y-2">
+                      <Textarea
+                        value={editingMessage}
+                        onChange={(e) => setEditingMessage(e.target.value)}
+                        rows={3}
+                        className="text-sm"
+                      />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleSaveEdit}>
+                          <Save className="h-3.5 w-3.5 mr-1" />
+                          Save
+                        </Button>
+                        <Button size="sm" variant="ghost" onClick={handleCancelEdit}>
+                          <X className="h-3.5 w-3.5 mr-1" />
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {recipient.generatedMessage}
+                    </p>
+                  )}
+                </div>
+              ))}
+
+              {recipientsWithMessages.length > 3 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowAllMessages(!showAllMessages)}
+                  className="w-full"
+                >
+                  {showAllMessages ? (
+                    <>
+                      <ChevronUp className="h-4 w-4 mr-1" />
+                      Show Less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="h-4 w-4 mr-1" />
+                      Show All {recipientsWithMessages.length} Messages
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+
+            {!messagesConfirmed && (
+              <Button
+                onClick={handleConfirmMessages}
+                disabled={editingId !== null}
+                className="w-full mt-4"
+                size="lg"
+              >
+                <CheckCircle className="mr-2 h-5 w-5" />
+                Confirm Messages & Generate Videos
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Step 3: Generate Videos */}
+      <Card className={!messagesConfirmed ? 'opacity-60' : ''}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
-              2
+              3
             </span>
             Generate Videos
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Create personalized video cards with animations, music, and AI-generated messages.
+            {messagesConfirmed
+              ? 'Creating personalized video cards with animations, music, and your messages.'
+              : 'Review and confirm messages above to enable video generation.'}
           </p>
           <Button
             onClick={handleGenerateVideos}
-            disabled={!messagesReady || videosGenerating}
+            disabled={!messagesConfirmed || videosGenerating}
             className="w-full"
             size="lg"
-            variant={messagesReady ? 'default' : 'secondary'}
+            variant={messagesConfirmed ? 'default' : 'secondary'}
           >
             {videosGenerating ? (
               <>

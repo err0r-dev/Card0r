@@ -48,13 +48,12 @@ export function calculateMessageDuration(message: string): number {
 
 export function calculateTotalDuration(message: string): number {
   const INTRO_DURATION = 5; // seconds
-  const NAME_REVEAL_DURATION = 3; // seconds
   const SENDER_REVEAL_DURATION = 3; // seconds
   const OUTRO_DURATION = 3; // seconds
 
   const messageDuration = calculateMessageDuration(message);
 
-  const total = INTRO_DURATION + NAME_REVEAL_DURATION + messageDuration +
+  const total = INTRO_DURATION + messageDuration +
                 SENDER_REVEAL_DURATION + OUTRO_DURATION;
 
   // Clamp between 20-60 seconds

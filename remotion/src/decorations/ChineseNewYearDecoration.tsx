@@ -1,6 +1,7 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, random, interpolate } from 'remotion';
 import { useMemo } from 'react';
 import { usePulse, useOscillate } from '../utils/animations';
+import { SparkleOverlay, GlowPulse, SwayMotion, ConfettiBurst } from '../utils/decorationAnimations';
 
 interface ChineseNewYearDecorationProps {
   width: number;
@@ -228,6 +229,10 @@ export function ChineseNewYearDecoration({ width, height }: ChineseNewYearDecora
 
   return (
     <AbsoluteFill style={{ pointerEvents: 'none', overflow: 'hidden' }}>
+      {/* Red and gold sparkle overlay */}
+      <SparkleOverlay count={30} color="#FFD700" minSize={3} maxSize={7} seed="cny-gold" />
+      <SparkleOverlay count={20} color="#FF0000" minSize={2} maxSize={5} seed="cny-red" />
+
       {/* Red gradient background tint */}
       <div
         style={{
