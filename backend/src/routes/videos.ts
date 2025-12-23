@@ -1,5 +1,6 @@
 import express from 'express';
 import { generateVideoBatch, getJobStatus } from '../services/video-generator.js';
+import { generateZipForJob, getZipProgress } from '../services/zip-generator.js';
 import type { VideoGenerationRequest } from '@card0r/shared';
 
 const router = express.Router();
@@ -49,6 +50,60 @@ router.get('/status/:jobId', async (req, res) => {
       error: 'Status check failed',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
+  }
+});
+
+// Generate ZIP for all completed videos in a job
+router.post('/download-zip/:jobId', async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const batch = await getJobStatus(jobId);
+
+    if (!batch) {
+      return res.status(404).json({ error: 'Job not found' });
+    }
+
+    const completedJobs = batch.jobs.filter(
+      (job) => job.status === 'completed' && job.videoUrl
+    );
+
+    if (completedJobs.length === 0) {
+      return res.status(400).json({ error: 'No completed videos to download' });
+    }
+
+    // Start ZIP generation (async) and return immediately
+    generateZipForJob(jobId, completedJobs).catch((err) => {
+      console.error('ZIP generation error:', err);
+    });
+
+    res.json({
+      status: 'processing',
+      message: 'ZIP generation started',
+      totalVideos: completedJobs.length,
+    });
+  } catch (error) {
+    console.error('ZIP generation error:', error);
+    res.status(500).json({
+      error: 'ZIP generation failed',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// Get ZIP generation progress
+router.get('/download-zip/:jobId/progress', async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const progress = getZipProgress(jobId);
+
+    if (!progress) {
+      return res.status(404).json({ error: 'No ZIP generation in progress' });
+    }
+
+    res.json(progress);
+  } catch (error) {
+    console.error('ZIP progress check error:', error);
+    res.status(500).json({ error: 'Failed to check progress' });
   }
 });
 

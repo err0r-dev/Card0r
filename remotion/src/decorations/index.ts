@@ -10,6 +10,10 @@ import { DiwaliDecoration } from './DiwaliDecoration';
 import { ChineseNewYearDecoration } from './ChineseNewYearDecoration';
 import { EidDecoration, RamadanDecoration } from './IslamicDecoration';
 import { ParticleDecoration } from './ParticleDecoration';
+import { RoshHashanahDecoration } from './RoshHashanahDecoration';
+import { PassoverDecoration } from './PassoverDecoration';
+import { ThankYouDecoration } from './ThankYouDecoration';
+import { CongratulationsDecoration } from './CongratulationsDecoration';
 
 export interface DecorationProps {
   width: number;
@@ -43,10 +47,14 @@ export function getDecorationComponent(theme: HolidayTheme): React.FC<Decoration
       return EidDecoration;
     case 'ramadan':
       return RamadanDecoration;
-    // Themes without specific decorations use enhanced particles
     case 'rosh_hashanah':
+      return RoshHashanahDecoration;
     case 'passover':
-    case 'yom_kippur':
+      return PassoverDecoration;
+    case 'thank_you':
+      return ThankYouDecoration;
+    case 'congratulations':
+      return CongratulationsDecoration;
     default:
       return null; // Will use ParticleDecoration as fallback
   }
@@ -66,4 +74,8 @@ export {
   EidDecoration,
   RamadanDecoration,
   ParticleDecoration,
+  RoshHashanahDecoration,
+  PassoverDecoration,
+  ThankYouDecoration,
+  CongratulationsDecoration,
 };

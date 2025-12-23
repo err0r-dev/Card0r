@@ -12,7 +12,6 @@ export enum HolidayTheme {
   ROSH_HASHANAH = 'rosh_hashanah',
   HANUKKAH = 'hanukkah',
   PASSOVER = 'passover',
-  YOM_KIPPUR = 'yom_kippur',
 
   // Islamic
   EID_AL_FITR = 'eid_al_fitr',
@@ -23,12 +22,16 @@ export enum HolidayTheme {
   CHINESE_NEW_YEAR = 'chinese_new_year',
   DIWALI = 'diwali',
   LUNAR_NEW_YEAR = 'lunar_new_year',
+
+  // General
+  THANK_YOU = 'thank_you',
+  CONGRATULATIONS = 'congratulations',
 }
 
 export interface HolidayThemeInfo {
   id: HolidayTheme;
   name: string;
-  category: 'western' | 'jewish' | 'islamic' | 'asian';
+  category: 'western' | 'jewish' | 'islamic' | 'asian' | 'general';
   description: string;
   colors: {
     primary: string;
@@ -133,4 +136,18 @@ export interface ApiKeyValidationResponse {
 export interface CsvUploadResponse {
   recipients: Recipient[];
   errors: string[];
+}
+
+// ZIP Download types
+export interface ZipGenerationResponse {
+  status: 'processing' | 'completed' | 'failed';
+  message?: string;
+  totalVideos?: number;
+}
+
+export interface ZipProgressResponse {
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  zipPath?: string;
+  error?: string;
 }

@@ -66,7 +66,7 @@ export function CardComposition({
 
       {/* Intro Slide */}
       <Sequence from={introStart} durationInFrames={introFrames}>
-        <IntroSlide theme={theme} />
+        <IntroSlide theme={theme} recipientName={recipientName} />
       </Sequence>
 
       {/* Name Reveal Slide */}
@@ -88,7 +88,7 @@ export function CardComposition({
 
       {/* Outro Slide */}
       <Sequence from={outroStart} durationInFrames={outroFrames}>
-        <OutroSlide name={recipientName} theme={theme} />
+        <OutroSlide theme={theme} />
       </Sequence>
 
       {/* Audio */}

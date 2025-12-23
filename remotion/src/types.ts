@@ -26,13 +26,15 @@ export const HOLIDAY_COLORS: Record<HolidayTheme, ThemeColors> = {
   rosh_hashanah: { bg: '#f5f5dc', primary: '#daa520', secondary: '#cd853f', accent: '#ff6347' },
   hanukkah: { bg: '#001f3f', primary: '#0074d9', secondary: '#ffffff', accent: '#ffd700' },
   passover: { bg: '#f5f5dc', primary: '#8b4513', secondary: '#daa520', accent: '#cd853f' },
-  yom_kippur: { bg: '#f0f0f0', primary: '#4a4a4a', secondary: '#7f7f7f', accent: '#ffffff' },
   eid_al_fitr: { bg: '#0a5f38', primary: '#ffd700', secondary: '#00d4aa', accent: '#ffffff' },
   eid_al_adha: { bg: '#0a5f38', primary: '#ffd700', secondary: '#00d4aa', accent: '#ffffff' },
   ramadan: { bg: '#1a237e', primary: '#ffd700', secondary: '#9c27b0', accent: '#00bcd4' },
   chinese_new_year: { bg: '#b71c1c', primary: '#ffd700', secondary: '#ffeb3b', accent: '#ff5722' },
   diwali: { bg: '#1a237e', primary: '#ff9800', secondary: '#ffeb3b', accent: '#f44336' },
   lunar_new_year: { bg: '#b71c1c', primary: '#ffd700', secondary: '#ffeb3b', accent: '#ff5722' },
+  // General
+  thank_you: { bg: '#fff5f5', primary: '#e53e3e', secondary: '#fc8181', accent: '#ffd700' },
+  congratulations: { bg: '#faf5ff', primary: '#805ad5', secondary: '#d69e2e', accent: '#38b2ac' },
 };
 
 export const FORMAT_CONFIGS: Record<VideoFormat, { width: number; height: number }> = {

@@ -12,13 +12,14 @@ const HOLIDAY_PROMPTS: Record<HolidayTheme, string> = {
   [HolidayTheme.ROSH_HASHANAH]: 'Create a meaningful Rosh Hashanah greeting (Jewish New Year)',
   [HolidayTheme.HANUKKAH]: 'Create a joyful Hanukkah greeting',
   [HolidayTheme.PASSOVER]: 'Create a thoughtful Passover greeting',
-  [HolidayTheme.YOM_KIPPUR]: 'Create a reflective Yom Kippur message',
   [HolidayTheme.EID_AL_FITR]: 'Create a celebratory Eid al-Fitr greeting',
   [HolidayTheme.EID_AL_ADHA]: 'Create a meaningful Eid al-Adha greeting',
   [HolidayTheme.RAMADAN]: 'Create a blessed Ramadan greeting',
   [HolidayTheme.CHINESE_NEW_YEAR]: 'Create a prosperous Chinese New Year greeting',
   [HolidayTheme.DIWALI]: 'Create a bright and festive Diwali greeting',
   [HolidayTheme.LUNAR_NEW_YEAR]: 'Create a prosperous Lunar New Year greeting',
+  [HolidayTheme.THANK_YOU]: 'Create a heartfelt thank you message',
+  [HolidayTheme.CONGRATULATIONS]: 'Create an enthusiastic congratulations message',
 };
 
 export async function generateMessages(

@@ -11,55 +11,39 @@ export function CustomizeStep() {
   const [showMusic, setShowMusic] = useState(false);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-8"
-    >
+    <div className="space-y-6">
       {/* Theme Selection */}
       <div>
-        <h2 className="text-3xl font-bold mb-2">Choose Your Theme</h2>
-        <p className="text-muted-foreground">
-          Select from 17 festive themes with unique visual effects
-        </p>
+        <h3 className="text-lg font-semibold mb-3">Select Theme</h3>
+        <HolidaySelector />
       </div>
 
-      <HolidaySelector />
-
-      <Separator className="my-8" />
+      <Separator />
 
       {/* Format Selection */}
       <div>
-        <h3 className="text-2xl font-bold mb-2">Select Export Format</h3>
-        <p className="text-muted-foreground">
-          Choose the video dimensions and quality
-        </p>
+        <h3 className="text-lg font-semibold mb-3">Video Format</h3>
+        <FormatPicker />
       </div>
 
-      <FormatPicker />
-
-      <Separator className="my-8" />
+      <Separator />
 
       {/* Optional Music Section - Collapsible */}
       <div>
         <Button
           variant="outline"
           onClick={() => setShowMusic(!showMusic)}
-          className="w-full justify-between h-14 text-left"
+          className="w-full justify-between h-12 text-left"
         >
-          <span className="flex items-center gap-3">
-            <Music className="w-5 h-5" />
-            <span>
-              <span className="font-medium">Add Background Music</span>
-              <span className="text-muted-foreground ml-2">(Optional)</span>
-            </span>
+          <span className="flex items-center gap-2">
+            <Music className="w-4 h-4" />
+            <span className="font-medium">Background Music</span>
+            <span className="text-muted-foreground text-sm">(Optional)</span>
           </span>
           {showMusic ? (
-            <ChevronUp className="w-5 h-5" />
+            <ChevronUp className="w-4 h-4" />
           ) : (
-            <ChevronDown className="w-5 h-5" />
+            <ChevronDown className="w-4 h-4" />
           )}
         </Button>
 
@@ -74,7 +58,7 @@ export function CustomizeStep() {
             >
               <div className="pt-4">
                 <p className="text-sm text-muted-foreground mb-4">
-                  Select music that matches your theme, or proceed without music
+                  Select music that matches your theme
                 </p>
                 <MusicSelector />
               </div>
@@ -82,6 +66,6 @@ export function CustomizeStep() {
           )}
         </AnimatePresence>
       </div>
-    </motion.div>
+    </div>
   );
 }

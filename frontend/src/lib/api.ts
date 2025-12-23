@@ -8,6 +8,8 @@ import type {
   VideoGenerationRequest,
   BatchVideoResponse,
   HolidayTheme,
+  ZipGenerationResponse,
+  ZipProgressResponse,
 } from '@card0r/shared';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
@@ -91,6 +93,18 @@ class ApiClient {
 
   async getJobStatus(jobId: string): Promise<BatchVideoResponse> {
     return this.fetch<BatchVideoResponse>(`/videos/status/${jobId}`, {
+      method: 'GET',
+    });
+  }
+
+  async startZipGeneration(jobId: string): Promise<ZipGenerationResponse> {
+    return this.fetch<ZipGenerationResponse>(`/videos/download-zip/${jobId}`, {
+      method: 'POST',
+    });
+  }
+
+  async getZipProgress(jobId: string): Promise<ZipProgressResponse> {
+    return this.fetch<ZipProgressResponse>(`/videos/download-zip/${jobId}/progress`, {
       method: 'GET',
     });
   }

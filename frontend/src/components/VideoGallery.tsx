@@ -1,16 +1,22 @@
 import { useState } from 'react';
-import { Download, Play, Video, X, CheckCircle2 } from 'lucide-react';
+import { Download, Play, Video, X, CheckCircle2, Loader2, Archive } from 'lucide-react';
 import { useVideoStore } from '../stores/videoStore';
+import { apiClient } from '../lib/api';
 import { Card, CardContent } from './ui/card';
 import { Button } from './ui/button';
+import { Progress } from './ui/progress';
 import { toast } from 'sonner';
 
 const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:3001';
 
 export function VideoGallery() {
-  const { jobs } = useVideoStore();
+  const { jobs, currentJobId } = useVideoStore();
   const [downloadedIds, setDownloadedIds] = useState<Set<string>>(new Set());
   const [previewVideo, setPreviewVideo] = useState<{ url: string; name: string } | null>(null);
+  const [zipState, setZipState] = useState<{
+    isGenerating: boolean;
+    progress: number;
+  }>({ isGenerating: false, progress: 0 });
 
   const completedJobs = jobs.filter((job) => job.status === 'completed' && job.videoUrl);
 
@@ -28,13 +34,58 @@ export function VideoGallery() {
     toast.success(`Downloaded video for ${name}!`);
   };
 
-  const handleDownloadAll = () => {
-    completedJobs.forEach((job, index) => {
-      // Stagger downloads to avoid browser blocking
-      setTimeout(() => {
-        handleDownload(job.videoUrl!, job.recipientName, job.id);
-      }, index * 500);
-    });
+  const handleDownloadAllAsZip = async () => {
+    if (!currentJobId) {
+      toast.error('No active job found');
+      return;
+    }
+
+    setZipState({ isGenerating: true, progress: 0 });
+
+    try {
+      // Start ZIP generation
+      await apiClient.startZipGeneration(currentJobId);
+
+      // Poll for progress
+      const pollInterval = setInterval(async () => {
+        try {
+          const progress = await apiClient.getZipProgress(currentJobId);
+
+          setZipState({ isGenerating: true, progress: progress.progress });
+
+          if (progress.status === 'completed' && progress.zipPath) {
+            clearInterval(pollInterval);
+            setZipState({ isGenerating: false, progress: 100 });
+
+            // Download the ZIP file
+            const link = document.createElement('a');
+            link.href = `${API_BASE}${progress.zipPath}`;
+            link.download = `card0r_videos_${new Date().toISOString().split('T')[0]}.zip`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            toast.success(`Downloaded ${completedJobs.length} videos as ZIP!`);
+
+            // Mark all as downloaded
+            setDownloadedIds(new Set(completedJobs.map(j => j.id)));
+          } else if (progress.status === 'failed') {
+            clearInterval(pollInterval);
+            setZipState({ isGenerating: false, progress: 0 });
+            toast.error(`ZIP generation failed: ${progress.error}`);
+          }
+        } catch {
+          clearInterval(pollInterval);
+          setZipState({ isGenerating: false, progress: 0 });
+          toast.error('Failed to check ZIP progress');
+        }
+      }, 500);
+
+    } catch (error) {
+      setZipState({ isGenerating: false, progress: 0 });
+      toast.error('Failed to start ZIP generation');
+      console.error(error);
+    }
   };
 
   if (completedJobs.length === 0) {
@@ -66,14 +117,29 @@ export function VideoGallery() {
                   Click below to download {completedJobs.length === 1 ? 'your video' : 'all videos'}
                 </p>
               </div>
-              <Button
-                size="lg"
-                onClick={handleDownloadAll}
-                className="bg-white text-green-600 hover:bg-green-50 font-bold px-8 py-6 text-lg shadow-lg"
-              >
-                <Download className="mr-2 h-6 w-6" />
-                Download {completedJobs.length === 1 ? 'Video' : `All ${completedJobs.length} Videos`}
-              </Button>
+              <div className="flex flex-col items-center sm:items-end gap-2">
+                <Button
+                  size="lg"
+                  onClick={handleDownloadAllAsZip}
+                  disabled={zipState.isGenerating}
+                  className="bg-white text-green-600 hover:bg-green-50 font-bold px-8 py-6 text-lg shadow-lg disabled:opacity-70"
+                >
+                  {zipState.isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-6 w-6 animate-spin" />
+                      Creating ZIP... {zipState.progress}%
+                    </>
+                  ) : (
+                    <>
+                      <Archive className="mr-2 h-6 w-6" />
+                      Download {completedJobs.length === 1 ? 'Video' : 'All as ZIP'}
+                    </>
+                  )}
+                </Button>
+                {zipState.isGenerating && (
+                  <Progress value={zipState.progress} className="w-full sm:w-48 h-2 bg-white/30" />
+                )}
+              </div>
             </div>
           </div>
         )}

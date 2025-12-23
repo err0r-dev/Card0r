@@ -2,7 +2,7 @@
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 5945:
+/***/ 6724:
 /***/ ((__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) => {
 
 
@@ -25,13 +25,14 @@ var HolidayTheme;
   HolidayTheme2["ROSH_HASHANAH"] = "rosh_hashanah";
   HolidayTheme2["HANUKKAH"] = "hanukkah";
   HolidayTheme2["PASSOVER"] = "passover";
-  HolidayTheme2["YOM_KIPPUR"] = "yom_kippur";
   HolidayTheme2["EID_AL_FITR"] = "eid_al_fitr";
   HolidayTheme2["EID_AL_ADHA"] = "eid_al_adha";
   HolidayTheme2["RAMADAN"] = "ramadan";
   HolidayTheme2["CHINESE_NEW_YEAR"] = "chinese_new_year";
   HolidayTheme2["DIWALI"] = "diwali";
   HolidayTheme2["LUNAR_NEW_YEAR"] = "lunar_new_year";
+  HolidayTheme2["THANK_YOU"] = "thank_you";
+  HolidayTheme2["CONGRATULATIONS"] = "congratulations";
 })(HolidayTheme || (HolidayTheme = {}));
 var VideoFormat;
 (function(VideoFormat2) {
@@ -53,13 +54,15 @@ const HOLIDAY_COLORS = {
   rosh_hashanah: { bg: "#f5f5dc", primary: "#daa520", secondary: "#cd853f", accent: "#ff6347" },
   hanukkah: { bg: "#001f3f", primary: "#0074d9", secondary: "#ffffff", accent: "#ffd700" },
   passover: { bg: "#f5f5dc", primary: "#8b4513", secondary: "#daa520", accent: "#cd853f" },
-  yom_kippur: { bg: "#f0f0f0", primary: "#4a4a4a", secondary: "#7f7f7f", accent: "#ffffff" },
   eid_al_fitr: { bg: "#0a5f38", primary: "#ffd700", secondary: "#00d4aa", accent: "#ffffff" },
   eid_al_adha: { bg: "#0a5f38", primary: "#ffd700", secondary: "#00d4aa", accent: "#ffffff" },
   ramadan: { bg: "#1a237e", primary: "#ffd700", secondary: "#9c27b0", accent: "#00bcd4" },
   chinese_new_year: { bg: "#b71c1c", primary: "#ffd700", secondary: "#ffeb3b", accent: "#ff5722" },
   diwali: { bg: "#1a237e", primary: "#ff9800", secondary: "#ffeb3b", accent: "#f44336" },
-  lunar_new_year: { bg: "#b71c1c", primary: "#ffd700", secondary: "#ffeb3b", accent: "#ff5722" }
+  lunar_new_year: { bg: "#b71c1c", primary: "#ffd700", secondary: "#ffeb3b", accent: "#ff5722" },
+  // General
+  thank_you: { bg: "#fff5f5", primary: "#e53e3e", secondary: "#fc8181", accent: "#ffd700" },
+  congratulations: { bg: "#faf5ff", primary: "#805ad5", secondary: "#d69e2e", accent: "#38b2ac" }
 };
 const FORMAT_CONFIGS = {
   "1080p": { width: 1920, height: 1080 },
@@ -286,14 +289,34 @@ function useBurst(triggerFrame, options) {
 
 
 
-function getThemeDisplayName(theme) {
-  return theme.split("_").map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+const THEME_GREETINGS = {
+  christmas: "Merry Christmas",
+  new_year: "Happy New Year",
+  easter: "Happy Easter",
+  valentines_day: "Happy Valentine's Day",
+  halloween: "Happy Halloween",
+  thanksgiving: "Happy Thanksgiving",
+  rosh_hashanah: "Shanah Tovah",
+  hanukkah: "Happy Hanukkah",
+  passover: "Chag Pesach Sameach",
+  eid_al_fitr: "Eid Mubarak",
+  eid_al_adha: "Eid Mubarak",
+  ramadan: "Ramadan Mubarak",
+  chinese_new_year: "Gong Xi Fa Cai",
+  diwali: "Happy Diwali",
+  lunar_new_year: "Happy Lunar New Year",
+  thank_you: "Thank You",
+  congratulations: "Congratulations"
+};
+function getGreetingMessage(theme, name) {
+  const greeting = THEME_GREETINGS[theme] || "Happy Holidays";
+  return `${greeting}, ${name}!`;
 }
-function IntroSlide({ theme }) {
+function IntroSlide({ theme, recipientName }) {
   const frame = (0,esm.useCurrentFrame)();
   const { fps, durationInFrames } = (0,esm.useVideoConfig)();
   const colors = HOLIDAY_COLORS[theme];
-  const themeName = getThemeDisplayName(theme);
+  const greetingMessage = getGreetingMessage(theme, recipientName);
   const progress = frame / durationInFrames;
   const alpha = Math.sin(progress * Math.PI);
   const scale = (0,esm.interpolate)(
@@ -302,19 +325,22 @@ function IntroSlide({ theme }) {
     [0.8, 1],
     { extrapolateRight: "clamp" }
   );
+  const baseFontSize = 100;
+  const fontSize = greetingMessage.length > 30 ? 70 : greetingMessage.length > 22 ? 85 : baseFontSize;
   return /* @__PURE__ */ (0,jsx_runtime.jsx)(
     esm.AbsoluteFill,
     {
       style: {
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
+        padding: "0 40px"
       },
       children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
         "h1",
         {
           style: {
-            fontSize: 120,
+            fontSize,
             fontWeight: "bold",
             textAlign: "center",
             opacity: alpha,
@@ -322,9 +348,10 @@ function IntroSlide({ theme }) {
             background: `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`,
             WebkitBackgroundClip: "text",
             WebkitTextFillColor: "transparent",
-            textShadow: `0 4px 20px ${colors.primary}40`
+            textShadow: `0 4px 20px ${colors.primary}40`,
+            lineHeight: 1.2
           },
-          children: themeName
+          children: greetingMessage
         }
       )
     }
@@ -540,10 +567,30 @@ function SenderSlide({ senderName, theme }) {
 
 
 
-function OutroSlide({ name, theme }) {
+const THEME_CLOSINGS = {
+  christmas: "Season's Greetings",
+  new_year: "Cheers!",
+  easter: "Blessings",
+  valentines_day: "With Love",
+  halloween: "Boo!",
+  thanksgiving: "Gratitude",
+  rosh_hashanah: "L'Shanah Tovah",
+  hanukkah: "Chag Sameach",
+  passover: "Next Year in Jerusalem",
+  eid_al_fitr: "Eid Mubarak",
+  eid_al_adha: "Eid Mubarak",
+  ramadan: "Ramadan Kareem",
+  chinese_new_year: "Gong Hei Fat Choy",
+  diwali: "Shubh Deepavali",
+  lunar_new_year: "Best Wishes",
+  thank_you: "With Gratitude",
+  congratulations: "Well Done!"
+};
+function OutroSlide({ theme }) {
   const frame = (0,esm.useCurrentFrame)();
-  const { fps, durationInFrames } = (0,esm.useVideoConfig)();
+  const { durationInFrames } = (0,esm.useVideoConfig)();
   const colors = HOLIDAY_COLORS[theme];
+  const closingMessage = THEME_CLOSINGS[theme] || "Best Wishes";
   const opacity = (0,esm.interpolate)(
     frame,
     [0, durationInFrames * 0.7, durationInFrames],
@@ -564,14 +611,15 @@ function OutroSlide({ name, theme }) {
         "h1",
         {
           style: {
-            fontSize: 80,
+            fontSize: 70,
             fontWeight: "bold",
             textAlign: "center",
             color: colors.accent,
             transform: `scale(${pulse})`,
-            textShadow: `0 0 30px ${colors.accent}60, 0 0 60px ${colors.primary}40`
+            textShadow: `0 0 30px ${colors.accent}60, 0 0 60px ${colors.primary}40`,
+            fontStyle: "italic"
           },
-          children: name
+          children: closingMessage
         }
       )
     }
@@ -3546,7 +3594,1267 @@ function ParticleDecoration({ theme, particleCount = 100, enableSparkle = true }
   ] });
 }
 
+;// ./src/decorations/RoshHashanahDecoration.tsx
+
+
+
+
+
+function AppleSVG({ size, opacity }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size, viewBox: "0 0 50 55", style: { opacity }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M25,5 Q28,0 26,8", stroke: "#8B4513", strokeWidth: "3", fill: "none" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "30", cy: "6", rx: "6", ry: "3", fill: "#228B22", transform: "rotate(30 30 6)" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: "M25,12 Q40,15 42,30 Q43,45 25,52 Q7,45 8,30 Q10,15 25,12",
+        fill: "#DC143C"
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "18", cy: "25", rx: "4", ry: "6", fill: "rgba(255,255,255,0.3)" })
+  ] });
+}
+function HoneyJarSVG({ size, dripProgress }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size * 1.2, viewBox: "0 0 50 60", children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "8", y: "20", width: "34", height: "35", rx: "5", fill: "rgba(255,215,0,0.8)" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "15", y: "12", width: "20", height: "10", fill: "rgba(255,215,0,0.9)" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "12", y: "8", width: "26", height: "6", rx: "2", fill: "#DAA520" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "12", y: "24", width: "26", height: "28", rx: "3", fill: "#FFD700" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "ellipse",
+      {
+        cx: "25",
+        cy: 55 + dripProgress * 8,
+        rx: "4",
+        ry: 3 + dripProgress * 2,
+        fill: "#FFD700",
+        opacity: 0.8
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "14", y: "32", width: "22", height: "12", rx: "2", fill: "#FFFAF0", opacity: 0.6 })
+  ] });
+}
+function PomegranateSVG({ size, opacity }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size, viewBox: "0 0 50 55", style: { opacity }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "25,0 20,8 30,8", fill: "#8B0000" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "22,2 18,8 26,8", fill: "#A52A2A" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "28,2 24,8 32,8", fill: "#A52A2A" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "25", cy: "30", rx: "20", ry: "22", fill: "#C41E3A" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "20", cy: "25", r: "3", fill: "#FF6B6B" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "30", cy: "25", r: "3", fill: "#FF6B6B" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "25", cy: "32", r: "3", fill: "#FF6B6B" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "18", cy: "35", r: "2.5", fill: "#FF6B6B" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "32", cy: "35", r: "2.5", fill: "#FF6B6B" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "18", cy: "22", rx: "4", ry: "6", fill: "rgba(255,255,255,0.2)" })
+  ] });
+}
+function ShofarSVG({ size }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size * 1.5, height: size, viewBox: "0 0 120 60", children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: "M10,30 Q20,10 60,15 Q100,20 110,35 Q115,45 105,50 Q95,55 85,50 Q75,45 65,42 Q40,38 20,40 Q10,42 10,30",
+        fill: "#DAA520",
+        stroke: "#8B4513",
+        strokeWidth: "2"
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M30,25 Q50,22 70,28", stroke: "#B8860B", strokeWidth: "1", fill: "none" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M35,32 Q55,30 75,35", stroke: "#B8860B", strokeWidth: "1", fill: "none" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M25,38 Q45,36 65,40", stroke: "#B8860B", strokeWidth: "1", fill: "none" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "12", cy: "30", rx: "4", ry: "8", fill: "#CD853F" })
+  ] });
+}
+function GoldenLeafSVG({ size, rotation }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
+    "svg",
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 30 40",
+      style: { transform: `rotate(${rotation}deg)` },
+      children: [
+        /* @__PURE__ */ (0,jsx_runtime.jsx)(
+          "path",
+          {
+            d: "M15,0 Q25,10 25,20 Q25,35 15,40 Q5,35 5,20 Q5,10 15,0",
+            fill: "#DAA520",
+            opacity: 0.8
+          }
+        ),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M15,5 L15,35", stroke: "#B8860B", strokeWidth: "1", fill: "none" }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M15,12 Q10,15 8,20", stroke: "#B8860B", strokeWidth: "0.5", fill: "none" }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M15,12 Q20,15 22,20", stroke: "#B8860B", strokeWidth: "0.5", fill: "none" }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M15,22 Q10,25 8,30", stroke: "#B8860B", strokeWidth: "0.5", fill: "none" }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M15,22 Q20,25 22,30", stroke: "#B8860B", strokeWidth: "0.5", fill: "none" })
+      ]
+    }
+  );
+}
+function BeeSVG({ size }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size * 0.7, viewBox: "0 0 40 28", children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "12", cy: "8", rx: "8", ry: "5", fill: "rgba(255,255,255,0.6)" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "28", cy: "8", rx: "8", ry: "5", fill: "rgba(255,255,255,0.6)" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "20", cy: "16", rx: "12", ry: "8", fill: "#FFD700" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "12", y: "12", width: "4", height: "8", fill: "#1a1a1a" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "20", y: "12", width: "4", height: "8", fill: "#1a1a1a" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "28", y: "14", width: "3", height: "6", fill: "#1a1a1a" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "8", cy: "16", r: "5", fill: "#1a1a1a" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "6", cy: "14", r: "1.5", fill: "white" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "10", cy: "14", r: "1.5", fill: "white" })
+  ] });
+}
+function RoshHashanahDecoration({ width, height }) {
+  const frame = (0,esm.useCurrentFrame)();
+  const { durationInFrames } = (0,esm.useVideoConfig)();
+  const dripProgress = usePulse({ frequency: 0.5, min: 0, max: 1 });
+  const apples = (0,react.useMemo)(() => {
+    return Array.from({ length: 15 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`apple-x-${i}`) * width,
+      startY: (0,esm.random)(`apple-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`apple-size-${i}`) * 25 + 30,
+      speed: (0,esm.random)(`apple-speed-${i}`) * 1 + 0.3,
+      delay: (0,esm.random)(`apple-delay-${i}`) * 30,
+      swayAmplitude: (0,esm.random)(`apple-sway-${i}`) * 20 + 10,
+      opacity: (0,esm.random)(`apple-opacity-${i}`) * 0.3 + 0.6
+    }));
+  }, [width, height]);
+  const pomegranates = (0,react.useMemo)(() => {
+    return Array.from({ length: 10 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`pom-x-${i}`) * width,
+      startY: (0,esm.random)(`pom-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`pom-size-${i}`) * 20 + 25,
+      speed: (0,esm.random)(`pom-speed-${i}`) * 0.8 + 0.3,
+      delay: (0,esm.random)(`pom-delay-${i}`) * 30,
+      opacity: (0,esm.random)(`pom-opacity-${i}`) * 0.3 + 0.5
+    }));
+  }, [width, height]);
+  const leaves = (0,react.useMemo)(() => {
+    return Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`leaf-x-${i}`) * width,
+      startY: (0,esm.random)(`leaf-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`leaf-size-${i}`) * 15 + 15,
+      speed: (0,esm.random)(`leaf-speed-${i}`) * 2 + 0.8,
+      delay: (0,esm.random)(`leaf-delay-${i}`) * 30,
+      rotation: (0,esm.random)(`leaf-rot-${i}`) * 360,
+      rotationSpeed: (0,esm.random)(`leaf-rot-speed-${i}`) * 4 - 2,
+      swayAmplitude: (0,esm.random)(`leaf-sway-${i}`) * 40 + 15
+    }));
+  }, [width, height]);
+  const bees = (0,react.useMemo)(() => {
+    return Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`bee-x-${i}`) * width * 0.8 + width * 0.1,
+      y: (0,esm.random)(`bee-y-${i}`) * height * 0.6 + height * 0.2,
+      size: (0,esm.random)(`bee-size-${i}`) * 15 + 20,
+      phase: (0,esm.random)(`bee-phase-${i}`) * Math.PI * 2,
+      speedX: (0,esm.random)(`bee-speedX-${i}`) * 2 + 1,
+      speedY: (0,esm.random)(`bee-speedY-${i}`) * 1 + 0.5
+    }));
+  }, [width, height]);
+  const honeyJars = (0,react.useMemo)(() => {
+    return Array.from({ length: 5 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`jar-x-${i}`) * width * 0.6 + width * 0.2,
+      startY: (0,esm.random)(`jar-startY-${i}`) * (height + 80),
+      size: (0,esm.random)(`jar-size-${i}`) * 20 + 40,
+      speed: (0,esm.random)(`jar-speed-${i}`) * 0.5 + 0.2,
+      delay: (0,esm.random)(`jar-delay-${i}`) * 30
+    }));
+  }, [width, height]);
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(ellipse at center, rgba(218,165,32,0.1) 0%, transparent 70%)"
+        }
+      }
+    ),
+    leaves.map((leaf) => {
+      const yOffset = (leaf.startY + (frame + leaf.delay) * leaf.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + leaf.delay) * 0.02) * leaf.swayAmplitude;
+      const rotation = leaf.rotation + frame * leaf.rotationSpeed;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: leaf.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(GoldenLeafSVG, { size: leaf.size, rotation })
+        },
+        `leaf-${leaf.id}`
+      );
+    }),
+    apples.map((apple) => {
+      const yOffset = (apple.startY + (frame + apple.delay) * apple.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + apple.delay) * 0.015) * apple.swayAmplitude;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: apple.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(AppleSVG, { size: apple.size, opacity: apple.opacity })
+        },
+        `apple-${apple.id}`
+      );
+    }),
+    pomegranates.map((pom) => {
+      const yOffset = (pom.startY + (frame + pom.delay) * pom.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + pom.delay) * 0.012) * 25;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: pom.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(PomegranateSVG, { size: pom.size, opacity: pom.opacity })
+        },
+        `pom-${pom.id}`
+      );
+    }),
+    honeyJars.map((jar) => {
+      const yOffset = (jar.startY + (frame + jar.delay) * jar.speed) % (height + 80);
+      const currentY = yOffset - 40;
+      const xSway = Math.sin((frame + jar.delay) * 0.01) * 15;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: jar.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(HoneyJarSVG, { size: jar.size, dripProgress })
+        },
+        `jar-${jar.id}`
+      );
+    }),
+    bees.map((bee) => {
+      const buzzX = Math.sin(frame * 0.1 + bee.phase) * 30 * bee.speedX;
+      const buzzY = Math.cos(frame * 0.15 + bee.phase) * 20 * bee.speedY;
+      const wobble = Math.sin(frame * 0.3) * 5;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: bee.x + buzzX,
+            top: bee.y + buzzY,
+            transform: `rotate(${wobble}deg)`
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(BeeSVG, { size: bee.size })
+        },
+        `bee-${bee.id}`
+      );
+    }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          right: 20,
+          bottom: 30,
+          opacity: 0.15
+        },
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(ShofarSVG, { size: 150 })
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          left: 20,
+          top: 20,
+          fontSize: 28,
+          fontFamily: "serif",
+          opacity: 0.08,
+          color: "#DAA520"
+        },
+        children: "\u05E9\u05E0\u05D4 \u05D8\u05D5\u05D1\u05D4"
+      }
+    )
+  ] });
+}
+
+;// ./src/decorations/PassoverDecoration.tsx
+
+
+
+
+
+function MatzahSVG({ size, opacity }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size * 0.7, viewBox: "0 0 60 42", style: { opacity }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "2", y: "2", width: "56", height: "38", rx: "3", fill: "#E8DCC8", stroke: "#D4C4A8", strokeWidth: "2" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "5", y1: "10", x2: "55", y2: "10", stroke: "#C9B896", strokeWidth: "1" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "5", y1: "21", x2: "55", y2: "21", stroke: "#C9B896", strokeWidth: "1" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("line", { x1: "5", y1: "32", x2: "55", y2: "32", stroke: "#C9B896", strokeWidth: "1" }),
+    [0, 1, 2, 3, 4].map(
+      (row) => [0, 1, 2, 3, 4, 5, 6, 7].map((col) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "circle",
+        {
+          cx: 10 + col * 6,
+          cy: 8 + row * 7,
+          r: "1.5",
+          fill: "#B8A67A"
+        },
+        `${row}-${col}`
+      ))
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "15", cy: "15", r: "3", fill: "#C4A55A", opacity: 0.4 }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "45", cy: "28", r: "4", fill: "#C4A55A", opacity: 0.3 }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "30", cy: "35", r: "2", fill: "#C4A55A", opacity: 0.4 })
+  ] });
+}
+function WineCupSVG({ size, wineLevel }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size * 1.3, viewBox: "0 0 40 52", children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: "M5,8 L8,35 Q10,40 20,40 Q30,40 32,35 L35,8 Q35,5 20,5 Q5,5 5,8",
+        fill: "rgba(255,215,0,0.3)",
+        stroke: "#DAA520",
+        strokeWidth: "2"
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: `M8,${35 - wineLevel * 20} L10,35 Q12,38 20,38 Q28,38 30,35 L32,${35 - wineLevel * 20} Q32,${33 - wineLevel * 18} 20,${33 - wineLevel * 18} Q8,${33 - wineLevel * 18} 8,${35 - wineLevel * 20}`,
+        fill: "#722F37"
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "17", y: "40", width: "6", height: "8", fill: "#DAA520" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "20", cy: "50", rx: "12", ry: "3", fill: "#DAA520" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "20", cy: "6", rx: "13", ry: "2", fill: "rgba(255,255,255,0.3)" })
+  ] });
+}
+function SederPlateSVG({ size }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size, viewBox: "0 0 100 100", children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "50", cy: "50", rx: "45", ry: "40", fill: "#F5F5DC", stroke: "#DAA520", strokeWidth: "3" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "50", cy: "50", rx: "38", ry: "33", fill: "none", stroke: "#DAA520", strokeWidth: "1" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "50", cy: "25", r: "8", fill: "#FFF8DC", stroke: "#D4C4A8" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "50", cy: "24", rx: "5", ry: "4", fill: "#FAEBD7" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "30", cy: "35", rx: "7", ry: "5", fill: "#8B4513" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "70", cy: "35", r: "7", fill: "#228B22" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "25", cy: "55", r: "7", fill: "#8B6914" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "75", cy: "55", r: "7", fill: "#90EE90" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "50", cy: "70", r: "7", fill: "#32CD32" })
+  ] });
+}
+function StarOfDavidSVG({ size, color, opacity }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size, viewBox: "0 0 50 50", style: { opacity }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "25,5 45,40 5,40", fill: "none", stroke: color, strokeWidth: "2" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "25,45 45,10 5,10", fill: "none", stroke: color, strokeWidth: "2" })
+  ] });
+}
+function ParsleySVG({ size, rotation }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(
+    "svg",
+    {
+      width: size,
+      height: size,
+      viewBox: "0 0 30 40",
+      style: { transform: `rotate(${rotation}deg)` },
+      children: [
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M15,40 Q14,30 15,20", stroke: "#228B22", strokeWidth: "2", fill: "none" }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "10", cy: "15", rx: "6", ry: "10", fill: "#32CD32", transform: "rotate(-20 10 15)" }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "20", cy: "15", rx: "6", ry: "10", fill: "#32CD32", transform: "rotate(20 20 15)" }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "15", cy: "8", rx: "5", ry: "8", fill: "#3CB371" })
+      ]
+    }
+  );
+}
+function PassoverDecoration({ width, height }) {
+  const frame = (0,esm.useCurrentFrame)();
+  const { durationInFrames } = (0,esm.useVideoConfig)();
+  const wineLevel = usePulse({ frequency: 0.3, min: 0.6, max: 0.9 });
+  const matzahs = (0,react.useMemo)(() => {
+    return Array.from({ length: 12 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`matzah-x-${i}`) * width,
+      startY: (0,esm.random)(`matzah-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`matzah-size-${i}`) * 30 + 40,
+      speed: (0,esm.random)(`matzah-speed-${i}`) * 0.8 + 0.3,
+      delay: (0,esm.random)(`matzah-delay-${i}`) * 30,
+      rotation: (0,esm.random)(`matzah-rot-${i}`) * 20 - 10,
+      opacity: (0,esm.random)(`matzah-opacity-${i}`) * 0.3 + 0.5
+    }));
+  }, [width, height]);
+  const wineCups = (0,react.useMemo)(() => {
+    return Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`cup-x-${i}`) * width * 0.8 + width * 0.1,
+      startY: (0,esm.random)(`cup-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`cup-size-${i}`) * 20 + 35,
+      speed: (0,esm.random)(`cup-speed-${i}`) * 0.6 + 0.2,
+      delay: (0,esm.random)(`cup-delay-${i}`) * 30
+    }));
+  }, [width, height]);
+  const stars = (0,react.useMemo)(() => {
+    return Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`star-x-${i}`) * width,
+      startY: (0,esm.random)(`star-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`star-size-${i}`) * 25 + 20,
+      speed: (0,esm.random)(`star-speed-${i}`) * 1 + 0.4,
+      delay: (0,esm.random)(`star-delay-${i}`) * 30,
+      rotationSpeed: (0,esm.random)(`star-rot-${i}`) * 2 - 1,
+      opacity: (0,esm.random)(`star-opacity-${i}`) * 0.3 + 0.2
+    }));
+  }, [width, height]);
+  const parsley = (0,react.useMemo)(() => {
+    return Array.from({ length: 18 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`parsley-x-${i}`) * width,
+      startY: (0,esm.random)(`parsley-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`parsley-size-${i}`) * 15 + 20,
+      speed: (0,esm.random)(`parsley-speed-${i}`) * 1.5 + 0.5,
+      delay: (0,esm.random)(`parsley-delay-${i}`) * 30,
+      rotation: (0,esm.random)(`parsley-rot-${i}`) * 360,
+      rotationSpeed: (0,esm.random)(`parsley-rot-speed-${i}`) * 3 - 1.5,
+      swayAmplitude: (0,esm.random)(`parsley-sway-${i}`) * 30 + 15
+    }));
+  }, [width, height]);
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(ellipse at center, rgba(139,69,19,0.08) 0%, transparent 70%)"
+        }
+      }
+    ),
+    stars.map((star) => {
+      const yOffset = (star.startY + (frame + star.delay) * star.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + star.delay) * 0.015) * 25;
+      const rotation = (frame + star.delay) * star.rotationSpeed;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: star.x + xSway,
+            top: currentY,
+            transform: `rotate(${rotation}deg)`
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(StarOfDavidSVG, { size: star.size, color: "#8B4513", opacity: star.opacity })
+        },
+        `star-${star.id}`
+      );
+    }),
+    parsley.map((herb) => {
+      const yOffset = (herb.startY + (frame + herb.delay) * herb.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + herb.delay) * 0.02) * herb.swayAmplitude;
+      const rotation = herb.rotation + frame * herb.rotationSpeed;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: herb.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(ParsleySVG, { size: herb.size, rotation })
+        },
+        `parsley-${herb.id}`
+      );
+    }),
+    matzahs.map((matzah) => {
+      const yOffset = (matzah.startY + (frame + matzah.delay) * matzah.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + matzah.delay) * 0.01) * 20;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: matzah.x + xSway,
+            top: currentY,
+            transform: `rotate(${matzah.rotation}deg)`
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(MatzahSVG, { size: matzah.size, opacity: matzah.opacity })
+        },
+        `matzah-${matzah.id}`
+      );
+    }),
+    wineCups.map((cup) => {
+      const yOffset = (cup.startY + (frame + cup.delay) * cup.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + cup.delay) * 8e-3) * 15;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: cup.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(WineCupSVG, { size: cup.size, wineLevel })
+        },
+        `cup-${cup.id}`
+      );
+    }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          right: 20,
+          bottom: 20,
+          opacity: 0.12
+        },
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(SederPlateSVG, { size: 180 })
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          left: 20,
+          bottom: 20,
+          display: "flex",
+          gap: 8,
+          opacity: 0.15
+        },
+        children: [0, 1, 2, 3].map((i) => /* @__PURE__ */ (0,jsx_runtime.jsx)("div", { style: { transform: `translateY(${i % 2 === 0 ? 0 : -5}px)` }, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(WineCupSVG, { size: 30, wineLevel: 0.8 }) }, i))
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          left: 20,
+          top: 20,
+          fontSize: 24,
+          fontFamily: "serif",
+          opacity: 0.08,
+          color: "#8B4513"
+        },
+        children: "\u05D7\u05D2 \u05E4\u05E1\u05D7 \u05E9\u05DE\u05D7"
+      }
+    )
+  ] });
+}
+
+;// ./src/decorations/ThankYouDecoration.tsx
+
+
+
+
+
+function ThankYouDecoration_HeartSVG({ size, color, opacity }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: size, height: size, viewBox: "0 0 24 24", style: { opacity }, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "path",
+    {
+      d: "M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z",
+      fill: color,
+      filter: `drop-shadow(0 0 ${size / 6}px ${color}40)`
+    }
+  ) });
+}
+function ThankYouDecoration_FlowerSVG({ size, color, opacity }) {
+  const petalColors = ["#FF69B4", "#FFB6C1", "#FFC0CB", "#FF1493", "#DB7093"];
+  const petalColor = color || petalColors[0];
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size, viewBox: "0 0 50 50", style: { opacity }, children: [
+    [0, 60, 120, 180, 240, 300].map((angle, i) => /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "ellipse",
+      {
+        cx: "25",
+        cy: "12",
+        rx: "8",
+        ry: "12",
+        fill: petalColor,
+        transform: `rotate(${angle} 25 25)`,
+        opacity: 0.8
+      },
+      i
+    )),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "25", cy: "25", r: "8", fill: "#FFD700" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "25", cy: "25", r: "5", fill: "#FFA500" })
+  ] });
+}
+function RibbonSVG({ size, color }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size * 0.6, viewBox: "0 0 60 36", children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "30", cy: "18", rx: "6", ry: "5", fill: color }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: "M30,18 Q15,5 5,18 Q15,30 30,18",
+        fill: color,
+        opacity: 0.9
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: "M30,18 Q45,5 55,18 Q45,30 30,18",
+        fill: color,
+        opacity: 0.9
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M26,22 Q20,28 18,35", stroke: color, strokeWidth: "4", fill: "none" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M34,22 Q40,28 42,35", stroke: color, strokeWidth: "4", fill: "none" })
+  ] });
+}
+function SparkleSVG({ size, opacity }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: size, height: size, viewBox: "0 0 24 24", style: { opacity }, children: /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "12,2 14,10 22,12 14,14 12,22 10,14 2,12 10,10", fill: "#FFD700" }) });
+}
+function ThankYouDecoration_ConfettiPiece({ size, color, rotation }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "div",
+    {
+      style: {
+        width: size,
+        height: size * 2,
+        backgroundColor: color,
+        borderRadius: 2,
+        transform: `rotate(${rotation}deg)`,
+        opacity: 0.8
+      }
+    }
+  );
+}
+function GiftBoxSVG({ size, opacity }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size, viewBox: "0 0 50 50", style: { opacity }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "5", y: "20", width: "40", height: "28", rx: "2", fill: "#FF69B4" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "3", y: "14", width: "44", height: "8", rx: "2", fill: "#FF1493" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "22", y: "14", width: "6", height: "34", fill: "#FFD700" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "3", y: "16", width: "44", height: "4", fill: "#FFD700" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "25", cy: "12", rx: "4", ry: "3", fill: "#FFD700" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "18", cy: "10", rx: "5", ry: "4", fill: "#FFD700" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "32", cy: "10", rx: "5", ry: "4", fill: "#FFD700" })
+  ] });
+}
+function ThankYouDecoration({ width, height }) {
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps, durationInFrames } = (0,esm.useVideoConfig)();
+  const heartPulse = usePulse({ frequency: 1.2, min: 0.9, max: 1.1 });
+  const hearts = (0,react.useMemo)(() => {
+    const colors = ["#FF69B4", "#FFB6C1", "#FF1493", "#FFC0CB", "#e53e3e"];
+    return Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`heart-x-${i}`) * width,
+      startY: (0,esm.random)(`heart-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`heart-size-${i}`) * 20 + 15,
+      color: colors[Math.floor((0,esm.random)(`heart-color-${i}`) * colors.length)],
+      speed: (0,esm.random)(`heart-speed-${i}`) * 1.2 + 0.4,
+      delay: (0,esm.random)(`heart-delay-${i}`) * 30,
+      swayAmplitude: (0,esm.random)(`heart-sway-${i}`) * 25 + 10,
+      swaySpeed: (0,esm.random)(`heart-sway-speed-${i}`) * 0.02 + 0.01,
+      opacity: (0,esm.random)(`heart-opacity-${i}`) * 0.4 + 0.5,
+      rotation: (0,esm.random)(`heart-rot-${i}`) * 30 - 15
+    }));
+  }, [width, height]);
+  const flowers = (0,react.useMemo)(() => {
+    const colors = ["#FF69B4", "#FFB6C1", "#DDA0DD", "#FFC0CB", "#FF1493"];
+    return Array.from({ length: 20 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`flower-x-${i}`) * width,
+      startY: (0,esm.random)(`flower-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`flower-size-${i}`) * 25 + 25,
+      color: colors[Math.floor((0,esm.random)(`flower-color-${i}`) * colors.length)],
+      speed: (0,esm.random)(`flower-speed-${i}`) * 1 + 0.3,
+      delay: (0,esm.random)(`flower-delay-${i}`) * 30,
+      rotation: (0,esm.random)(`flower-rot-${i}`) * 360,
+      rotationSpeed: (0,esm.random)(`flower-rot-speed-${i}`) * 2 - 1,
+      opacity: (0,esm.random)(`flower-opacity-${i}`) * 0.3 + 0.5
+    }));
+  }, [width, height]);
+  const confetti = (0,react.useMemo)(() => {
+    const colors = ["#FF69B4", "#FFD700", "#87CEEB", "#98FB98", "#DDA0DD", "#FFB6C1"];
+    return Array.from({ length: 50 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`confetti-x-${i}`) * width,
+      startY: (0,esm.random)(`confetti-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`confetti-size-${i}`) * 6 + 4,
+      color: colors[Math.floor((0,esm.random)(`confetti-color-${i}`) * colors.length)],
+      speed: (0,esm.random)(`confetti-speed-${i}`) * 2 + 1,
+      delay: (0,esm.random)(`confetti-delay-${i}`) * 30,
+      rotation: (0,esm.random)(`confetti-rot-${i}`) * 360,
+      rotationSpeed: (0,esm.random)(`confetti-rot-speed-${i}`) * 8 - 4,
+      swayAmplitude: (0,esm.random)(`confetti-sway-${i}`) * 40 + 20
+    }));
+  }, [width, height]);
+  const sparkles = (0,react.useMemo)(() => {
+    return Array.from({ length: 25 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`sparkle-x-${i}`) * width,
+      y: (0,esm.random)(`sparkle-y-${i}`) * height,
+      size: (0,esm.random)(`sparkle-size-${i}`) * 10 + 6,
+      phase: (0,esm.random)(`sparkle-phase-${i}`) * Math.PI * 2
+    }));
+  }, [width, height]);
+  const ribbons = (0,react.useMemo)(() => {
+    const colors = ["#FF69B4", "#FFD700", "#87CEEB", "#DDA0DD"];
+    return Array.from({ length: 8 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`ribbon-x-${i}`) * width * 0.8 + width * 0.1,
+      startY: (0,esm.random)(`ribbon-startY-${i}`) * (height + 80),
+      size: (0,esm.random)(`ribbon-size-${i}`) * 30 + 40,
+      color: colors[Math.floor((0,esm.random)(`ribbon-color-${i}`) * colors.length)],
+      speed: (0,esm.random)(`ribbon-speed-${i}`) * 0.8 + 0.3,
+      delay: (0,esm.random)(`ribbon-delay-${i}`) * 30,
+      swayAmplitude: (0,esm.random)(`ribbon-sway-${i}`) * 20 + 10
+    }));
+  }, [width, height]);
+  const gifts = (0,react.useMemo)(() => {
+    return Array.from({ length: 6 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`gift-x-${i}`) * width * 0.7 + width * 0.15,
+      startY: (0,esm.random)(`gift-startY-${i}`) * (height + 80),
+      size: (0,esm.random)(`gift-size-${i}`) * 25 + 35,
+      speed: (0,esm.random)(`gift-speed-${i}`) * 0.5 + 0.2,
+      delay: (0,esm.random)(`gift-delay-${i}`) * 30,
+      opacity: (0,esm.random)(`gift-opacity-${i}`) * 0.3 + 0.5
+    }));
+  }, [width, height]);
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(ellipse at center, rgba(255,182,193,0.12) 0%, transparent 70%)"
+        }
+      }
+    ),
+    confetti.map((piece) => {
+      const yOffset = (piece.startY + (frame + piece.delay) * piece.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + piece.delay) * 0.03) * piece.swayAmplitude;
+      const rotation = piece.rotation + frame * piece.rotationSpeed;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: piece.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(ThankYouDecoration_ConfettiPiece, { size: piece.size, color: piece.color, rotation })
+        },
+        `confetti-${piece.id}`
+      );
+    }),
+    hearts.map((heart) => {
+      const yOffset = (heart.startY + (frame + heart.delay) * heart.speed) % (height + 100);
+      const currentY = height - yOffset + 50;
+      const xSway = Math.sin((frame + heart.delay) * heart.swaySpeed) * heart.swayAmplitude;
+      const shouldPulse = heart.id % 4 === 0;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: heart.x + xSway,
+            top: currentY,
+            transform: `rotate(${heart.rotation}deg) scale(${shouldPulse ? heartPulse : 1})`
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(ThankYouDecoration_HeartSVG, { size: heart.size, color: heart.color, opacity: heart.opacity })
+        },
+        `heart-${heart.id}`
+      );
+    }),
+    flowers.map((flower) => {
+      const yOffset = (flower.startY + (frame + flower.delay) * flower.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + flower.delay) * 0.015) * 25;
+      const rotation = flower.rotation + frame * flower.rotationSpeed;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: flower.x + xSway,
+            top: currentY,
+            transform: `rotate(${rotation}deg)`
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(ThankYouDecoration_FlowerSVG, { size: flower.size, color: flower.color, opacity: flower.opacity })
+        },
+        `flower-${flower.id}`
+      );
+    }),
+    ribbons.map((ribbon) => {
+      const yOffset = (ribbon.startY + (frame + ribbon.delay) * ribbon.speed) % (height + 80);
+      const currentY = yOffset - 40;
+      const xSway = Math.sin((frame + ribbon.delay) * 0.012) * ribbon.swayAmplitude;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: ribbon.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(RibbonSVG, { size: ribbon.size, color: ribbon.color })
+        },
+        `ribbon-${ribbon.id}`
+      );
+    }),
+    gifts.map((gift) => {
+      const yOffset = (gift.startY + (frame + gift.delay) * gift.speed) % (height + 80);
+      const currentY = yOffset - 40;
+      const xSway = Math.sin((frame + gift.delay) * 0.01) * 15;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: gift.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(GiftBoxSVG, { size: gift.size, opacity: gift.opacity })
+        },
+        `gift-${gift.id}`
+      );
+    }),
+    sparkles.map((sparkle) => {
+      const twinkle = (Math.sin(frame * 0.12 + sparkle.phase) + 1) / 2;
+      const scale = 0.5 + twinkle * 0.7;
+      const opacity = 0.3 + twinkle * 0.7;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: sparkle.x,
+            top: sparkle.y,
+            transform: `scale(${scale})`,
+            opacity
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(SparkleSVG, { size: sparkle.size, opacity: 1 })
+        },
+        `sparkle-${sparkle.id}`
+      );
+    }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          right: -20,
+          bottom: -20,
+          opacity: 0.08,
+          transform: `scale(${heartPulse})`
+        },
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(ThankYouDecoration_HeartSVG, { size: 180, color: "#e53e3e", opacity: 1 })
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          left: 20,
+          top: 20,
+          fontSize: 32,
+          fontWeight: "bold",
+          fontFamily: "cursive, sans-serif",
+          opacity: 0.06,
+          color: "#e53e3e",
+          letterSpacing: 2
+        },
+        children: "Thank You"
+      }
+    )
+  ] });
+}
+
+;// ./src/decorations/CongratulationsDecoration.tsx
+
+
+
+
+
+function BalloonSVG({ size, color, opacity }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size * 1.4, viewBox: "0 0 40 56", style: { opacity }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "20", cy: "20", rx: "18", ry: "22", fill: color }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("ellipse", { cx: "14", cy: "14", rx: "5", ry: "7", fill: "rgba(255,255,255,0.3)" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "20,42 16,46 24,46", fill: color }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("path", { d: "M20,46 Q18,50 22,54", stroke: "#888", strokeWidth: "1", fill: "none" })
+  ] });
+}
+function StarSVG({ size, color, opacity, filled }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: size, height: size, viewBox: "0 0 24 24", style: { opacity }, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "polygon",
+    {
+      points: "12,2 15,9 22,9 17,14 19,22 12,18 5,22 7,14 2,9 9,9",
+      fill: filled ? color : "none",
+      stroke: color,
+      strokeWidth: filled ? 0 : 1.5
+    }
+  ) });
+}
+function CongratulationsDecoration_ConfettiPiece({ size, color, rotation, shape }) {
+  if (shape === "circle") {
+    return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          width: size,
+          height: size,
+          backgroundColor: color,
+          borderRadius: "50%",
+          opacity: 0.85
+        }
+      }
+    );
+  }
+  if (shape === "triangle") {
+    return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          width: 0,
+          height: 0,
+          borderLeft: `${size / 2}px solid transparent`,
+          borderRight: `${size / 2}px solid transparent`,
+          borderBottom: `${size}px solid ${color}`,
+          transform: `rotate(${rotation}deg)`,
+          opacity: 0.85
+        }
+      }
+    );
+  }
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "div",
+    {
+      style: {
+        width: size,
+        height: size * 2.5,
+        backgroundColor: color,
+        borderRadius: 2,
+        transform: `rotate(${rotation}deg)`,
+        opacity: 0.85
+      }
+    }
+  );
+}
+function StreamerSVG({ size, color }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)("svg", { width: size, height: size * 3, viewBox: "0 0 30 90", children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "path",
+    {
+      d: "M15,0 Q5,15 25,30 Q5,45 25,60 Q5,75 15,90",
+      stroke: color,
+      strokeWidth: "6",
+      fill: "none",
+      strokeLinecap: "round"
+    }
+  ) });
+}
+function TrophySVG({ size }) {
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size, height: size, viewBox: "0 0 60 60", children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: "M15,10 L15,30 Q15,40 30,42 Q45,40 45,30 L45,10 Z",
+        fill: "#FFD700",
+        stroke: "#DAA520",
+        strokeWidth: "2"
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: "M15,15 Q5,15 5,25 Q5,32 15,32",
+        stroke: "#FFD700",
+        strokeWidth: "4",
+        fill: "none"
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "path",
+      {
+        d: "M45,15 Q55,15 55,25 Q55,32 45,32",
+        stroke: "#FFD700",
+        strokeWidth: "4",
+        fill: "none"
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "26", y: "42", width: "8", height: "8", fill: "#DAA520" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("rect", { x: "18", y: "50", width: "24", height: "6", rx: "2", fill: "#DAA520" }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)("polygon", { points: "30,18 32,24 38,24 33,28 35,34 30,30 25,34 27,28 22,24 28,24", fill: "#FFA500" })
+  ] });
+}
+function CongratulationsDecoration_FireworkBurst({ x, y, size, progress, color }) {
+  if (progress <= 0 || progress >= 1) return null;
+  const scale = (0,esm.interpolate)(progress, [0, 0.3, 1], [0, 1, 1.2]);
+  const opacity = (0,esm.interpolate)(progress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
+  const rays = 12;
+  const rayLength = size * scale;
+  return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+    "div",
+    {
+      style: {
+        position: "absolute",
+        left: x,
+        top: y,
+        opacity
+      },
+      children: /* @__PURE__ */ (0,jsx_runtime.jsxs)("svg", { width: size * 2.5, height: size * 2.5, viewBox: "-50 -50 100 100", children: [
+        Array.from({ length: rays }).map((_, i) => {
+          const angle = i * 360 / rays;
+          const rad = angle * Math.PI / 180;
+          const x2 = Math.cos(rad) * rayLength;
+          const y2 = Math.sin(rad) * rayLength;
+          return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+            "line",
+            {
+              x1: "0",
+              y1: "0",
+              x2,
+              y2,
+              stroke: color,
+              strokeWidth: "3",
+              strokeLinecap: "round"
+            },
+            i
+          );
+        }),
+        /* @__PURE__ */ (0,jsx_runtime.jsx)("circle", { cx: "0", cy: "0", r: size * 0.2 * scale, fill: color })
+      ] })
+    }
+  );
+}
+function CongratulationsDecoration({ width, height }) {
+  const frame = (0,esm.useCurrentFrame)();
+  const { fps, durationInFrames } = (0,esm.useVideoConfig)();
+  const balloonFloat = usePulse({ frequency: 0.5, min: -5, max: 5 });
+  const balloons = (0,react.useMemo)(() => {
+    const colors = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#95E1D3", "#F38181", "#AA96DA", "#FCBAD3"];
+    return Array.from({ length: 25 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`balloon-x-${i}`) * width,
+      startY: (0,esm.random)(`balloon-startY-${i}`) * (height + 150),
+      size: (0,esm.random)(`balloon-size-${i}`) * 25 + 35,
+      color: colors[Math.floor((0,esm.random)(`balloon-color-${i}`) * colors.length)],
+      speed: (0,esm.random)(`balloon-speed-${i}`) * 1.2 + 0.5,
+      delay: (0,esm.random)(`balloon-delay-${i}`) * 30,
+      swayAmplitude: (0,esm.random)(`balloon-sway-${i}`) * 20 + 10,
+      swaySpeed: (0,esm.random)(`balloon-sway-speed-${i}`) * 0.02 + 0.01,
+      opacity: (0,esm.random)(`balloon-opacity-${i}`) * 0.3 + 0.6
+    }));
+  }, [width, height]);
+  const confetti = (0,react.useMemo)(() => {
+    const colors = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#95E1D3", "#F38181", "#AA96DA", "#805ad5", "#38b2ac"];
+    const shapes = ["rect", "circle", "triangle"];
+    return Array.from({ length: 80 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`confetti-x-${i}`) * width,
+      startY: (0,esm.random)(`confetti-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`confetti-size-${i}`) * 8 + 5,
+      color: colors[Math.floor((0,esm.random)(`confetti-color-${i}`) * colors.length)],
+      shape: shapes[Math.floor((0,esm.random)(`confetti-shape-${i}`) * shapes.length)],
+      speed: (0,esm.random)(`confetti-speed-${i}`) * 3 + 1.5,
+      delay: (0,esm.random)(`confetti-delay-${i}`) * 30,
+      rotation: (0,esm.random)(`confetti-rot-${i}`) * 360,
+      rotationSpeed: (0,esm.random)(`confetti-rot-speed-${i}`) * 10 - 5,
+      swayAmplitude: (0,esm.random)(`confetti-sway-${i}`) * 50 + 25
+    }));
+  }, [width, height]);
+  const stars = (0,react.useMemo)(() => {
+    const colors = ["#FFD700", "#FFA500", "#FFFF00", "#38b2ac", "#805ad5"];
+    return Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`star-x-${i}`) * width,
+      startY: (0,esm.random)(`star-startY-${i}`) * (height + 100),
+      size: (0,esm.random)(`star-size-${i}`) * 20 + 15,
+      color: colors[Math.floor((0,esm.random)(`star-color-${i}`) * colors.length)],
+      speed: (0,esm.random)(`star-speed-${i}`) * 1.5 + 0.5,
+      delay: (0,esm.random)(`star-delay-${i}`) * 30,
+      rotationSpeed: (0,esm.random)(`star-rot-${i}`) * 3 - 1.5,
+      opacity: (0,esm.random)(`star-opacity-${i}`) * 0.4 + 0.5,
+      filled: (0,esm.random)(`star-filled-${i}`) > 0.5
+    }));
+  }, [width, height]);
+  const streamers = (0,react.useMemo)(() => {
+    const colors = ["#FF6B6B", "#4ECDC4", "#FFE66D", "#AA96DA", "#805ad5"];
+    return Array.from({ length: 12 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`streamer-x-${i}`) * width,
+      startY: (0,esm.random)(`streamer-startY-${i}`) * (height + 150),
+      size: (0,esm.random)(`streamer-size-${i}`) * 15 + 20,
+      color: colors[Math.floor((0,esm.random)(`streamer-color-${i}`) * colors.length)],
+      speed: (0,esm.random)(`streamer-speed-${i}`) * 2 + 1,
+      delay: (0,esm.random)(`streamer-delay-${i}`) * 30,
+      swayAmplitude: (0,esm.random)(`streamer-sway-${i}`) * 30 + 15
+    }));
+  }, [width, height]);
+  const fireworks = (0,react.useMemo)(() => {
+    const colors = ["#FFD700", "#FF6B6B", "#4ECDC4", "#AA96DA", "#38b2ac"];
+    return Array.from({ length: 6 }, (_, i) => ({
+      id: i,
+      x: (0,esm.random)(`fw-x-${i}`) * width * 0.8 + width * 0.1,
+      y: (0,esm.random)(`fw-y-${i}`) * height * 0.5 + height * 0.1,
+      size: (0,esm.random)(`fw-size-${i}`) * 30 + 40,
+      color: colors[Math.floor((0,esm.random)(`fw-color-${i}`) * colors.length)],
+      startFrame: Math.floor((0,esm.random)(`fw-start-${i}`) * durationInFrames * 0.7),
+      duration: Math.floor(durationInFrames * 0.15)
+    }));
+  }, [width, height, durationInFrames]);
+  return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { pointerEvents: "none", overflow: "hidden" }, children: [
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          inset: 0,
+          background: "radial-gradient(ellipse at center, rgba(128,90,213,0.08) 0%, transparent 70%)"
+        }
+      }
+    ),
+    confetti.map((piece) => {
+      const yOffset = (piece.startY + (frame + piece.delay) * piece.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + piece.delay) * 0.04) * piece.swayAmplitude;
+      const rotation = piece.rotation + frame * piece.rotationSpeed;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: piece.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(CongratulationsDecoration_ConfettiPiece, { size: piece.size, color: piece.color, rotation, shape: piece.shape })
+        },
+        `confetti-${piece.id}`
+      );
+    }),
+    streamers.map((streamer) => {
+      const yOffset = (streamer.startY + (frame + streamer.delay) * streamer.speed) % (height + 150);
+      const currentY = yOffset - 75;
+      const xSway = Math.sin((frame + streamer.delay) * 0.02) * streamer.swayAmplitude;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: streamer.x + xSway,
+            top: currentY
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(StreamerSVG, { size: streamer.size, color: streamer.color })
+        },
+        `streamer-${streamer.id}`
+      );
+    }),
+    balloons.map((balloon) => {
+      const yOffset = (balloon.startY + (frame + balloon.delay) * balloon.speed) % (height + 150);
+      const currentY = height - yOffset + 75;
+      const xSway = Math.sin((frame + balloon.delay) * balloon.swaySpeed) * balloon.swayAmplitude;
+      const float = balloon.id % 3 === 0 ? balloonFloat : 0;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: balloon.x + xSway,
+            top: currentY + float
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(BalloonSVG, { size: balloon.size, color: balloon.color, opacity: balloon.opacity })
+        },
+        `balloon-${balloon.id}`
+      );
+    }),
+    stars.map((star) => {
+      const yOffset = (star.startY + (frame + star.delay) * star.speed) % (height + 100);
+      const currentY = yOffset - 50;
+      const xSway = Math.sin((frame + star.delay) * 0.02) * 20;
+      const rotation = frame * star.rotationSpeed;
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        "div",
+        {
+          style: {
+            position: "absolute",
+            left: star.x + xSway,
+            top: currentY,
+            transform: `rotate(${rotation}deg)`
+          },
+          children: /* @__PURE__ */ (0,jsx_runtime.jsx)(StarSVG, { size: star.size, color: star.color, opacity: star.opacity, filled: star.filled })
+        },
+        `star-${star.id}`
+      );
+    }),
+    fireworks.map((fw) => {
+      const progress = (0,esm.interpolate)(
+        frame,
+        [fw.startFrame, fw.startFrame + fw.duration],
+        [0, 1],
+        { extrapolateLeft: "clamp", extrapolateRight: "clamp" }
+      );
+      return /* @__PURE__ */ (0,jsx_runtime.jsx)(
+        CongratulationsDecoration_FireworkBurst,
+        {
+          x: fw.x,
+          y: fw.y,
+          size: fw.size,
+          progress,
+          color: fw.color
+        },
+        `fw-${fw.id}`
+      );
+    }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          right: 25,
+          bottom: 25,
+          opacity: 0.12
+        },
+        children: /* @__PURE__ */ (0,jsx_runtime.jsx)(TrophySVG, { size: 120 })
+      }
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          left: 20,
+          top: 20,
+          fontSize: 28,
+          fontWeight: "bold",
+          fontFamily: "sans-serif",
+          opacity: 0.06,
+          color: "#805ad5",
+          letterSpacing: 1
+        },
+        children: "Congratulations!"
+      }
+    )
+  ] });
+}
+
 ;// ./src/decorations/index.ts
+
+
+
+
 
 
 
@@ -3585,10 +4893,14 @@ function getDecorationComponent(theme) {
       return EidDecoration;
     case "ramadan":
       return RamadanDecoration;
-    // Themes without specific decorations use enhanced particles
     case "rosh_hashanah":
+      return RoshHashanahDecoration;
     case "passover":
-    case "yom_kippur":
+      return PassoverDecoration;
+    case "thank_you":
+      return ThankYouDecoration;
+    case "congratulations":
+      return CongratulationsDecoration;
     default:
       return null;
   }
@@ -3635,11 +4947,11 @@ function CardComposition({
   const outroStart = currentFrame;
   return /* @__PURE__ */ (0,jsx_runtime.jsxs)(esm.AbsoluteFill, { style: { backgroundColor: colors.bg }, children: [
     ThemeDecoration ? /* @__PURE__ */ (0,jsx_runtime.jsx)(ThemeDecoration, { width, height }) : /* @__PURE__ */ (0,jsx_runtime.jsx)(ParticleDecoration, { theme, particleCount: 120, enableSparkle: true }),
-    /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: introStart, durationInFrames: introFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(IntroSlide, { theme }) }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: introStart, durationInFrames: introFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(IntroSlide, { theme, recipientName }) }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: nameRevealStart, durationInFrames: nameRevealFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(NameRevealSlide, { name: recipientName, theme }) }),
     /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: messageStart, durationInFrames: messageFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(MessageSlide, { name: recipientName, message, theme }) }),
     senderName && /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: senderRevealStart, durationInFrames: senderRevealFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(SenderSlide, { senderName, theme }) }),
-    /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: outroStart, durationInFrames: outroFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(OutroSlide, { name: recipientName, theme }) }),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.Sequence, { from: outroStart, durationInFrames: outroFrames, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(OutroSlide, { theme }) }),
     audioSrc && /* @__PURE__ */ (0,jsx_runtime.jsx)(
       esm.Audio,
       {
@@ -30925,7 +32237,7 @@ var NoReactInternals = {
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
 /******/ 	__webpack_require__(4255);
-/******/ 	__webpack_require__(5945);
+/******/ 	__webpack_require__(6724);
 /******/ 	__webpack_require__(3902);
 /******/ 	var __webpack_exports__ = __webpack_require__(1640);
 /******/ 	

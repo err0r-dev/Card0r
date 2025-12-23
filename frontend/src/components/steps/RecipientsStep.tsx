@@ -1,36 +1,92 @@
+import { useState } from 'react';
 import { FileUploader } from '../FileUploader';
 import { RecipientForm } from '../RecipientForm';
 import { RecipientTable } from '../RecipientTable';
 import { SenderField } from '../SenderField';
-import { motion } from 'framer-motion';
+import { InputModeToggle, type InputMode } from '../InputModeToggle';
+import { ConfirmModeChangeDialog } from '../ConfirmModeChangeDialog';
+import { useRecipientsStore } from '../../stores/recipientsStore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function RecipientsStep() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-8"
-    >
-      <div>
-        <h2 className="text-3xl font-bold mb-2">Add Recipients</h2>
-        <p className="text-muted-foreground">
-          Upload a CSV/Excel file or manually enter recipient details
-        </p>
-      </div>
+  const { recipients } = useRecipientsStore();
+  const [inputMode, setInputMode] = useState<InputMode>('manual');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingMode, setPendingMode] = useState<InputMode | null>(null);
 
+  const handleModeChange = (newMode: InputMode) => {
+    if (newMode === inputMode) return;
+
+    // If there are recipients, ask for confirmation
+    if (recipients.length > 0) {
+      setPendingMode(newMode);
+      setShowConfirmDialog(true);
+    } else {
+      setInputMode(newMode);
+    }
+  };
+
+  const handleConfirmModeChange = () => {
+    if (pendingMode) {
+      setInputMode(pendingMode);
+    }
+    setPendingMode(null);
+    setShowConfirmDialog(false);
+  };
+
+  const handleCancelModeChange = () => {
+    setPendingMode(null);
+    setShowConfirmDialog(false);
+  };
+
+  return (
+    <div className="space-y-6">
       {/* Sender Field - Who the cards are from */}
       <SenderField />
 
-      {/* Input Methods */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        <FileUploader />
-        <RecipientForm />
-      </div>
+      {/* Input Mode Toggle */}
+      <InputModeToggle
+        mode={inputMode}
+        onModeChange={handleModeChange}
+      />
 
-      {/* Recipients List */}
+      {/* Input Method - Animated switch */}
+      <AnimatePresence mode="wait">
+        {inputMode === 'manual' ? (
+          <motion.div
+            key="manual"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <RecipientForm />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="csv"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <FileUploader />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Recipients List - Always visible */}
       <RecipientTable />
-    </motion.div>
+
+      {/* Confirmation Dialog */}
+      <ConfirmModeChangeDialog
+        open={showConfirmDialog}
+        onOpenChange={setShowConfirmDialog}
+        pendingMode={pendingMode}
+        recipientCount={recipients.length}
+        onConfirm={handleConfirmModeChange}
+        onCancel={handleCancelModeChange}
+      />
+    </div>
   );
 }

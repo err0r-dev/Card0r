@@ -25,6 +25,9 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static files for generated videos
 app.use('/videos', express.static(path.join(__dirname, '../videos')));
 
+// Serve temp files for ZIP downloads
+app.use('/temp', express.static(path.join(__dirname, '../temp')));
+
 // API Routes
 app.use('/api', apiRoutes);
 

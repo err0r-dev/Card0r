@@ -3,15 +3,36 @@ import type { HolidayTheme } from '@card0r/shared';
 import { HOLIDAY_COLORS } from '../types';
 
 interface OutroSlideProps {
-  name: string;
   theme: HolidayTheme;
 }
 
-export function OutroSlide({ name, theme }: OutroSlideProps) {
+// Themed closing messages
+const THEME_CLOSINGS: Record<HolidayTheme, string> = {
+  christmas: "Season's Greetings",
+  new_year: 'Cheers!',
+  easter: 'Blessings',
+  valentines_day: 'With Love',
+  halloween: 'Boo!',
+  thanksgiving: 'Gratitude',
+  rosh_hashanah: 'L\'Shanah Tovah',
+  hanukkah: 'Chag Sameach',
+  passover: 'Next Year in Jerusalem',
+  eid_al_fitr: 'Eid Mubarak',
+  eid_al_adha: 'Eid Mubarak',
+  ramadan: 'Ramadan Kareem',
+  chinese_new_year: 'Gong Hei Fat Choy',
+  diwali: 'Shubh Deepavali',
+  lunar_new_year: 'Best Wishes',
+  thank_you: 'With Gratitude',
+  congratulations: 'Well Done!',
+};
+
+export function OutroSlide({ theme }: OutroSlideProps) {
   const frame = useCurrentFrame();
-  const { fps, durationInFrames } = useVideoConfig();
+  const { durationInFrames } = useVideoConfig();
 
   const colors = HOLIDAY_COLORS[theme];
+  const closingMessage = THEME_CLOSINGS[theme] || 'Best Wishes';
 
   // Fade out towards the end
   const opacity = interpolate(
@@ -35,15 +56,16 @@ export function OutroSlide({ name, theme }: OutroSlideProps) {
     >
       <h1
         style={{
-          fontSize: 80,
+          fontSize: 70,
           fontWeight: 'bold',
           textAlign: 'center',
           color: colors.accent,
           transform: `scale(${pulse})`,
           textShadow: `0 0 30px ${colors.accent}60, 0 0 60px ${colors.primary}40`,
+          fontStyle: 'italic',
         }}
       >
-        {name}
+        {closingMessage}
       </h1>
     </AbsoluteFill>
   );

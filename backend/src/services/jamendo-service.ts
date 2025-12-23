@@ -13,13 +13,14 @@ const MUSIC_KEYWORDS: Record<HolidayTheme, string> = {
   rosh_hashanah: 'calm',
   hanukkah: 'happy',
   passover: 'calm',
-  yom_kippur: 'calm',
   eid_al_fitr: 'happy',
   eid_al_adha: 'calm',
   ramadan: 'calm',
   chinese_new_year: 'happy',
   diwali: 'happy',
   lunar_new_year: 'happy',
+  thank_you: 'happy',
+  congratulations: 'celebration',
 };
 
 export async function fetchMusic(theme: HolidayTheme, apiKey: string): Promise<MusicSearchResponse> {

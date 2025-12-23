@@ -4,21 +4,41 @@ import { HOLIDAY_COLORS } from '../types';
 
 interface IntroSlideProps {
   theme: HolidayTheme;
+  recipientName: string;
 }
 
-function getThemeDisplayName(theme: string): string {
-  return theme
-    .split('_')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
+// Greeting messages for each theme
+const THEME_GREETINGS: Record<HolidayTheme, string> = {
+  christmas: 'Merry Christmas',
+  new_year: 'Happy New Year',
+  easter: 'Happy Easter',
+  valentines_day: "Happy Valentine's Day",
+  halloween: 'Happy Halloween',
+  thanksgiving: 'Happy Thanksgiving',
+  rosh_hashanah: 'Shanah Tovah',
+  hanukkah: 'Happy Hanukkah',
+  passover: 'Chag Pesach Sameach',
+  eid_al_fitr: 'Eid Mubarak',
+  eid_al_adha: 'Eid Mubarak',
+  ramadan: 'Ramadan Mubarak',
+  chinese_new_year: 'Gong Xi Fa Cai',
+  diwali: 'Happy Diwali',
+  lunar_new_year: 'Happy Lunar New Year',
+  thank_you: 'Thank You',
+  congratulations: 'Congratulations',
+};
+
+function getGreetingMessage(theme: HolidayTheme, name: string): string {
+  const greeting = THEME_GREETINGS[theme] || 'Happy Holidays';
+  return `${greeting}, ${name}!`;
 }
 
-export function IntroSlide({ theme }: IntroSlideProps) {
+export function IntroSlide({ theme, recipientName }: IntroSlideProps) {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
   const colors = HOLIDAY_COLORS[theme];
-  const themeName = getThemeDisplayName(theme);
+  const greetingMessage = getGreetingMessage(theme, recipientName);
 
   // Fade in and out using sine wave
   const progress = frame / durationInFrames;
@@ -32,17 +52,22 @@ export function IntroSlide({ theme }: IntroSlideProps) {
     { extrapolateRight: 'clamp' }
   );
 
+  // Dynamic font size based on message length
+  const baseFontSize = 100;
+  const fontSize = greetingMessage.length > 30 ? 70 : greetingMessage.length > 22 ? 85 : baseFontSize;
+
   return (
     <AbsoluteFill
       style={{
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
+        padding: '0 40px',
       }}
     >
       <h1
         style={{
-          fontSize: 120,
+          fontSize,
           fontWeight: 'bold',
           textAlign: 'center',
           opacity: alpha,
@@ -51,9 +76,10 @@ export function IntroSlide({ theme }: IntroSlideProps) {
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           textShadow: `0 4px 20px ${colors.primary}40`,
+          lineHeight: 1.2,
         }}
       >
-        {themeName}
+        {greetingMessage}
       </h1>
     </AbsoluteFill>
   );

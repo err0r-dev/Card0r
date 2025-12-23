@@ -9,7 +9,8 @@ import { SplashScreen } from './components/SplashScreen';
 import { SetupScreen } from './components/SetupScreen';
 import { MainLayout } from './components/MainLayout';
 import { SettingsModal } from './components/SettingsModal';
-import { WizardNavigation } from './components/WizardNavigation';
+import { StepProgress } from './components/StepProgress';
+import { GuidedStepCard } from './components/GuidedStepCard';
 import {
   RecipientsStep,
   CustomizeStep,
@@ -17,6 +18,26 @@ import {
   DownloadStep,
 } from './components/steps';
 import { toast } from 'sonner';
+
+// Step configuration
+const STEP_CONFIG = {
+  1: {
+    title: 'Add Recipients',
+    description: 'Enter the people who will receive personalized video cards',
+  },
+  2: {
+    title: 'Customize Your Cards',
+    description: 'Choose a theme, format, and optional background music',
+  },
+  3: {
+    title: 'Generate Videos',
+    description: 'AI will create personalized messages and render your videos',
+  },
+  4: {
+    title: 'Your Videos Are Ready!',
+    description: 'Download your personalized video cards',
+  },
+};
 
 function App() {
   const {
@@ -29,11 +50,11 @@ function App() {
     goBack,
     goForward,
     canGoBack,
-    canGoForward,
+    resetWizard,
   } = useUIStore();
   const { darkMode, openaiKey, jamendoKey, hasCompletedSetup } = useSettingsStore();
-  const { recipients, senderName } = useRecipientsStore();
-  const { selectedTheme, jobs } = useVideoStore();
+  const { recipients, senderName, clearRecipients } = useRecipientsStore();
+  const { selectedTheme, jobs, clearVideoState } = useVideoStore();
 
   // Apply dark mode class to html element
   useEffect(() => {
@@ -75,7 +96,7 @@ function App() {
       case 3:
         return allVideosComplete;
       case 4:
-        return true; // Can always "start over" from download step
+        return true;
       default:
         return false;
     }
@@ -96,11 +117,42 @@ function App() {
     }
     if (currentStep === 4) {
       // Reset and start over
-      setCurrentStep(1);
+      handleStartOver();
       return;
     }
     goForward();
   };
+
+  // Start over handler
+  const handleStartOver = () => {
+    clearRecipients();
+    clearVideoState();
+    resetWizard();
+  };
+
+  // Get forward button label
+  const getForwardLabel = (): string => {
+    if (currentStep === 3 && !allVideosComplete && jobs.length > 0) {
+      return 'Generating...';
+    }
+    if (currentStep === 3) {
+      return 'View Downloads';
+    }
+    if (currentStep === 4) {
+      return 'Start Over';
+    }
+    return 'Next';
+  };
+
+  // Check if next is disabled
+  const isNextDisabled = (): boolean => {
+    if (!canProceedForward()) return true;
+    if (currentStep === 3 && !allVideosComplete && jobs.length > 0) return true;
+    return false;
+  };
+
+  // Get step config
+  const stepConfig = STEP_CONFIG[currentStep as keyof typeof STEP_CONFIG];
 
   // Render step content
   const renderStepContent = () => {
@@ -116,14 +168,6 @@ function App() {
       default:
         return <RecipientsStep />;
     }
-  };
-
-  // Get forward button label
-  const getForwardLabel = (): string | undefined => {
-    if (currentStep === 3 && !allVideosComplete) {
-      return 'Generating...';
-    }
-    return undefined; // Use default
   };
 
   return (
@@ -145,23 +189,29 @@ function App() {
         <MainLayout>
           <SettingsModal />
 
-          {/* Step Content */}
-          <div className="pb-32">
-            <AnimatePresence mode="wait">
-              {renderStepContent()}
-            </AnimatePresence>
+          {/* Step Progress at top */}
+          <div className="mb-6">
+            <StepProgress currentStep={currentStep} />
           </div>
 
-          {/* Wizard Navigation */}
-          <WizardNavigation
-            currentStep={currentStep}
-            canGoBack={canGoBack()}
-            canGoForward={canGoForward()}
-            onBack={goBack}
-            onForward={handleForward}
-            forwardDisabled={!canProceedForward() || (currentStep === 3 && !allVideosComplete && jobs.length > 0)}
-            forwardLabel={getForwardLabel()}
-          />
+          {/* Guided Step Card */}
+          <AnimatePresence mode="wait">
+            <GuidedStepCard
+              key={currentStep}
+              title={stepConfig.title}
+              description={stepConfig.description}
+              onBack={canGoBack() ? goBack : undefined}
+              onNext={handleForward}
+              canGoBack={canGoBack()}
+              canGoNext={true}
+              nextLabel={getForwardLabel()}
+              nextDisabled={isNextDisabled()}
+              variant={currentStep === 4 ? 'success' : 'default'}
+              showNavigation={true}
+            >
+              {renderStepContent()}
+            </GuidedStepCard>
+          </AnimatePresence>
         </MainLayout>
       )}
 

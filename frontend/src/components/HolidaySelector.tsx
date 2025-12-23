@@ -25,7 +25,6 @@ const HOLIDAYS: HolidayOption[] = [
   { id: HolidayTheme.ROSH_HASHANAH, name: 'Rosh Hashanah', emoji: '🍎', category: 'Jewish', gradient: 'from-amber-500 to-yellow-600' },
   { id: HolidayTheme.HANUKKAH, name: 'Hanukkah', emoji: '🕎', category: 'Jewish', gradient: 'from-blue-500 to-indigo-600' },
   { id: HolidayTheme.PASSOVER, name: 'Passover', emoji: '🍷', category: 'Jewish', gradient: 'from-amber-600 to-red-600' },
-  { id: HolidayTheme.YOM_KIPPUR, name: 'Yom Kippur', emoji: '🕊️', category: 'Jewish', gradient: 'from-gray-400 to-gray-600' },
 
   // Islamic
   { id: HolidayTheme.EID_AL_FITR, name: 'Eid al-Fitr', emoji: '🌙', category: 'Islamic', gradient: 'from-green-500 to-teal-600' },
@@ -36,9 +35,13 @@ const HOLIDAYS: HolidayOption[] = [
   { id: HolidayTheme.CHINESE_NEW_YEAR, name: 'Chinese New Year', emoji: '🐉', category: 'Asian', gradient: 'from-red-600 to-yellow-500' },
   { id: HolidayTheme.DIWALI, name: 'Diwali', emoji: '🪔', category: 'Asian', gradient: 'from-orange-500 to-yellow-500' },
   { id: HolidayTheme.LUNAR_NEW_YEAR, name: 'Lunar New Year', emoji: '🏮', category: 'Asian', gradient: 'from-red-500 to-orange-500' },
+
+  // General
+  { id: HolidayTheme.THANK_YOU, name: 'Thank You', emoji: '💝', category: 'General', gradient: 'from-pink-400 to-red-400' },
+  { id: HolidayTheme.CONGRATULATIONS, name: 'Congratulations', emoji: '🎊', category: 'General', gradient: 'from-purple-500 to-yellow-500' },
 ];
 
-const CATEGORIES = ['Western', 'Jewish', 'Islamic', 'Asian'];
+const CATEGORIES = ['Western', 'Jewish', 'Islamic', 'Asian', 'General'];
 
 export function HolidaySelector() {
   const { selectedTheme, setSelectedTheme } = useVideoStore();
