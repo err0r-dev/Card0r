@@ -113,6 +113,8 @@ export function SettingsModal() {
               value={localOpenaiKey}
               onChange={(e) => setLocalOpenaiKey(e.target.value)}
               className="text-gray-900 dark:text-gray-100"
+              autoComplete="off"
+              data-1p-ignore
             />
             <p className="text-xs text-muted-foreground">
               Get your API key from{' '}
@@ -146,6 +148,8 @@ export function SettingsModal() {
               value={localJamendoKey}
               onChange={(e) => setLocalJamendoKey(e.target.value)}
               className="text-gray-900 dark:text-gray-100"
+              autoComplete="off"
+              data-1p-ignore
             />
             <p className="text-xs text-muted-foreground">
               Get your API key from{' '}

@@ -195,12 +195,12 @@ export function VideoGenerator() {
             <span className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
               1
             </span>
-            Generate Personalized Messages
+            Generate Personalised Messages
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground mb-4">
-            Use AI to create personalized greeting messages for each recipient based on your guidance.
+            Use AI to create personalised greeting messages for each recipient based on your guidance.
           </p>
           <Button
             onClick={handleGenerateMessages}

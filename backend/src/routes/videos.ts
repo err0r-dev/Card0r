@@ -145,4 +145,51 @@ router.delete('/delete/:filename', async (req, res) => {
   }
 });
 
+// Delete multiple videos by filenames
+router.post('/delete-batch', async (req, res) => {
+  try {
+    const { filenames } = req.body as { filenames: string[] };
+
+    if (!filenames || !Array.isArray(filenames)) {
+      return res.status(400).json({ error: 'Filenames array is required' });
+    }
+
+    const results: { filename: string; success: boolean; error?: string }[] = [];
+
+    for (const filename of filenames) {
+      const sanitizedFilename = path.basename(filename);
+      const videoPath = path.join(VIDEOS_DIR, sanitizedFilename);
+
+      try {
+        await fs.access(videoPath);
+        await fs.unlink(videoPath);
+        console.log(`[Videos] Deleted video: ${sanitizedFilename}`);
+        results.push({ filename: sanitizedFilename, success: true });
+      } catch (err) {
+        // File doesn't exist or couldn't be deleted
+        results.push({
+          filename: sanitizedFilename,
+          success: false,
+          error: err instanceof Error ? err.message : 'Unknown error',
+        });
+      }
+    }
+
+    const successCount = results.filter((r) => r.success).length;
+    console.log(`[Videos] Batch delete: ${successCount}/${filenames.length} files deleted`);
+
+    res.json({
+      success: true,
+      message: `Deleted ${successCount} of ${filenames.length} videos`,
+      results,
+    });
+  } catch (error) {
+    console.error('Batch video deletion error:', error);
+    res.status(500).json({
+      error: 'Batch video deletion failed',
+      message: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
 export default router;

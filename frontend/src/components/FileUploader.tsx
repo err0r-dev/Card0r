@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { FileSpreadsheet, Loader2 } from 'lucide-react';
+import { FileSpreadsheet, Loader2, Download } from 'lucide-react';
 import { useRecipientsStore } from '../stores/recipientsStore';
 import { apiClient } from '../lib/api';
 import { Card, CardContent } from './ui/card';
@@ -111,12 +111,18 @@ export function FileUploader() {
         </div>
 
         <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-          <p className="text-sm font-medium mb-2">CSV Format Example:</p>
-          <pre className="text-xs bg-background p-2 rounded border overflow-x-auto">
-{`Name,Message
-John Doe,Wishing you success this year
-Jane Smith,Hope your holidays are wonderful`}
-          </pre>
+          <div className="flex justify-center">
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+            >
+              <a href="/template.csv" download="template.csv">
+                <Download className="h-3.5 w-3.5 mr-1.5" />
+                Download Template
+              </a>
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>

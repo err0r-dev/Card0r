@@ -64,7 +64,7 @@ export function FormatPicker() {
                     flex items-start gap-4 p-4 rounded-lg border-2 cursor-pointer transition-all
                     ${
                       selectedFormat === format.id
-                        ? 'border-primary bg-primary/5'
+                        ? 'border-primary bg-primary/10 dark:bg-primary/20 ring-2 ring-primary/30'
                         : 'border-border hover:border-primary/50'
                     }
                   `}

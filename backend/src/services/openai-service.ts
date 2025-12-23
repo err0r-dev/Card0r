@@ -51,7 +51,7 @@ ${senderName ? `- The message is from "${senderName}" - you may reference this n
 Return ONLY the message text, no additional commentary.`;
 
       const completion = await openai.chat.completions.create({
-        model: 'gpt-4',
+        model: 'gpt-4.1-mini',
         messages: [
           {
             role: 'system',

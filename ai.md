@@ -4,7 +4,7 @@ This file provides comprehensive context for AI assistants (like Claude, ChatGPT
 
 ## Project Overview
 
-**Card0r** is a full-stack TypeScript application that generates personalized video greeting cards using AI-powered message generation and Remotion-based React video rendering.
+**Card0r** is a full-stack TypeScript application that generates personalised video greeting cards using AI-powered message generation and Remotion-based React video rendering.
 
 **Tech Stack:**
 - Frontend: React 19 + Vite + TypeScript + TailwindCSS + shadcn/ui
@@ -105,6 +105,7 @@ Located in `backend/src/routes/`:
   - `POST /api/videos/download-zip/:jobId` - Start ZIP generation
   - `GET /api/videos/download-zip/:jobId/progress` - Check ZIP progress
   - `DELETE /api/videos/delete/:filename` - Delete a video file
+  - `POST /api/videos/delete-batch` - Delete multiple video files
 
 ### Remotion Video System
 
@@ -181,22 +182,32 @@ Located in `frontend/src/components/`:
 - sonner.tsx (toast notifications)
 - All based on Radix UI primitives with Tailwind styling
 
+**Public Assets** (`public/`):
+- `favicon.svg` - Custom "C" favicon with orange/yellow gradient
+- `apple-touch-icon.png` - iOS home screen icon (180x180)
+- `template.csv` - Downloadable CSV template with Name,Message columns
+
 **Feature Components**:
 1. **SplashScreen.tsx** - Animated entrance with Mail icon (greeting card) and Framer Motion particles
-2. **MainLayout.tsx** - Top nav, dark mode toggle, settings button
-3. **SettingsModal.tsx** - API key management with validation
-4. **FileUploader.tsx** - Drag-drop CSV/Excel upload with FileSpreadsheet icon
-5. **RecipientForm.tsx** - Manual entry form with sender name field
-6. **RecipientTable.tsx** - List of recipients with edit/delete
-7. **HolidaySelector.tsx** - 17 holiday cards in 4 categories
-8. **FormatPicker.tsx** - Radio group for export formats
-9. **MusicSelector.tsx** - Music track selection from Jamendo
-10. **VideoGenerator.tsx** - Three-step process: generate messages, review/edit/confirm, generate videos
-11. **VideoGallery.tsx** - Grid with preview, download, and delete functionality
-12. **DownloadStep.tsx** - Final download interface with batch ZIP download
-13. **ConfirmStartOverDialog.tsx** - Warning dialog when starting over with completed videos
-14. **ConfirmModeChangeDialog.tsx** - Confirmation when switching input modes
-15. **InputModeToggle.tsx** - Toggle between CSV upload and manual entry
+2. **MainLayout.tsx** - Top nav, dark mode toggle, settings button, err0r.dev footer link
+3. **SetupScreen.tsx** - Initial API key entry (1Password autofill disabled)
+4. **SettingsModal.tsx** - API key management with validation (1Password autofill disabled)
+5. **FileUploader.tsx** - Drag-drop CSV/Excel upload with FileSpreadsheet icon and downloadable template
+6. **RecipientForm.tsx** - Manual entry form with sender name field
+7. **RecipientTable.tsx** - List of recipients with edit/delete
+8. **HolidaySelector.tsx** - 17 holiday cards in 4 categories
+9. **FormatPicker.tsx** - Radio group for export formats
+10. **MusicSelector.tsx** - Music track selection from Jamendo
+11. **VideoGenerator.tsx** - Three-step process: generate messages, review/edit/confirm, generate videos
+12. **VideoGallery.tsx** - Grid with preview, download, and delete functionality
+13. **DownloadStep.tsx** - Final download interface with batch ZIP download
+14. **ConfirmStartOverDialog.tsx** - Warning dialog when starting over with completed videos (deletes video files)
+15. **ConfirmModeChangeDialog.tsx** - Confirmation when switching input modes
+16. **InputModeToggle.tsx** - Toggle between CSV upload and manual entry
+
+**Utilities** (`lib/`):
+- `api.ts` - API client with typed methods for all backend endpoints including batch delete
+- `utils.ts` - Utility functions (cn for className merging)
 
 **Generation Flow** (VideoGenerator.tsx):
 1. **Step 1: Generate Messages** - Auto-triggers when prerequisites are met (recipients, theme, API key)
@@ -402,6 +413,21 @@ Located in `shared/src/index.ts`:
 }
 ```
 
+### POST /api/videos/delete-batch
+**Request:**
+```json
+{
+  "filenames": ["video1.mp4", "video2.mp4"]
+}
+```
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Deleted 2 of 2 videos"
+}
+```
+
 ---
 
 ## Development Guidelines
@@ -560,6 +586,12 @@ docker-compose logs -f
 # Stop
 docker-compose down
 ```
+
+**Docker Configuration Notes:**
+- Backend uses `node:20-slim` (Debian-based) for Remotion compatibility with Chrome Headless Shell
+- Chrome Headless Shell is pre-downloaded during Docker build via `ensureBrowser()`
+- Frontend uses `nginx:alpine` with proper file permissions for static assets
+- Shared package is symlinked into node_modules during build
 
 ### Previewing Videos in Remotion Studio
 
@@ -762,4 +794,4 @@ When working on this project, consider asking:
 ---
 
 Last Updated: 2025-12-23
-Version: 1.1.0
+Version: 1.2.0

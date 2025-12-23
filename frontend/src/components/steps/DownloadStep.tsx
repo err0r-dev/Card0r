@@ -31,10 +31,10 @@ export function DownloadStep() {
         {completedCount > 0 ? (
           <>
             <Sparkles className="inline h-4 w-4 mr-1 text-yellow-500" />
-            {completedCount} personalized video{completedCount !== 1 ? 's' : ''} created successfully!
+            {completedCount} personalised video{completedCount !== 1 ? 's' : ''} created successfully!
           </>
         ) : (
-          'Download your personalized video cards below'
+          'Download your personalised video cards below'
         )}
       </motion.p>
 

@@ -104,6 +104,8 @@ export function SetupScreen({ onComplete }: SetupScreenProps) {
               value={localOpenaiKey}
               onChange={(e) => setLocalOpenaiKey(e.target.value)}
               className="text-base"
+              autoComplete="off"
+              data-1p-ignore
             />
             <a
               href="https://platform.openai.com/api-keys"
@@ -137,6 +139,8 @@ export function SetupScreen({ onComplete }: SetupScreenProps) {
               value={localJamendoKey}
               onChange={(e) => setLocalJamendoKey(e.target.value)}
               className="text-base"
+              autoComplete="off"
+              data-1p-ignore
             />
             <a
               href="https://developer.jamendo.com/v3.0"

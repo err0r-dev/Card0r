@@ -116,6 +116,15 @@ class ApiClient {
       method: 'DELETE',
     });
   }
+
+  async deleteVideoBatch(videoUrls: string[]): Promise<{ success: boolean; message: string }> {
+    // Extract filenames from URLs
+    const filenames = videoUrls.map(url => url.split('/').pop() || '').filter(Boolean);
+    return this.fetch<{ success: boolean; message: string }>('/videos/delete-batch', {
+      method: 'POST',
+      body: JSON.stringify({ filenames }),
+    });
+  }
 }
 
 export const apiClient = new ApiClient();

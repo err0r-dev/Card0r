@@ -68,8 +68,15 @@ export function MainLayout({ children }: MainLayoutProps) {
       {/* Footer */}
       <footer className="border-t border-border mt-auto py-6">
         <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>
-            Built with AI-powered personalisation • OpenAI GPT-4 • FFmpeg Video Processing
+          <p className="mt-1">
+            <a
+              href="https://err0r.dev"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline hover:text-foreground transition-colors"
+            >
+              err0r.dev
+            </a>
           </p>
         </div>
       </footer>

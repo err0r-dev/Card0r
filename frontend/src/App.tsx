@@ -19,12 +19,13 @@ import {
   DownloadStep,
 } from './components/steps';
 import { toast } from 'sonner';
+import { apiClient } from './lib/api';
 
 // Step configuration
 const STEP_CONFIG = {
   1: {
     title: 'Add Recipients',
-    description: 'Enter the people who will receive personalized video cards',
+    description: 'Enter the people who will receive personalised video cards',
   },
   2: {
     title: 'Customize Your Cards',
@@ -32,11 +33,11 @@ const STEP_CONFIG = {
   },
   3: {
     title: 'Generate Videos',
-    description: 'AI will create personalized messages and render your videos',
+    description: 'AI will create personalised messages and render your videos',
   },
   4: {
     title: 'Your Videos Are Ready!',
-    description: 'Download your personalized video cards',
+    description: 'Download your personalised video cards',
   },
 };
 
@@ -134,7 +135,20 @@ function App() {
   };
 
   // Start over handler
-  const handleStartOver = () => {
+  const handleStartOver = async () => {
+    // Delete video files from server before clearing state
+    const completedVideos = jobs.filter(j => j.status === 'completed' && j.videoUrl);
+    if (completedVideos.length > 0) {
+      try {
+        const videoUrls = completedVideos.map(j => j.videoUrl!);
+        await apiClient.deleteVideoBatch(videoUrls);
+        console.log(`[App] Deleted ${completedVideos.length} video files from server`);
+      } catch (error) {
+        console.error('[App] Failed to delete video files:', error);
+        // Continue with state reset even if delete fails
+      }
+    }
+
     clearRecipients();
     clearVideoState();
     resetWizard();

@@ -1,15 +1,15 @@
 # Card0r
 
-Create custom video e-cards for multiple recipients easily - A world-class video card generator with AI-powered personalization.
+Create custom video e-cards for multiple recipients easily - A world-class video card generator with AI-powered personalisation.
 
 ## Project Overview
 
-Card0r is a full-stack web application that generates personalized, animated video greeting cards for multiple recipients. It features:
+Card0r is a full-stack web application that generates personalised, animated video greeting cards for multiple recipients. It features:
 
-- **CSV/Excel Upload**: Bulk import recipients with messages
+- **CSV/Excel Upload**: Bulk import recipients with downloadable template
 - **Manual Entry**: Add recipients one by one through the UI
 - **17 Holiday Themes**: Christmas, New Year, Easter, Valentine's, Halloween, Thanksgiving, Jewish holidays (Rosh Hashanah, Hanukkah, Passover, Yom Kippur), Islamic holidays (Eid al-Fitr, Eid al-Adha, Ramadan), Asian holidays (Chinese New Year, Diwali, Lunar New Year), plus Thank You and Congratulations themes
-- **AI-Powered Messages**: OpenAI GPT-4 generates personalized messages with user review/edit before video generation
+- **AI-Powered Messages**: OpenAI GPT-4 generates personalised messages with user review/edit before video generation
 - **Theme-Specific Decorations**: Each theme has unique animated decorations with sparkle overlays and enhanced animations
 - **Multiple Export Formats**: 1080p, 4K, Square (Instagram), Social (Stories)
 - **Background Music**: Jamendo music integration
@@ -115,7 +115,7 @@ Card0r/
 2. **API Routes** (`backend/src/routes/`)
    - `/api/validate-keys` - Validate OpenAI/Jamendo API keys
    - `/api/upload-csv` - Parse CSV/Excel files
-   - `/api/generate-messages` - Generate personalized messages with OpenAI
+   - `/api/generate-messages` - Generate personalised messages with OpenAI
    - `/api/music/:theme` - Fetch holiday music from Jamendo
    - `/api/videos/generate` - Start batch video generation
    - `/api/videos/status/:jobId` - Check generation progress
@@ -253,7 +253,7 @@ docker-compose up -d
 3. **Select Theme** - Choose from 17 holiday themes with visual previews
 4. **Select Format** - Choose video dimensions (1080p, 4K, Square, Social)
 5. **Select Music** - Browse and select background music (optional)
-6. **Generate Messages** - AI generates personalized messages automatically
+6. **Generate Messages** - AI generates personalised messages automatically
 7. **Review & Edit** - Review generated messages, edit if needed, then confirm
 8. **Generate Videos** - Videos are generated after message confirmation
 9. **Download** - Preview, download individual videos, delete unwanted ones, or download all as ZIP
@@ -272,6 +272,7 @@ docker-compose up -d
 | `/api/videos/download-zip/:jobId` | POST | Start ZIP generation |
 | `/api/videos/download-zip/:jobId/progress` | GET | Check ZIP progress |
 | `/api/videos/delete/:filename` | DELETE | Delete a video file |
+| `/api/videos/delete-batch` | POST | Delete multiple video files |
 | `/videos/:filename` | GET | Download generated video |
 
 ## Environment Variables
@@ -301,6 +302,8 @@ MIT
 
 Built with:
 - 17 holiday themes with custom animated decorations and sparkle overlays
-- AI-powered personalization via OpenAI GPT-4
+- AI-powered personalisation via OpenAI GPT-4
 - React-based video rendering with Remotion
 - Modern, responsive React interface with shadcn/ui
+
+Created by [err0r.dev](https://err0r.dev)
