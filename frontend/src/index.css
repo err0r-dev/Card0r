@@ -12,7 +12,7 @@
   --color-secondary: 48 96% 89%;
   --color-secondary-foreground: 45 93% 20%;
   --color-muted: 48 96% 95%;
-  --color-muted-foreground: 45 20% 40%;
+  --color-muted-foreground: 45 30% 25%;
   --color-accent: 48 96% 89%;
   --color-accent-foreground: 45 93% 20%;
   --color-destructive: 0 84.2% 60.2%;
@@ -39,7 +39,7 @@
     --secondary: 48 96% 89%;
     --secondary-foreground: 45 93% 20%;
     --muted: 48 96% 95%;
-    --muted-foreground: 45 20% 40%;
+    --muted-foreground: 45 30% 25%;
     --accent: 48 96% 89%;
     --accent-foreground: 45 93% 20%;
     --destructive: 0 84.2% 60.2%;
@@ -67,8 +67,8 @@
     --accent-foreground: 48 100% 96%;
     --destructive: 0 62.8% 50%;
     --destructive-foreground: 48 100% 96%;
-    --border: 45 20% 20%;
-    --input: 45 20% 20%;
+    --border: 45 20% 25%;
+    --input: 45 20% 30%;
     --ring: 45 93% 58%;
   }
 

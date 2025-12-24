@@ -66,8 +66,8 @@ export function MusicSelector() {
     return (
       <Card>
         <CardContent className="p-12">
-          <div className="text-center">
-            <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-amber-500 dark:text-amber-400" />
+          <div className="text-center" role="status" aria-live="polite">
+            <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-amber-500 dark:text-amber-400" aria-hidden="true" />
             <p>Searching for music...</p>
           </div>
         </CardContent>
@@ -109,13 +109,23 @@ export function MusicSelector() {
               <div
                 key={track.id}
                 className={`
-                  relative p-4 rounded-lg border-2 cursor-pointer transition-all
+                  relative p-4 rounded-lg border-2 cursor-pointer transition-all focus:outline-none focus:ring-2 focus:ring-amber-500
                   ${isSelected
                     ? 'border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-amber-900/20'
                     : 'border-gray-300 dark:border-gray-600 hover:border-amber-400 dark:hover:border-amber-500'
                   }
                 `}
                 onClick={() => setSelectedMusicUrl(track.downloadUrl)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setSelectedMusicUrl(track.downloadUrl);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+                aria-label={`Select ${track.name}${isSelected ? ' (currently selected)' : ''}`}
+                aria-pressed={isSelected}
               >
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">

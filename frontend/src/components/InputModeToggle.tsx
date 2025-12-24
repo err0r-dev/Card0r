@@ -24,8 +24,10 @@ export function InputModeToggle({ mode, onModeChange, disabled }: InputModeToggl
               : 'text-muted-foreground hover:text-foreground',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
+          aria-pressed={mode === 'manual'}
+          aria-label="Add recipients manually"
         >
-          <UserPlus className="h-4 w-4" />
+          <UserPlus className="h-4 w-4" aria-hidden="true" />
           Add Manually
         </button>
 
@@ -40,8 +42,10 @@ export function InputModeToggle({ mode, onModeChange, disabled }: InputModeToggl
               : 'text-muted-foreground hover:text-foreground',
             disabled && 'opacity-50 cursor-not-allowed'
           )}
+          aria-pressed={mode === 'csv'}
+          aria-label="Upload CSV or Excel file"
         >
-          <Upload className="h-4 w-4" />
+          <Upload className="h-4 w-4" aria-hidden="true" />
           Upload CSV/Excel
         </button>
       </div>

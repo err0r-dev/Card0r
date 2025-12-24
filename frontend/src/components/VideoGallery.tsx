@@ -198,6 +198,7 @@ export function VideoGallery() {
                   <button
                     onClick={() => setPreviewVideo({ url: `${API_BASE}${job.videoUrl}`, name: job.recipientName })}
                     className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                    aria-label={`Play video for ${job.recipientName}`}
                   >
                     <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
                       <Play className="h-8 w-8 text-white" fill="white" />
@@ -214,6 +215,7 @@ export function VideoGallery() {
                       size="sm"
                       className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                       onClick={() => handleDelete(job.id, job.recipientName, job.videoUrl)}
+                      aria-label={`Delete video for ${job.recipientName}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -262,14 +264,18 @@ export function VideoGallery() {
         <div
           className="fixed inset-0 z-50 flex items-center justify-center"
           onClick={() => setPreviewVideo(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Video preview for ${previewVideo.name}`}
         >
           {/* Backdrop */}
-          <div className="absolute inset-0 bg-black/90" />
+          <div className="absolute inset-0 bg-black/90" aria-hidden="true" />
 
           {/* Close button */}
           <button
             onClick={() => setPreviewVideo(null)}
             className="absolute top-4 right-4 z-10 bg-white/10 hover:bg-white/20 rounded-full p-3 text-white transition-colors"
+            aria-label="Close video preview"
           >
             <X className="h-6 w-6" />
           </button>

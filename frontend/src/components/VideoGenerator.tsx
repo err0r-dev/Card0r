@@ -552,7 +552,7 @@ export function VideoGenerator() {
 
                 {/* Progress Display - inline within Step 3 */}
                 {hasJobs && (
-                  <div className="space-y-4">
+                  <div className="space-y-4" role="status" aria-live="polite" aria-label="Video generation progress">
                     {/* Cancel All button when generating */}
                     {videosGenerating && jobs.some(j => j.status === 'pending' || j.status === 'processing') && (
                       <div className="flex justify-end">
@@ -573,16 +573,16 @@ export function VideoGenerator() {
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium">{job.recipientName}</span>
                             {job.status === 'completed' && (
-                              <CheckCircle className="h-4 w-4 text-green-500" />
+                              <CheckCircle className="h-4 w-4 text-green-500" aria-label="Completed" />
                             )}
                             {job.status === 'failed' && (
-                              <XCircle className="h-4 w-4 text-red-500" />
+                              <XCircle className="h-4 w-4 text-red-500" aria-label="Failed" />
                             )}
                             {job.status === 'cancelled' && (
-                              <Ban className="h-4 w-4 text-gray-500" />
+                              <Ban className="h-4 w-4 text-gray-500" aria-label="Cancelled" />
                             )}
                             {job.status === 'processing' && (
-                              <Loader2 className="h-4 w-4 animate-spin text-amber-500 dark:text-amber-400" />
+                              <Loader2 className="h-4 w-4 animate-spin text-amber-500 dark:text-amber-400" aria-label="Processing" />
                             )}
                           </div>
                           <div className="flex items-center gap-2">
@@ -596,6 +596,7 @@ export function VideoGenerator() {
                                 size="sm"
                                 className="h-6 w-6 p-0 text-muted-foreground hover:text-destructive"
                                 onClick={() => handleCancelVideo(job.id)}
+                                aria-label={`Cancel video for ${job.recipientName}`}
                               >
                                 <X className="h-4 w-4" />
                               </Button>

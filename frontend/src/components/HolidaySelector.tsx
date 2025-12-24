@@ -61,12 +61,22 @@ export function HolidaySelector() {
                   <Card
                     key={holiday.id}
                     className={cn(
-                      'cursor-pointer transition-all hover:scale-105 relative',
+                      'cursor-pointer transition-all hover:scale-105 relative focus:outline-none focus:ring-4 focus:ring-amber-500',
                       isSelected
                         ? 'ring-4 ring-amber-500 dark:ring-amber-400 shadow-xl scale-105 bg-amber-50 dark:bg-amber-900/20'
                         : 'hover:shadow-md hover:ring-2 hover:ring-amber-300 dark:hover:ring-amber-500'
                     )}
                     onClick={() => setSelectedTheme(holiday.id)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setSelectedTheme(holiday.id);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Select ${holiday.name} theme${isSelected ? ' (currently selected)' : ''}`}
+                    aria-pressed={isSelected}
                   >
                     <CardContent className="p-0">
                       <div className={cn(

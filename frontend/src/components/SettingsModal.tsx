@@ -100,9 +100,9 @@ export function SettingsModal() {
               <Label htmlFor="openai-key">OpenAI API Key</Label>
               {validation.openai !== null && (
                 validation.openai ? (
-                  <Check className="h-4 w-4 text-green-500" />
+                  <Check className="h-4 w-4 text-green-500" aria-label="OpenAI key valid" />
                 ) : (
-                  <X className="h-4 w-4 text-red-500" />
+                  <X className="h-4 w-4 text-red-500" aria-label="OpenAI key invalid" />
                 )
               )}
             </div>
@@ -135,9 +135,9 @@ export function SettingsModal() {
               <Label htmlFor="jamendo-key">Jamendo API Key (Client ID)</Label>
               {validation.jamendo !== null && (
                 validation.jamendo ? (
-                  <Check className="h-4 w-4 text-green-500" />
+                  <Check className="h-4 w-4 text-green-500" aria-label="Jamendo key valid" />
                 ) : (
-                  <X className="h-4 w-4 text-red-500" />
+                  <X className="h-4 w-4 text-red-500" aria-label="Jamendo key invalid" />
                 )
               )}
             </div>

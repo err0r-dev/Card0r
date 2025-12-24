@@ -84,13 +84,15 @@ export function FileUploader() {
             onChange={handleFileInput}
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
             disabled={isUploading}
+            aria-label="Upload CSV or Excel file with recipients"
+            id="file-upload"
           />
 
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-center gap-4" role={isUploading ? 'status' : undefined} aria-live={isUploading ? 'polite' : undefined}>
             {isUploading ? (
-              <Loader2 className="h-12 w-12 text-amber-500 dark:text-amber-400 animate-spin" />
+              <Loader2 className="h-12 w-12 text-amber-500 dark:text-amber-400 animate-spin" aria-hidden="true" />
             ) : (
-              <FileSpreadsheet className="h-12 w-12 text-muted-foreground" />
+              <FileSpreadsheet className="h-12 w-12 text-muted-foreground" aria-hidden="true" />
             )}
 
             <div>

@@ -45,7 +45,8 @@ export function RecipientForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">
-              Recipient Name <span className="text-destructive">*</span>
+              Recipient Name <span className="text-destructive" aria-hidden="true">*</span>
+              <span className="sr-only">(required)</span>
             </Label>
             <Input
               id="name"
@@ -53,15 +54,18 @@ export function RecipientForm() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="text-base"
+              aria-required="true"
+              aria-describedby="name-description"
             />
-            <p className="text-xs text-muted-foreground">
+            <p id="name-description" className="text-xs text-muted-foreground">
               Full name of the person receiving the video card
             </p>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="message" className="text-sm font-medium">
-              Message Guidance <span className="text-destructive">*</span>
+              Message Guidance <span className="text-destructive" aria-hidden="true">*</span>
+              <span className="sr-only">(required)</span>
             </Label>
             <Textarea
               id="message"
@@ -70,8 +74,10 @@ export function RecipientForm() {
               onChange={(e) => setMessageGuidance(e.target.value)}
               rows={4}
               className="text-base resize-none"
+              aria-required="true"
+              aria-describedby="message-description"
             />
-            <p className="text-xs text-muted-foreground">
+            <p id="message-description" className="text-xs text-muted-foreground">
               AI will use this guidance to create a personalised message for this recipient
             </p>
           </div>

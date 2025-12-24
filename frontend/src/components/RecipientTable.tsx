@@ -50,6 +50,7 @@ export function RecipientTable() {
                   size="icon"
                   onClick={() => removeRecipient(recipient.id)}
                   className="flex-shrink-0 text-destructive hover:text-destructive"
+                  aria-label={`Delete ${recipient.name}`}
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

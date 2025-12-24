@@ -91,9 +91,9 @@ export function SetupScreen({ onComplete }: SetupScreenProps) {
               </Label>
               {validation.openai !== null && (
                 validation.openai ? (
-                  <Check className="h-5 w-5 text-green-500" />
+                  <Check className="h-5 w-5 text-green-500" aria-label="OpenAI key valid" />
                 ) : (
-                  <X className="h-5 w-5 text-red-500" />
+                  <X className="h-5 w-5 text-red-500" aria-label="OpenAI key invalid" />
                 )
               )}
             </div>
@@ -126,9 +126,9 @@ export function SetupScreen({ onComplete }: SetupScreenProps) {
               </Label>
               {validation.jamendo !== null && (
                 validation.jamendo ? (
-                  <Check className="h-5 w-5 text-green-500" />
+                  <Check className="h-5 w-5 text-green-500" aria-label="Jamendo key valid" />
                 ) : (
-                  <X className="h-5 w-5 text-red-500" />
+                  <X className="h-5 w-5 text-red-500" aria-label="Jamendo key invalid" />
                 )
               )}
             </div>

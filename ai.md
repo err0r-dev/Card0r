@@ -6,6 +6,8 @@ This file provides comprehensive context for AI assistants (like Claude, ChatGPT
 
 **Card0r** is a full-stack TypeScript application that generates personalised video greeting cards using AI-powered message generation and Remotion-based React video rendering.
 
+**Language Standard:** UK English is used throughout the codebase for all user-facing text.
+
 **Tech Stack:**
 - Frontend: React 19 + Vite + TypeScript + TailwindCSS + shadcn/ui
 - Backend: Node.js + Express + TypeScript + Remotion
@@ -28,7 +30,9 @@ Card0r/
 ├── remotion/           # Remotion video compositions and decorations
 ├── shared/             # Shared TypeScript types
 ├── docker-compose.yml  # Orchestrates both services
-└── [docs]              # README, ai.md
+├── README.md           # Main documentation
+├── Non-Techie-Readme.md # Plain-language setup guide
+└── ai.md               # This file
 ```
 
 ### Data Flow
@@ -63,7 +67,8 @@ Located in `backend/src/services/`:
 3. **openai-service.ts**
    - Integrates with OpenAI GPT-4
    - Holiday-specific prompts for each theme
-   - Generates ~75-100 word messages
+   - Configurable message length (5-100 words via `targetWordCount`)
+   - Configurable creativity (0-1 via `creativity`, maps to temperature 0.3-1.2)
    - Handles rate limiting and errors
 
 4. **jamendo-service.ts**
@@ -76,13 +81,14 @@ Located in `backend/src/services/`:
    - Bundles and renders Remotion compositions
    - Passes props (name, message, theme, senderName) to compositions
    - Supports multiple resolutions (1080p, 4K, square, social)
-   - H.264 encoding with quality optimization
+   - H.264 encoding with quality optimisation
    - Videos stored in `backend/videos/` directory
 
 6. **video-generator.ts**
    - Orchestrates entire video generation pipeline
    - Manages job queue (in-memory)
    - Tracks progress for each video
+   - **Supports cancellation** of individual jobs or entire batches
    - Handles batch processing
    - Cleanup after completion
 
@@ -98,10 +104,13 @@ Located in `backend/src/routes/`:
 - **validation.ts** - `POST /api/validate-keys`
 - **upload.ts** - `POST /api/upload-csv` (with Multer middleware)
 - **messages.ts** - `POST /api/generate-messages` (requires x-openai-key header)
+  - Accepts `targetWordCount` (5-100) and `creativity` (0-1) parameters
 - **music.ts** - `GET /api/music/:theme` (requires x-jamendo-key header)
 - **videos.ts**:
   - `POST /api/videos/generate` - Start video generation
   - `GET /api/videos/status/:jobId` - Check job status
+  - `POST /api/videos/cancel/:jobId` - Cancel all pending/processing jobs in batch
+  - `POST /api/videos/cancel/:jobId/:videoJobId` - Cancel specific video job
   - `POST /api/videos/download-zip/:jobId` - Start ZIP generation
   - `GET /api/videos/download-zip/:jobId/progress` - Check ZIP progress
   - `DELETE /api/videos/delete/:filename` - Delete a video file
@@ -132,6 +141,11 @@ Located in `remotion/src/`:
 - Sender reveal: 3 seconds
 - Outro: 3 seconds
 - 1-second fade out
+
+**Watermark:**
+- Positioned bottom-right
+- Font size: `Math.max(32, Math.round(width / 50))`
+- Text: "Created by Card0r - available at err0r.dev/card0r"
 
 **Decorations** (`remotion/src/decorations/`):
 
@@ -167,7 +181,7 @@ Each theme has its own decoration component with theme-specific animations:
 **Animation System:**
 - Pre-seeded Y/X positions for immediate particle visibility from frame 0
 - Reduced delays (30 frames max) for fast particle appearance
-- Relative timing using `durationInFrames` for special animations (Santa, Cupid, sparklers)
+- Relative timing using `durationInFrames` for special animations
 - Modulo-based wrapping: `(startY + (frame + delay) * speed) % (height + 100)`
 - Continuous animations throughout entire video duration
 - SparkleOverlay added to most decoration components for enhanced visual appeal
@@ -178,7 +192,7 @@ Located in `frontend/src/components/`:
 
 **UI Components** (`ui/`):
 - button.tsx, dialog.tsx, input.tsx, label.tsx, textarea.tsx
-- card.tsx, progress.tsx, radio-group.tsx, separator.tsx, select.tsx
+- card.tsx, progress.tsx, radio-group.tsx, separator.tsx, select.tsx, slider.tsx
 - sonner.tsx (toast notifications)
 - All based on Radix UI primitives with Tailwind styling
 
@@ -188,31 +202,39 @@ Located in `frontend/src/components/`:
 - `template.csv` - Downloadable CSV template with Name,Message columns
 
 **Feature Components**:
-1. **SplashScreen.tsx** - Animated entrance with Mail icon (greeting card) and Framer Motion particles
+1. **SplashScreen.tsx** - Animated entrance with Mail icon and Framer Motion particles
 2. **MainLayout.tsx** - Top nav, dark mode toggle, settings button, err0r.dev footer link
 3. **SetupScreen.tsx** - Initial API key entry (1Password autofill disabled)
 4. **SettingsModal.tsx** - API key management with validation (1Password autofill disabled)
-5. **FileUploader.tsx** - Drag-drop CSV/Excel upload with FileSpreadsheet icon and downloadable template
+5. **FileUploader.tsx** - Drag-drop CSV/Excel upload with downloadable template
 6. **RecipientForm.tsx** - Manual entry form with sender name field
 7. **RecipientTable.tsx** - List of recipients with edit/delete
-8. **HolidaySelector.tsx** - 17 holiday cards in 4 categories
+8. **HolidaySelector.tsx** - 17 holiday cards in 5 categories (keyboard accessible)
 9. **FormatPicker.tsx** - Radio group for export formats
-10. **MusicSelector.tsx** - Music track selection from Jamendo
-11. **VideoGenerator.tsx** - Three-step process: generate messages, review/edit/confirm, generate videos
+10. **MusicSelector.tsx** - Music track selection from Jamendo (keyboard accessible)
+11. **VideoGenerator.tsx** - Three-step accordion: AI settings, message review/edit, video generation with cancellation
 12. **VideoGallery.tsx** - Grid with preview, download, and delete functionality
 13. **DownloadStep.tsx** - Final download interface with batch ZIP download
-14. **ConfirmStartOverDialog.tsx** - Warning dialog when starting over with completed videos (deletes video files)
+14. **ConfirmStartOverDialog.tsx** - Warning dialog when starting over with completed videos
 15. **ConfirmModeChangeDialog.tsx** - Confirmation when switching input modes
 16. **InputModeToggle.tsx** - Toggle between CSV upload and manual entry
 
+**Accessibility Features**:
+- ARIA labels on all interactive elements
+- Keyboard navigation (tabIndex, onKeyDown handlers)
+- Screen reader announcements (aria-live regions)
+- Focus indicators on custom components
+- Form field descriptions (aria-describedby)
+- Required field indicators (aria-required)
+
 **Utilities** (`lib/`):
-- `api.ts` - API client with typed methods for all backend endpoints including batch delete
+- `api.ts` - API client with typed methods for all backend endpoints including cancellation
 - `utils.ts` - Utility functions (cn for className merging)
 
 **Generation Flow** (VideoGenerator.tsx):
-1. **Step 1: Generate Messages** - Auto-triggers when prerequisites are met (recipients, theme, API key)
+1. **Step 1: Configure AI Settings** - Adjust message length (5-100 words) and creativity (closer to original vs. more imaginative)
 2. **Step 2: Review & Edit** - User reviews AI-generated messages, can edit inline, must click "Confirm Messages & Generate Videos"
-3. **Step 3: Generate Videos** - Only starts after user confirms messages; tracks progress with polling
+3. **Step 3: Generate Videos** - Only starts after user confirms messages; tracks progress with polling; supports cancellation
 
 **Important**: Videos do NOT auto-generate. User must explicitly confirm messages before video generation begins.
 
@@ -243,14 +265,16 @@ Located in `frontend/src/stores/`:
 Located in `shared/src/index.ts`:
 
 **Key Enums:**
-- `HolidayTheme` - 17 holiday values (christmas, new_year, valentines_day, easter, halloween, thanksgiving, hanukkah, diwali, chinese_new_year, eid_al_fitr, eid_al_adha, ramadan, rosh_hashanah, passover, yom_kippur, lunar_new_year, thank_you, congratulations)
+- `HolidayTheme` - 17 holiday values (christmas, new_year, valentines_day, easter, halloween, thanksgiving, hanukkah, diwali, chinese_new_year, eid_al_fitr, eid_al_adha, ramadan, rosh_hashanah, passover, lunar_new_year, thank_you, congratulations)
 - `VideoFormat` - 4 format values (1080p, 4k, square, social)
 
 **Key Interfaces:**
 - `Recipient` - { id, name, messageGuidance }
 - `RecipientWithMessage` - extends Recipient with generatedMessage
 - `VideoGenerationJob` - { id, status, progress, recipientName, videoUrl, error }
+  - status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled'
 - `BatchVideoResponse` - { jobId, jobs[] }
+- `MessageGenerationRequest` - includes `targetWordCount` (5-100) and `creativity` (0-1)
 - `ZipGenerationResponse` - { status, message, totalVideos }
 - `ZipProgressResponse` - { status, progress, zipPath, error }
 - All API request/response types
@@ -269,18 +293,17 @@ Located in `shared/src/index.ts`:
 - `halloween` - Bats, ghosts, spiders, pumpkins
 - `thanksgiving` - Autumn leaves, acorns, pumpkins
 
-### Jewish (4)
+### Jewish (3)
 - `rosh_hashanah` - Honey, apples, shofar, pomegranates, gold/amber
 - `hanukkah` - Menorah, Stars of David, dreidels, gelt
 - `passover` - Matzah, wine, seder plate, earth tones
-- `yom_kippur` - Doves, peaceful gray/white
 
 ### Islamic (3)
 - `eid_al_fitr` - Crescent moons, lanterns, geometric patterns
 - `eid_al_adha` - Crescent moons, lanterns, geometric patterns
 - `ramadan` - Crescent moons, lanterns, geometric patterns
 
-### Asian (2)
+### Asian (3)
 - `chinese_new_year` - Lanterns, dragon, red envelopes
 - `diwali` - Diyas, rangoli, fireworks, sparklers
 - `lunar_new_year` - Lanterns, red/gold particles
@@ -337,7 +360,9 @@ Located in `shared/src/index.ts`:
 {
   "recipients": [...],
   "theme": "christmas",
-  "senderName": "John"
+  "senderName": "John",
+  "targetWordCount": 50,
+  "creativity": 0.5
 }
 ```
 **Response:**
@@ -352,7 +377,7 @@ Located in `shared/src/index.ts`:
 **Response:**
 ```json
 {
-  "tracks": [{ "id": "...", "name": "...", "url": "...", "duration": 35 }]
+  "tracks": [{ "id": "...", "name": "...", "downloadUrl": "...", "duration": 35 }]
 }
 ```
 
@@ -381,6 +406,24 @@ Located in `shared/src/index.ts`:
 {
   "jobId": "...",
   "jobs": [{ "id": "...", "status": "completed", "progress": 100, "videoUrl": "/videos/..." }]
+}
+```
+
+### POST /api/videos/cancel/:jobId
+**Response:**
+```json
+{
+  "success": true,
+  "message": "All pending jobs cancelled"
+}
+```
+
+### POST /api/videos/cancel/:jobId/:videoJobId
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Video job cancelled"
 }
 ```
 
@@ -442,7 +485,7 @@ Located in `shared/src/index.ts`:
    }
    ```
 
-2. **Add Colors** (`remotion/src/types.ts`)
+2. **Add Colours** (`remotion/src/types.ts`)
    ```typescript
    export const HOLIDAY_COLORS: Record<HolidayTheme, ThemeColors> = {
      // ...existing
@@ -526,22 +569,16 @@ The video structure in `remotion/src/CardComposition.tsx`:
 
 To modify, update the timing constants and Sequence components in CardComposition.tsx. Remember to update `calculateTotalFrames()` if changing durations.
 
-### Adding New Animation Effects
+### Accessibility Guidelines
 
-To add shared animations, update `remotion/src/utils/decorationAnimations.tsx`:
-
-```typescript
-export function NewEffect({ /* props */ }) {
-  const frame = useCurrentFrame();
-  const { width, height } = useVideoConfig();
-
-  // Animation logic...
-
-  return <AbsoluteFill>...</AbsoluteFill>;
-}
-```
-
-Then import and use in decoration components.
+When adding new components:
+- Add `aria-label` to icon-only buttons
+- Use `role="button"` for clickable non-button elements
+- Add `tabIndex={0}` and `onKeyDown` handlers for keyboard navigation
+- Use `aria-live="polite"` for dynamic status updates
+- Link form fields to descriptions with `aria-describedby`
+- Mark required fields with `aria-required="true"`
+- Hide decorative icons with `aria-hidden="true"`
 
 ---
 
@@ -644,7 +681,7 @@ This ensures videos are stored and served from the same location regardless of w
 - **Memory**: ~200-400MB during rendering
 - **Disk**: ~5-10MB per 1080p video, ~20-40MB per 4K
 
-### Optimization Opportunities
+### Optimisation Opportunities
 1. **Parallel Processing**: Generate multiple videos concurrently
 2. **Job Queue**: Use Redis or BullMQ for persistent jobs
 3. **Caching**: Cache generated messages and music
@@ -728,6 +765,7 @@ VITE_API_URL=http://localhost:3001/api
 ## Code Style
 
 - **TypeScript**: Strict mode enabled
+- **Language**: UK English for all user-facing text
 - **Formatting**: Prettier (recommended)
 - **Linting**: ESLint configured
 - **Comments**: JSDoc for complex functions
@@ -779,19 +817,23 @@ When working on this project, consider asking:
 4. "Does this impact video generation performance?"
 5. "Should this be configurable via environment variables?"
 6. "Does this need to be persisted across sessions?"
+7. "Does this text need to use UK English spelling?"
+8. "Does this component need accessibility attributes?"
 
 ---
 
 ## Project Philosophy
 
 - **User Experience First**: Intuitive, beautiful, responsive
+- **Accessibility**: WCAG AA compliant, keyboard navigable
 - **Type Safety**: TypeScript everywhere
 - **Modern Stack**: Latest stable versions
-- **Performance**: Optimize for speed where possible
+- **Performance**: Optimise for speed where possible
 - **Simplicity**: Prefer simple solutions over complex ones
 - **Documentation**: Code should be self-documenting
+- **UK English**: All user-facing text uses British spelling
 
 ---
 
-Last Updated: 2025-12-23
-Version: 1.2.0
+Last Updated: 2025-12-24
+Version: 1.3.0

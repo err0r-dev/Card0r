@@ -60,7 +60,7 @@ Return ONLY the message text, no additional commentary.`;
         messages: [
           {
             role: 'system',
-            content: 'You are a creative greeting card writer who creates personalized, heartfelt messages for special occasions.'
+            content: 'You are a creative greeting card writer who creates personalised, heartfelt messages for special occasions.'
           },
           {
             role: 'user',
