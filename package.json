@@ -1,0 +1,31 @@
+{
+  "name": "card0r",
+  "version": "1.0.0",
+  "description": "Create custom video e-cards for multiple recipients easily",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared",
+    "remotion"
+  ],
+  "scripts": {
+    "dev": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,magenta\" \"npm run dev:frontend\" \"npm run dev:backend\"",
+    "dev:frontend": "cd frontend && npm run dev",
+    "dev:backend": "cd backend && npm run dev",
+    "build": "npm run build:shared && npm run build:remotion && npm run build:frontend && npm run build:backend",
+    "build:frontend": "cd frontend && npm run build",
+    "build:backend": "cd backend && npm run build",
+    "build:shared": "cd shared && npm run build",
+    "build:remotion": "cd remotion && npm run bundle",
+    "remotion:studio": "cd remotion && npm run studio",
+    "start": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,magenta\" \"cd frontend && npm run preview\" \"cd backend && npm start\""
+  },
+  "devDependencies": {
+    "canvas": "^3.2.0",
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

@@ -1,0 +1,264 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: 0 0% 100%;
+  --color-foreground: 222.2 84% 4.9%;
+  --color-card: 0 0% 100%;
+  --color-card-foreground: 222.2 84% 4.9%;
+  --color-popover: 0 0% 100%;
+  --color-popover-foreground: 222.2 84% 4.9%;
+  --color-primary: 45 93% 47%;
+  --color-primary-foreground: 0 0% 100%;
+  --color-secondary: 48 96% 89%;
+  --color-secondary-foreground: 45 93% 20%;
+  --color-muted: 48 96% 95%;
+  --color-muted-foreground: 45 30% 25%;
+  --color-accent: 48 96% 89%;
+  --color-accent-foreground: 45 93% 20%;
+  --color-destructive: 0 84.2% 60.2%;
+  --color-destructive-foreground: 210 40% 98%;
+  --color-border: 45 40% 85%;
+  --color-input: 45 40% 85%;
+  --color-ring: 45 93% 47%;
+
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 45 93% 47%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 48 96% 89%;
+    --secondary-foreground: 45 93% 20%;
+    --muted: 48 96% 95%;
+    --muted-foreground: 45 30% 25%;
+    --accent: 48 96% 89%;
+    --accent-foreground: 45 93% 20%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 45 40% 85%;
+    --input: 45 40% 85%;
+    --ring: 45 93% 47%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 20 15% 8%;
+    --foreground: 48 100% 96%;
+    --card: 20 15% 10%;
+    --card-foreground: 48 100% 96%;
+    --popover: 20 15% 10%;
+    --popover-foreground: 48 100% 96%;
+    --primary: 45 93% 58%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 45 40% 25%;
+    --secondary-foreground: 48 100% 96%;
+    --muted: 45 20% 20%;
+    --muted-foreground: 45 30% 65%;
+    --accent: 45 40% 25%;
+    --accent-foreground: 48 100% 96%;
+    --destructive: 0 62.8% 50%;
+    --destructive-foreground: 48 100% 96%;
+    --border: 45 20% 25%;
+    --input: 45 20% 30%;
+    --ring: 45 93% 58%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+}
+
+/* ===== Wizard Step Progress Styles ===== */
+
+.step-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 1rem 0;
+}
+
+.step-dot {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  border: 2px solid hsl(var(--border));
+  background: hsl(var(--card));
+  color: hsl(var(--muted-foreground));
+}
+
+.step-dot.active {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  transform: scale(1.1);
+  box-shadow: 0 0 0 4px hsl(var(--primary) / 0.2);
+}
+
+.step-dot.completed {
+  border-color: hsl(142 76% 36%);
+  background: hsl(142 76% 36%);
+  color: white;
+}
+
+.dark .step-dot.completed {
+  border-color: hsl(142 71% 45%);
+  background: hsl(142 71% 45%);
+}
+
+.step-line {
+  width: 40px;
+  height: 2px;
+  background: hsl(var(--border));
+  transition: background 0.3s ease;
+  margin: 0 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .step-line {
+    width: 60px;
+  }
+}
+
+.step-line.completed {
+  background: hsl(142 76% 36%);
+}
+
+.dark .step-line.completed {
+  background: hsl(142 71% 45%);
+}
+
+.step-label {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  color: hsl(var(--muted-foreground));
+  display: none;
+  font-weight: 500;
+}
+
+@media (min-width: 640px) {
+  .step-label {
+    display: block;
+  }
+}
+
+.step-label.active {
+  color: hsl(var(--primary));
+  font-weight: 600;
+}
+
+/* ===== Guided Step Card Styles ===== */
+
+.guided-card {
+  max-width: 700px;
+  margin: 0 auto;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 24px hsl(var(--foreground) / 0.08);
+}
+
+.dark .guided-card {
+  box-shadow: 0 4px 24px hsl(0 0% 0% / 0.2);
+}
+
+.guided-card-success {
+  border-color: hsl(142 76% 36% / 0.3);
+  background: linear-gradient(
+    135deg,
+    hsl(var(--card)) 0%,
+    hsl(142 76% 36% / 0.05) 100%
+  );
+}
+
+.guided-step-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: hsl(var(--foreground));
+  margin-bottom: 0.5rem;
+}
+
+.guided-step-description {
+  color: hsl(var(--muted-foreground));
+  font-size: 0.95rem;
+}
+
+.guided-content {
+  margin-top: 1.5rem;
+}
+
+/* Gradient CTA button */
+.btn-gradient {
+  background: linear-gradient(
+    135deg,
+    hsl(var(--primary)) 0%,
+    hsl(35 93% 47%) 100%
+  );
+  color: white;
+  border: none;
+  transition: all 0.2s ease;
+  font-weight: 600;
+}
+
+.btn-gradient:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.35);
+}
+
+.btn-gradient:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn-gradient:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Animation utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}

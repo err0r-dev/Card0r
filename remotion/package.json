@@ -1,0 +1,27 @@
+{
+  "name": "@card0r/remotion",
+  "version": "1.0.0",
+  "description": "Remotion video compositions for Card0r",
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/Root.tsx",
+    "bundle": "remotion bundle src/Root.tsx --out-dir ../backend/remotion-bundle --public-dir public",
+    "build": "npm run bundle",
+    "render": "remotion render src/Root.tsx HolidayCard out/video.mp4"
+  },
+  "dependencies": {
+    "@card0r/shared": "*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.393"
+  },
+  "devDependencies": {
+    "@remotion/cli": "^4.0.393",
+    "@remotion/tailwind": "^4.0.393",
+    "@types/react": "^18.3.18",
+    "typescript": "^5.3.3",
+    "tailwindcss": "^3.4.17",
+    "postcss": "^8.4.49",
+    "autoprefixer": "^10.4.20"
+  }
+}
