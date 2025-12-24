@@ -1,5 +1,14 @@
 # Card0r
 
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-3178C6?logo=typescript&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-20+-339933?logo=nodedotjs&logoColor=white)
+![Remotion](https://img.shields.io/badge/Remotion-4.0-5851DB?logo=react&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-6.0-646CFF?logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.4-06B6D4?logo=tailwindcss&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?logo=docker&logoColor=white)
+![License](https://img.shields.io/badge/License-ERROR.DEV-orange)
+
 Create personalised video greeting cards for multiple recipients with AI-powered message generation.
 
 **New to Card0r?** See the [Non-Techie Setup Guide](Non-Techie-Readme.md) for a plain-language walkthrough.
