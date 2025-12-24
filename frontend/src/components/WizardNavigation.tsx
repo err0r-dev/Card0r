@@ -46,8 +46,8 @@ export function WizardNavigation({
                   <div
                     className={cn(
                       'w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors',
-                      isCompleted && 'bg-primary text-primary-foreground',
-                      isActive && 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-2 ring-offset-background',
+                      isCompleted && 'bg-amber-500 dark:bg-amber-500 text-white',
+                      isActive && 'bg-amber-500 dark:bg-amber-500 text-white ring-2 ring-amber-500 dark:ring-amber-400 ring-offset-2 ring-offset-background',
                       !isActive && !isCompleted && 'bg-muted text-muted-foreground'
                     )}
                   >
@@ -56,7 +56,7 @@ export function WizardNavigation({
                   <span
                     className={cn(
                       'text-xs mt-1 hidden sm:block',
-                      isActive ? 'text-primary font-medium' : 'text-muted-foreground'
+                      isActive ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-muted-foreground'
                     )}
                   >
                     {label}
@@ -66,7 +66,7 @@ export function WizardNavigation({
                   <div
                     className={cn(
                       'w-12 sm:w-16 h-0.5 mx-2',
-                      stepNum < currentStep ? 'bg-primary' : 'bg-muted'
+                      stepNum < currentStep ? 'bg-amber-500 dark:bg-amber-400' : 'bg-muted'
                     )}
                   />
                 )}

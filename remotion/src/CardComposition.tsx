@@ -126,6 +126,25 @@ export function CardComposition({
           }}
         />
       )}
+
+      {/* Watermark - scales with video resolution */}
+      <AbsoluteFill style={{ pointerEvents: 'none' }}>
+        <div
+          style={{
+            position: 'absolute',
+            bottom: Math.round(height * 0.03),
+            right: Math.round(width * 0.02),
+            fontSize: Math.max(32, Math.round(width / 50)),
+            color: 'rgba(255, 255, 255, 0.6)',
+            textShadow: '1px 1px 3px rgba(0, 0, 0, 0.7)',
+            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontWeight: 400,
+            letterSpacing: '0.02em',
+          }}
+        >
+          Created by Card0r - available at err0r.dev/card0r
+        </div>
+      </AbsoluteFill>
     </AbsoluteFill>
   );
 }

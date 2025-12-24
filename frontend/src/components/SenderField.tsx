@@ -8,11 +8,11 @@ export function SenderField() {
   const { senderName, setSenderName } = useRecipientsStore();
 
   return (
-    <Card className="bg-primary/5 border-primary/20">
+    <Card className="bg-amber-500/5 dark:bg-amber-400/5 border-amber-500/20 dark:border-amber-400/20">
       <CardContent className="pt-4">
         <div className="flex items-start gap-4">
-          <div className="p-2 rounded-full bg-primary/10">
-            <User className="w-5 h-5 text-primary" />
+          <div className="p-2 rounded-full bg-amber-500/10 dark:bg-amber-400/10">
+            <User className="w-5 h-5 text-amber-600 dark:text-amber-400" />
           </div>
           <div className="flex-1 space-y-2">
             <Label htmlFor="sender-name" className="text-base font-medium">

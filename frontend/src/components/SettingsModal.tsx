@@ -122,7 +122,7 @@ export function SettingsModal() {
                 href="https://platform.openai.com/api-keys"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline"
+                className="text-amber-600 dark:text-amber-400 hover:underline"
               >
                 OpenAI Platform
               </a>
@@ -157,7 +157,7 @@ export function SettingsModal() {
                 href="https://developer.jamendo.com/v3.0"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:underline"
+                className="text-amber-600 dark:text-amber-400 hover:underline"
               >
                 Jamendo Developer
               </a>

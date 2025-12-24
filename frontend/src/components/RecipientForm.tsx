@@ -37,7 +37,7 @@ export function RecipientForm() {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Plus className="h-5 w-5 text-primary" />
+          <Plus className="h-5 w-5 text-amber-600 dark:text-amber-400" />
           Add Recipient Manually
         </CardTitle>
       </CardHeader>

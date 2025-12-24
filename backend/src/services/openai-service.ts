@@ -27,7 +27,12 @@ export async function generateMessages(
   apiKey: string
 ): Promise<MessageGenerationResponse> {
   const openai = new OpenAI({ apiKey });
-  const { recipients, theme, senderName } = request;
+  const { recipients, theme, senderName, targetWordCount = 50, creativity = 0.5 } = request;
+
+  // Map creativity (0-1) to temperature (0.3-1.2)
+  const temperature = 0.3 + (creativity * 0.9);
+  // Calculate max tokens based on target word count (approx 2.5 tokens per word)
+  const maxTokens = Math.ceil(targetWordCount * 2.5);
 
   const holidayPrompt = HOLIDAY_PROMPTS[theme];
   const recipientsWithMessages: RecipientWithMessage[] = [];
@@ -42,7 +47,7 @@ Guidance: ${recipient.messageGuidance}
 
 Requirements:
 - Make it personal and warm
-- Keep it suitable for a 30-second video (approximately 75-100 words when read aloud)
+- Keep the message approximately ${targetWordCount} words in length
 - Focus on the person and the guidance provided
 - Use appropriate tone for the holiday
 - Make it feel genuine and heartfelt
@@ -62,8 +67,8 @@ Return ONLY the message text, no additional commentary.`;
             content: prompt
           }
         ],
-        temperature: 0.8,
-        max_tokens: 200
+        temperature,
+        max_tokens: maxTokens
       });
 
       const generatedMessage = completion.choices[0]?.message?.content?.trim() || '';

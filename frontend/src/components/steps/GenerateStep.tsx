@@ -37,7 +37,7 @@ export function GenerateStep() {
             <div className="font-medium">{senderName || 'Not specified'}</div>
 
             <div className="text-muted-foreground">Recipients:</div>
-            <div className="font-medium">{recipients.length} people</div>
+            <div className="font-medium">{recipients.length} {recipients.length === 1 ? 'person' : 'people'}</div>
 
             <div className="text-muted-foreground">Theme:</div>
             <div className="font-medium">

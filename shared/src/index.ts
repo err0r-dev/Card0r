@@ -84,7 +84,7 @@ export interface VideoGenerationRequest {
 
 export interface VideoGenerationJob {
   id: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed' | 'cancelled';
   progress: number; // 0-100
   recipientName: string;
   videoUrl?: string;
@@ -101,6 +101,8 @@ export interface MessageGenerationRequest {
   recipients: Recipient[];
   theme: HolidayTheme;
   senderName?: string;
+  targetWordCount?: number; // 5-100 words, defaults to 50
+  creativity?: number; // 0-1, maps to AI temperature (0 = closer to original, 1 = more imaginative)
 }
 
 export interface MessageGenerationResponse {

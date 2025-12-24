@@ -233,7 +233,7 @@ export function VideoGallery() {
                       className={`flex-1 font-semibold ${
                         isDownloaded
                           ? 'bg-green-500 hover:bg-green-600'
-                          : 'bg-primary hover:bg-primary/90'
+                          : 'bg-amber-500 hover:bg-amber-600 dark:bg-amber-500 dark:hover:bg-amber-400'
                       }`}
                       onClick={() => handleDownload(job.videoUrl!, job.recipientName, job.id)}
                     >

@@ -70,6 +70,13 @@ function App() {
     }
   }, [darkMode]);
 
+  // Scroll to top when entering the Customise step
+  useEffect(() => {
+    if (currentStep === 2) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentStep]);
+
   // Check if setup is needed when splash finishes
   useEffect(() => {
     if (!showSplash && !hasCompletedSetup && (!openaiKey || !jamendoKey)) {

@@ -2,7 +2,7 @@ import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs/promises';
-import { generateVideoBatch, getJobStatus } from '../services/video-generator.js';
+import { generateVideoBatch, getJobStatus, cancelJob } from '../services/video-generator.js';
 import { generateZipForJob, getZipProgress } from '../services/zip-generator.js';
 import type { VideoGenerationRequest } from '@card0r/shared';
 
@@ -55,6 +55,48 @@ router.get('/status/:jobId', async (req, res) => {
     console.error('Status check error:', error);
     res.status(500).json({
       error: 'Status check failed',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Cancel all pending/processing jobs in a batch
+router.post('/cancel/:jobId', async (req, res) => {
+  try {
+    const { jobId } = req.params;
+    const success = cancelJob(jobId);
+
+    if (!success) {
+      return res.status(404).json({ error: 'Job not found or no jobs to cancel' });
+    }
+
+    console.log(`[Videos] Cancelled all jobs in batch: ${jobId}`);
+    res.json({ success: true, message: 'All pending jobs cancelled' });
+  } catch (error) {
+    console.error('Cancel batch error:', error);
+    res.status(500).json({
+      error: 'Failed to cancel jobs',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
+
+// Cancel a specific video job
+router.post('/cancel/:jobId/:videoJobId', async (req, res) => {
+  try {
+    const { jobId, videoJobId } = req.params;
+    const success = cancelJob(jobId, videoJobId);
+
+    if (!success) {
+      return res.status(404).json({ error: 'Job not found or already completed' });
+    }
+
+    console.log(`[Videos] Cancelled video job: ${videoJobId} in batch ${jobId}`);
+    res.json({ success: true, message: 'Video job cancelled' });
+  } catch (error) {
+    console.error('Cancel video error:', error);
+    res.status(500).json({
+      error: 'Failed to cancel video',
       message: error instanceof Error ? error.message : 'Unknown error'
     });
   }

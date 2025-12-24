@@ -97,6 +97,15 @@ class ApiClient {
     });
   }
 
+  async cancelVideoJob(jobId: string, videoJobId?: string): Promise<{ success: boolean; message: string }> {
+    const endpoint = videoJobId
+      ? `/videos/cancel/${jobId}/${videoJobId}`
+      : `/videos/cancel/${jobId}`;
+    return this.fetch<{ success: boolean; message: string }>(endpoint, {
+      method: 'POST',
+    });
+  }
+
   async startZipGeneration(jobId: string): Promise<ZipGenerationResponse> {
     return this.fetch<ZipGenerationResponse>(`/videos/download-zip/${jobId}`, {
       method: 'POST',

@@ -64,7 +64,7 @@ export function SetupScreen({ onComplete }: SetupScreenProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4"
+      className="min-h-screen bg-gradient-to-br from-background via-background to-amber-500/5 dark:to-amber-400/5 flex items-center justify-center p-4"
     >
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center space-y-2">
@@ -72,9 +72,9 @@ export function SetupScreen({ onComplete }: SetupScreenProps) {
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: 'spring', delay: 0.2 }}
-            className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-2"
+            className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 dark:bg-amber-400/10 flex items-center justify-center mb-2"
           >
-            <Sparkles className="w-8 h-8 text-primary" />
+            <Sparkles className="w-8 h-8 text-amber-500 dark:text-amber-400" />
           </motion.div>
           <CardTitle className="text-2xl">Welcome to Card0r!</CardTitle>
           <CardDescription className="text-base">
@@ -111,7 +111,7 @@ export function SetupScreen({ onComplete }: SetupScreenProps) {
               href="https://platform.openai.com/api-keys"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center text-sm text-primary hover:underline"
+              className="inline-flex items-center text-sm text-amber-600 dark:text-amber-400 hover:underline"
             >
               Get your OpenAI key
               <ExternalLink className="w-3 h-3 ml-1" />
@@ -146,7 +146,7 @@ export function SetupScreen({ onComplete }: SetupScreenProps) {
               href="https://developer.jamendo.com/v3.0"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center text-sm text-primary hover:underline"
+              className="inline-flex items-center text-sm text-amber-600 dark:text-amber-400 hover:underline"
             >
               Get your Jamendo key
               <ExternalLink className="w-3 h-3 ml-1" />

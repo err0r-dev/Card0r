@@ -63,8 +63,8 @@ export function HolidaySelector() {
                     className={cn(
                       'cursor-pointer transition-all hover:scale-105 relative',
                       isSelected
-                        ? 'ring-4 ring-yellow-500 shadow-xl scale-105 bg-yellow-50 dark:bg-yellow-900/20'
-                        : 'hover:shadow-md hover:ring-2 hover:ring-yellow-300'
+                        ? 'ring-4 ring-amber-500 dark:ring-amber-400 shadow-xl scale-105 bg-amber-50 dark:bg-amber-900/20'
+                        : 'hover:shadow-md hover:ring-2 hover:ring-amber-300 dark:hover:ring-amber-500'
                     )}
                     onClick={() => setSelectedTheme(holiday.id)}
                   >
@@ -75,23 +75,23 @@ export function HolidaySelector() {
                       )}>
                         {holiday.emoji}
                         {isSelected && (
-                          <div className="absolute top-2 right-2 bg-yellow-500 rounded-full p-1">
+                          <div className="absolute top-2 right-2 bg-amber-500 rounded-full p-1">
                             <Check className="h-4 w-4 text-white" strokeWidth={3} />
                           </div>
                         )}
                       </div>
                       <div className={cn(
                         'p-4',
-                        isSelected && 'bg-yellow-50 dark:bg-yellow-900/20'
+                        isSelected && 'bg-amber-50 dark:bg-amber-900/20'
                       )}>
                         <p className={cn(
                           'font-medium text-center',
-                          isSelected && 'text-yellow-900 dark:text-yellow-100 font-bold'
+                          isSelected && 'text-amber-900 dark:text-amber-100 font-bold'
                         )}>
                           {holiday.name}
                         </p>
                         {isSelected && (
-                          <p className="text-xs text-center text-yellow-700 dark:text-yellow-300 mt-1">
+                          <p className="text-xs text-center text-amber-700 dark:text-amber-300 mt-1">
                             ✓ Selected
                           </p>
                         )}

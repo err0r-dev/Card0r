@@ -5319,7 +5319,24 @@ function CardComposition({
           return 0.4;
         }
       }
-    )
+    ),
+    /* @__PURE__ */ (0,jsx_runtime.jsx)(esm.AbsoluteFill, { style: { pointerEvents: "none" }, children: /* @__PURE__ */ (0,jsx_runtime.jsx)(
+      "div",
+      {
+        style: {
+          position: "absolute",
+          bottom: Math.round(height * 0.03),
+          right: Math.round(width * 0.02),
+          fontSize: Math.max(32, Math.round(width / 50)),
+          color: "rgba(255, 255, 255, 0.6)",
+          textShadow: "1px 1px 3px rgba(0, 0, 0, 0.7)",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+          fontWeight: 400,
+          letterSpacing: "0.02em"
+        },
+        children: "Created by Card0r - available at err0r.dev/card0r"
+      }
+    ) })
   ] });
 }
 function calculateTotalFrames(message, fps = FPS) {

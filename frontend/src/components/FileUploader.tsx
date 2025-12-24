@@ -74,8 +74,8 @@ export function FileUploader() {
           onDragLeave={handleDragLeave}
           className={`
             relative border-2 border-dashed rounded-lg p-12 text-center transition-colors
-            ${isDragging ? 'border-primary bg-primary/5' : 'border-muted-foreground/25'}
-            ${isUploading ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:border-primary/50'}
+            ${isDragging ? 'border-amber-500 dark:border-amber-400 bg-amber-500/5 dark:bg-amber-400/5' : 'border-gray-400 dark:border-gray-600'}
+            ${isUploading ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:border-amber-500/50 dark:hover:border-amber-400/50'}
           `}
         >
           <input
@@ -88,7 +88,7 @@ export function FileUploader() {
 
           <div className="flex flex-col items-center gap-4">
             {isUploading ? (
-              <Loader2 className="h-12 w-12 text-primary animate-spin" />
+              <Loader2 className="h-12 w-12 text-amber-500 dark:text-amber-400 animate-spin" />
             ) : (
               <FileSpreadsheet className="h-12 w-12 text-muted-foreground" />
             )}
@@ -105,7 +105,7 @@ export function FileUploader() {
             <div className="text-xs text-muted-foreground space-y-1">
               <p className="font-medium">Supported formats: .csv, .xlsx, .xls</p>
               <p>Required columns: Name, Message (or similar)</p>
-              <p className="text-primary">✓ Bulk upload multiple recipients at once</p>
+              <p className="text-amber-600 dark:text-amber-400">✓ Bulk upload multiple recipients at once</p>
             </div>
           </div>
         </div>

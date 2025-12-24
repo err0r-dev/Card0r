@@ -67,7 +67,7 @@ export function MusicSelector() {
       <Card>
         <CardContent className="p-12">
           <div className="text-center">
-            <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-primary" />
+            <Loader2 className="h-12 w-12 mx-auto mb-4 animate-spin text-amber-500 dark:text-amber-400" />
             <p>Searching for music...</p>
           </div>
         </CardContent>
@@ -111,8 +111,8 @@ export function MusicSelector() {
                 className={`
                   relative p-4 rounded-lg border-2 cursor-pointer transition-all
                   ${isSelected
-                    ? 'border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20'
-                    : 'border-border hover:border-yellow-300'
+                    ? 'border-amber-500 dark:border-amber-400 bg-amber-50 dark:bg-amber-900/20'
+                    : 'border-gray-300 dark:border-gray-600 hover:border-amber-400 dark:hover:border-amber-500'
                   }
                 `}
                 onClick={() => setSelectedMusicUrl(track.downloadUrl)}
@@ -120,7 +120,7 @@ export function MusicSelector() {
                 <div className="flex items-start gap-3">
                   <div className="flex-shrink-0">
                     {isSelected && (
-                      <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center">
                         <Check className="h-5 w-5 text-white" />
                       </div>
                     )}
@@ -131,8 +131,8 @@ export function MusicSelector() {
                     )}
                   </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h4 className={`font-medium truncate ${isSelected ? 'text-yellow-900 dark:text-yellow-100' : ''}`}>
+                  <div className={`flex-1 min-w-0 ${isSelected ? 'pr-16' : ''}`}>
+                    <h4 className={`font-medium truncate ${isSelected ? 'text-amber-900 dark:text-amber-100' : ''}`}>
                       {track.name}
                     </h4>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -156,8 +156,8 @@ export function MusicSelector() {
 
                 {isSelected && (
                   <div className="absolute top-2 right-2">
-                    <span className="text-xs font-medium text-yellow-700 dark:text-yellow-300">
-                      ✓ Selected
+                    <span className="text-xs font-medium bg-amber-500 text-white px-2 py-0.5 rounded-full">
+                      Selected
                     </span>
                   </div>
                 )}

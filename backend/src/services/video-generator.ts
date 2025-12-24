@@ -7,6 +7,41 @@ import type { VideoGenerationRequest, BatchVideoResponse, VideoGenerationJob } f
 // In-memory job storage (in production, use Redis or database)
 const jobs = new Map<string, BatchVideoResponse>();
 
+// Track cancelled jobs (individual video job IDs)
+const cancelledJobs = new Set<string>();
+
+// Cancel a specific video job or all jobs in a batch
+export function cancelJob(jobId: string, videoJobId?: string): boolean {
+  const batch = jobs.get(jobId);
+  if (!batch) return false;
+
+  if (videoJobId) {
+    // Cancel individual video job
+    const job = batch.jobs.find(j => j.id === videoJobId);
+    if (job && (job.status === 'pending' || job.status === 'processing')) {
+      cancelledJobs.add(videoJobId);
+      job.status = 'cancelled';
+      jobs.set(jobId, batch);
+      return true;
+    }
+  } else {
+    // Cancel all pending/processing jobs in batch
+    let cancelled = false;
+    for (const job of batch.jobs) {
+      if (job.status === 'pending' || job.status === 'processing') {
+        cancelledJobs.add(job.id);
+        job.status = 'cancelled';
+        cancelled = true;
+      }
+    }
+    if (cancelled) {
+      jobs.set(jobId, batch);
+    }
+    return cancelled;
+  }
+  return false;
+}
+
 export async function generateVideoBatch(request: VideoGenerationRequest): Promise<BatchVideoResponse> {
   const jobId = uuidv4();
   const { recipients, theme, format, musicUrl, senderName } = request;
@@ -43,6 +78,14 @@ async function processVideoBatch(jobId: string, request: VideoGenerationRequest)
   for (let i = 0; i < recipients.length; i++) {
     const recipient = recipients[i];
     const job = batch.jobs[i];
+
+    // Check if job was cancelled before starting
+    if (cancelledJobs.has(job.id) || job.status === 'cancelled') {
+      console.log(`[VideoGenerator] Skipping cancelled job for ${recipient.name}`);
+      job.status = 'cancelled';
+      jobs.set(jobId, batch);
+      continue;
+    }
 
     try {
       job.status = 'processing';
