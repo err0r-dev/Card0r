@@ -22,8 +22,8 @@
     "start": "concurrently --names \"FRONTEND,BACKEND\" --prefix-colors \"cyan,magenta\" \"cd frontend && npm run preview\" \"cd backend && npm start\""
   },
   "devDependencies": {
-    "canvas": "^3.2.0",
-    "concurrently": "^8.2.2"
+    "canvas": "^3.2.3",
+    "concurrently": "^10.0.3"
   },
   "engines": {
     "node": ">=20.0.0"
